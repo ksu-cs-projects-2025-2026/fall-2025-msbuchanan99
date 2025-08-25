@@ -1,0 +1,69 @@
+﻿@page "/upload"
+@using System.Text
+@inject HttpClient Http
+
+<h3>PDFReader</h3>
+<InputFile OnChange="HandleFileUpload" accept=".pdf"></InputFile>
+<button @onclick="ProcessFile" disabled="@(fileData == null || isProcessing)">
+    @if (isProcessing)
+    {
+        <span>Processing...</span>
+    }
+    else
+    {
+        <span>Upload and Process PDF</span>
+    }
+</button>
+
+<div>
+    @if (string.IsNullOrEmpty(contents))
+    {
+        <p>Nothing To See Here...</p>
+    }
+    else {
+        <p>@((MarkupString)contents)</p>
+    }
+</div>
+@code {
+    private string? contents;
+    private byte[]? fileData;
+    private bool isProcessing = false;
+
+    private async Task HandleFileUpload(InputFileChangeEventArgs e){
+        var file = e.File;
+        if(file != null){
+            using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10MB limit
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            fileData = memoryStream.ToArray();
+        }
+    }
+
+    private async Task ProcessFile(){
+        if (fileData == null) return;
+
+        isProcessing = true;
+        try{
+            var data = new MultipartFormDataContent();
+            data.Add(new ByteArrayContent(fileData), "fileData", "file.pdf");
+
+            var response = await Http.PostAsync("/Upload", data);
+            if (response.IsSuccessStatusCode)
+            {
+                contents = await response.Content.ReadAsStringAsync();
+            }
+            else
+            {
+                contents = "Error processing file.";
+            }
+        }
+        catch (Exception ex)
+        {
+            contents = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            isProcessing = false;
+        }
+    }
+}
