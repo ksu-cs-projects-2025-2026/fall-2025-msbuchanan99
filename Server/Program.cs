@@ -1,4 +1,7 @@
 
+using Microsoft.EntityFrameworkCore;
+using Server.Data;
+
 namespace Server
 {
     public class Program
@@ -11,7 +14,10 @@ namespace Server
 
             builder.Services.AddControllers();
             builder.Services.AddRazorPages();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            builder.Services.AddDbContext<ThreadfolioContext>(options =>
+                options.UseSqlite(
+                    builder.Configuration.GetConnectionString("DefaultConnection")));
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 

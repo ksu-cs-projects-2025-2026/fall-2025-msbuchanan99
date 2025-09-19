@@ -11,12 +11,16 @@ namespace Server.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        public string Name { get; set; } = "No name";
+        [Required]
+        [StringLength(100)]
+        public string Name { get; set; } = "";
 
-        public string Number { get; set; } = "No Number";
+        [Required]
+        [StringLength(20)]
+        public string Number { get; set; } = "";
 
-        [MaxLength(7)]
-        public string HexColor { get; set; } = "#000000";
+        [StringLength(6)]
+        public string? HexColor { get; set; }
 
         [Precision(0)]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

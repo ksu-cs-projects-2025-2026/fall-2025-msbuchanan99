@@ -10,11 +10,13 @@ namespace Server.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-
+        [Required]
         [MaxLength(25)]
-        public string? Username { get; set; }
+        public string Username { get; set; } = "";
 
-        public string? Password { get; set; } //have encoded and decoded passwords
+        [Required]
+        [MaxLength(50)]
+        public string Password { get; set; } = "";
 
         [Precision(0)]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -24,8 +26,9 @@ namespace Server.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime LastModified { get; set; }
 
-        public List<Material>? MaterialsOwned { get; set; }
+        //Floss and amount
+        public Dictionary<Floss, int> Floss { get; set; } = [];
 
-        public List<Project>? Projects { get; set; }
+        public List<Project> Projects { get; set; } = [];
     }
 }
