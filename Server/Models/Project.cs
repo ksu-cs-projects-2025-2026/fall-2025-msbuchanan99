@@ -30,6 +30,10 @@ namespace Server.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime LastModified { get; set; }
 
-        public Dictionary<Floss, int> Floss { get; set; } = [];
+        public ICollection<ProjectFloss> ProjectFloss { get; set; } = [];
+
+        [NotMapped]
+        public Dictionary<Floss, int> Floss =>
+            ProjectFloss?.ToDictionary(pf => pf.Floss, pf => pf.Amount) ?? new Dictionary<Floss, int>();
     }
 }

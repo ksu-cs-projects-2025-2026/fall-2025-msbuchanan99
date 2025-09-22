@@ -11,6 +11,9 @@ namespace Server.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Floss> Floss { get; set; }
         public DbSet<Project> Projects { get; set; }
+        public DbSet<ProjectFloss> ProjectFloss { get; set; }
+        public DbSet<UserFloss> UserFloss { get; set; }
+        public DbSet<UserProjects> UserProjects { get; set; }
 
 
         public ThreadfolioContext(DbContextOptions<ThreadfolioContext> options)

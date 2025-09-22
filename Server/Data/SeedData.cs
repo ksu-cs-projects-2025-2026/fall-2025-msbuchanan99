@@ -35,10 +35,9 @@ public static class SeedData
 
                 context.Floss.Add(floss);
             }
-            var FlossLookup = context.Floss.ToDictionary(f => f.Id);
+            context.SaveChanges();
 
             //Seed from Projects
-            List<Project> Project = new List<Project>();
             var ProjectLines = File.ReadAllLines(Path.Combine(folder, "Projects.csv")).Skip(1);
             foreach (var line in ProjectLines)
             {
@@ -55,27 +54,27 @@ public static class SeedData
                 if (project.IsCompleted) project.CompletionDate = DateTime.Parse(cells[4]);
                 else project.CompletionDate = null;
 
-                //Find related flosses from projectfloss.csv
-                var ProjectFloss = File.ReadAllLines(Path.Combine(folder, "ProjectFloss.csv"))
-                    .Skip(1)
-                    .Where(p => p.Split(',')[0] == project.Id.ToString());
-                foreach (var pf in ProjectFloss)
-                {
-                    var pfcells = pf.Split(",");
-                    int flossId = int.Parse(pfcells[1]);
-                    int flossAmount = int.Parse(pfcells[2]);
-                    if (FlossLookup.TryGetValue(flossId, out var flossToAdd))
-                    {
-                        project.Floss.Add(flossToAdd, flossAmount);
-                    }
-                }
-
                 context.Projects.Add(project);
             }
-            var ProjectLookup = context.Projects.ToDictionary(p => p.Id);
+            context.SaveChanges();
+
+            //Seed from ProjectFloss
+            var ProjectFlossLines = File.ReadAllLines(Path.Combine(folder, "ProjectFloss.csv"));
+            foreach (var line in ProjectFlossLines)
+            {
+                var cells = line.Split(",");
+                var projectFloss = new ProjectFloss()
+                {
+                    ProjectId = int.Parse(cells[0]),
+                    FlossId = int.Parse(cells[1]),
+                    Amount = int.Parse(cells[2])
+                };
+
+                context.ProjectFloss.Add(projectFloss);
+            }
+            context.SaveChanges();
 
             //Seed from Users
-            List<User> Users = new List<User>();
             var UserLines = File.ReadAllLines(Path.Combine(folder, "Users.csv")).Skip(1);
             foreach (var line in UserLines)
             {
@@ -85,42 +84,44 @@ public static class SeedData
                     Id = int.Parse(cells[0]),
                     Username = cells[1],
                     Password = cells[2],
-                    CreatedOn = DateTime.Parse(cells[3]),
-                    LastModified = DateTime.Parse(cells[4])
+                    Role = int.Parse(cells[3]),
+                    CreatedOn = DateTime.Parse(cells[4]),
+                    LastModified = DateTime.Parse(cells[5])
                 };
-
-                //Find related flosses from userfloss.csv
-                var UserFloss = File.ReadAllLines(Path.Combine(folder, "UserFloss.csv"))
-                    .Skip(1)
-                    .Where(u => u.Split(",")[0] == user.Id.ToString());
-                foreach (var uf in UserFloss)
-                {
-                    var ufcells = uf.Split(",");
-                    int flossId = int.Parse(ufcells[1]);
-                    int flossAmount = int.Parse(ufcells[2]);
-                    if (FlossLookup.TryGetValue(flossId, out var flossToAdd))
-                    {
-                        user.Floss.Add(flossToAdd, flossAmount);
-                    }
-                }
-
-                //Find related projects from userProjects.csv
-                var UserProjects = File.ReadAllLines(Path.Combine(folder, "UserProjects.csv"))
-                    .Skip(1)
-                    .Where(u => u.Split(",")[0] == user.Id.ToString());
-                foreach (var up in UserProjects)
-                {
-                    var upcells = up.Split(",");
-                    int projectId = int.Parse(upcells[1]);
-                    if (ProjectLookup.TryGetValue(projectId, out var projectToAdd))
-                    {
-                        user.Projects.Add(projectToAdd);
-                    }
-                }
 
                 context.Users.Add(user);
             }
+            context.SaveChanges();
 
+            //Seed from UserProjects
+            var UserProjectsLines = File.ReadAllLines(Path.Combine(folder, "UserProjects.csv"));
+            foreach (var line in UserProjectsLines) 
+            {
+                var cells = line.Split(",");
+                var UserProject = new UserProjects()
+                {
+                    UserId = int.Parse(cells[0]),
+                    ProjectId = int.Parse(cells[1])
+                };
+
+                context.UserProjects.Add(UserProject);
+            }
+            context.SaveChanges();
+
+            //Seed from UserFloss
+            var UserFlossLines = File.ReadAllLines(Path.Combine(folder, "UserFloss.csv"));
+            foreach (var line in UserFlossLines)
+            {
+                var cell = line.Split(",");
+                var UserFloss = new UserFloss()
+                {
+                    UserId = int.Parse(cell[0]),
+                    FlossId = int.Parse(cell[1]),
+                    Amount = int.Parse(cell[2])
+                };
+
+                context.UserFloss.Add(UserFloss);
+            }
             context.SaveChanges();
         }
     }
