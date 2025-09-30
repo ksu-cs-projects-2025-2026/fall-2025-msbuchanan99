@@ -1464,9 +1464,6 @@ C:\Users\megha\Desktop\Threadfolio\Client\obj\Debug\net8.0\compressed\ujej6durna
 C:\Users\megha\Desktop\Threadfolio\Client\obj\Debug\net8.0\compressed\927plkmk2o-tptq2av103.gz
 C:\Users\megha\Desktop\Threadfolio\Client\obj\Debug\net8.0\compressed\fv852almvh-lfu7j35m59.gz
 C:\Users\megha\Desktop\Threadfolio\Client\obj\Debug\net8.0\compressed\ga4tohpf6k-oyz0vx2fzb.gz
-C:\Users\megha\Desktop\Threadfolio\Client\obj\Debug\net8.0\compressed\kb90l4x90i-8qo4gaxudl.gz
-C:\Users\megha\Desktop\Threadfolio\Client\obj\Debug\net8.0\compressed\nrce2f7bjz-alvba1ou1l.gz
-C:\Users\megha\Desktop\Threadfolio\Client\obj\Debug\net8.0\compressed\0kih5qk3hm-bmdske3gf6.gz
 C:\Users\megha\Desktop\Threadfolio\Client\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\megha\Desktop\Threadfolio\Client\obj\Debug\net8.0\staticwebassets.build.json.cache
 C:\Users\megha\Desktop\Threadfolio\Client\obj\Debug\net8.0\staticwebassets.development.json
@@ -1477,3 +1474,6 @@ C:\Users\megha\Desktop\Threadfolio\Client\obj\Debug\net8.0\Client.dll
 C:\Users\megha\Desktop\Threadfolio\Client\obj\Debug\net8.0\refint\Client.dll
 C:\Users\megha\Desktop\Threadfolio\Client\obj\Debug\net8.0\Client.pdb
 C:\Users\megha\Desktop\Threadfolio\Client\obj\Debug\net8.0\ref\Client.dll
+C:\Users\megha\Desktop\Threadfolio\Client\obj\Debug\net8.0\compressed\kb90l4x90i-7p8yu6rzek.gz
+C:\Users\megha\Desktop\Threadfolio\Client\obj\Debug\net8.0\compressed\nrce2f7bjz-jauxv7rbfd.gz
+C:\Users\megha\Desktop\Threadfolio\Client\obj\Debug\net8.0\compressed\0kih5qk3hm-83keibyt79.gz

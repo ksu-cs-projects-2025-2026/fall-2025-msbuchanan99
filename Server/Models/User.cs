@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Server.Models;
 
 namespace Server.Models
 {
@@ -18,16 +19,14 @@ namespace Server.Models
         [MaxLength(50)]
         public string Password { get; set; } = "";
 
-        //1 is for admin, 2 is for user
         [Required]
-        public int Role { get; set; }
+        public UserType Role { get; set; }
 
         [Precision(0)]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime CreatedOn { get; set; }
 
         [Precision(0)]
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime LastModified { get; set; }
 
         public ICollection<UserFloss> UserFloss { get; set; } = [];
@@ -41,5 +40,12 @@ namespace Server.Models
         [NotMapped]
         public List<Project> Projects =>
             UserProjects?.Select(up => up.Project).ToList() ?? new List<Project>();
+    }
+
+    public enum UserType
+    {
+        Admin = 1,
+        User = 2,
+        Anon = 3
     }
 }

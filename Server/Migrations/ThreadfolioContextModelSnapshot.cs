@@ -24,21 +24,27 @@ namespace Server.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(0)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("HexColor")
-                        .IsRequired()
+                        .HasMaxLength(6)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LastModified")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasPrecision(0)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Number")
                         .IsRequired()
+                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -46,92 +52,58 @@ namespace Server.Migrations
                     b.ToTable("Floss");
                 });
 
-            modelBuilder.Entity("Server.Models.Material", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("FlossId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("ModifiedOn")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("OwnerId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("ProjectId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("UnitMany")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UnitOne")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FlossId");
-
-                    b.HasIndex("OwnerId");
-
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("Materials");
-                });
-
             modelBuilder.Entity("Server.Models.Project", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("Completed")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTime?>("CompletionDate")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(0)
                         .HasColumnType("TEXT");
-
-                    b.Property<byte[]>("FileData")
-                        .HasColumnType("BLOB");
 
                     b.Property<string>("FileName")
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("IsCompleted")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("LastModified")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasPrecision(0)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
-
-                    b.Property<int?>("OwnerId")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OwnerId");
-
                     b.ToTable("Projects");
+                });
+
+            modelBuilder.Entity("Server.Models.ProjectFloss", b =>
+                {
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FlossId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ProjectId", "FlossId");
+
+                    b.HasIndex("FlossId");
+
+                    b.ToTable("ProjectFloss");
                 });
 
             modelBuilder.Entity("Server.Models.User", b =>
@@ -141,15 +113,27 @@ namespace Server.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(0)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LastModified")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasPrecision(0)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Password")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(25)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -157,44 +141,126 @@ namespace Server.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Server.Models.Material", b =>
+            modelBuilder.Entity("Server.Models.UserFloss", b =>
+                {
+                    b.Property<int>("FlossId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("FlossId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserFloss");
+                });
+
+            modelBuilder.Entity("Server.Models.UserProjects", b =>
+                {
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("FlossId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ProjectId", "UserId");
+
+                    b.HasIndex("FlossId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserProjects");
+                });
+
+            modelBuilder.Entity("Server.Models.ProjectFloss", b =>
                 {
                     b.HasOne("Server.Models.Floss", "Floss")
-                        .WithMany()
-                        .HasForeignKey("FlossId");
+                        .WithMany("ProjectFloss")
+                        .HasForeignKey("FlossId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("Server.Models.User", "Owner")
-                        .WithMany("MaterialsOwned")
-                        .HasForeignKey("OwnerId");
-
-                    b.HasOne("Server.Models.Project", null)
-                        .WithMany("MaterialList")
-                        .HasForeignKey("ProjectId");
+                    b.HasOne("Server.Models.Project", "Project")
+                        .WithMany("ProjectFloss")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Floss");
 
-                    b.Navigation("Owner");
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("Server.Models.UserFloss", b =>
+                {
+                    b.HasOne("Server.Models.Floss", "Floss")
+                        .WithMany("UserFloss")
+                        .HasForeignKey("FlossId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Server.Models.User", "User")
+                        .WithMany("UserFloss")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Floss");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Server.Models.UserProjects", b =>
+                {
+                    b.HasOne("Server.Models.Floss", null)
+                        .WithMany("UserProjects")
+                        .HasForeignKey("FlossId");
+
+                    b.HasOne("Server.Models.Project", "Project")
+                        .WithMany("UserProjects")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Server.Models.User", "User")
+                        .WithMany("UserProjects")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Server.Models.Floss", b =>
+                {
+                    b.Navigation("ProjectFloss");
+
+                    b.Navigation("UserFloss");
+
+                    b.Navigation("UserProjects");
                 });
 
             modelBuilder.Entity("Server.Models.Project", b =>
                 {
-                    b.HasOne("Server.Models.User", "Owner")
-                        .WithMany("Projects")
-                        .HasForeignKey("OwnerId");
+                    b.Navigation("ProjectFloss");
 
-                    b.Navigation("Owner");
-                });
-
-            modelBuilder.Entity("Server.Models.Project", b =>
-                {
-                    b.Navigation("MaterialList");
+                    b.Navigation("UserProjects");
                 });
 
             modelBuilder.Entity("Server.Models.User", b =>
                 {
-                    b.Navigation("MaterialsOwned");
+                    b.Navigation("UserFloss");
 
-                    b.Navigation("Projects");
+                    b.Navigation("UserProjects");
                 });
 #pragma warning restore 612, 618
         }

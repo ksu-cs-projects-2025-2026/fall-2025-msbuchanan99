@@ -18,18 +18,6 @@ C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\Server.runtimeconfig.
 C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\Server.dll
 C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\Server.pdb
 C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\Humanizer.dll
-C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\itext.barcodes.dll
-C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\itext.bouncy-castle-connector.dll
-C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\itext.forms.dll
-C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\itext.io.dll
-C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\itext.kernel.dll
-C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\itext.layout.dll
-C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\itext.pdfa.dll
-C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\itext.pdfua.dll
-C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\itext.sign.dll
-C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\itext.styledxmlparser.dll
-C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\itext.svg.dll
-C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\itext.commons.dll
 C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\Microsoft.AspNetCore.Components.WebAssembly.Server.dll
 C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll
 C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\Microsoft.Build.Locator.dll
@@ -40,7 +28,6 @@ C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\Microsoft.CodeAnalysi
 C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.dll
 C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\Microsoft.CodeAnalysis.Workspaces.MSBuild.dll
 C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\Microsoft.Data.Sqlite.dll
-C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\Microsoft.DotNet.PlatformAbstractions.dll
 C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.dll
 C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Abstractions.dll
 C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Design.dll
@@ -314,3 +301,9 @@ C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\runtimes\win\lib\net7
 C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\runtimes\win\lib\net7.0\System.Windows.Extensions.dll
 C:\Users\megha\Desktop\Threadfolio\Server\obj\Debug\net8.0\Server.RazorAssemblyInfo.cache
 C:\Users\megha\Desktop\Threadfolio\Server\obj\Debug\net8.0\Server.RazorAssemblyInfo.cs
+C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\HarfBuzzSharp.dll
+C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\Spire.Pdf.dll
+C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\runtimes\osx\native\libHarfBuzzSharp.dylib
+C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\runtimes\win-arm64\native\libHarfBuzzSharp.dll
+C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\runtimes\win-x64\native\libHarfBuzzSharp.dll
+C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\runtimes\win-x86\native\libHarfBuzzSharp.dll

@@ -1,13 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Server.Models
 {
     public class UserFloss
     {
-        [Key]
+        [ForeignKey("User")]
         public int UserId { get; set; }
 
-        [Key]
+        [ForeignKey("Project")]
         public int FlossId { get; set; }
 
         [Required]

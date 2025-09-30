@@ -3,12 +3,36 @@
   "WorkspaceRootPath": "C:\\Users\\megha\\Desktop\\Threadfolio\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\data\\seeddata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\data\\seeddata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\storage\\seeddata\\userfloss.csv||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\storage\\seeddata\\userfloss.csv||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\models\\userfloss.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\models\\userfloss.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\storage\\seeddata\\users.csv||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\storage\\seeddata\\users.csv||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\models\\project.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\models\\project.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\models\\projectfloss.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\models\\projectfloss.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\controllers\\projectcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -19,8 +43,12 @@
       "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\data\\threadfoliocontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\data\\seeddata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\data\\seeddata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\migrations\\20250930213621_initialcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\migrations\\20250930213621_initialcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\controllers\\flosscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\controllers\\flosscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -29,8 +57,8 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedWidth": 268,
-          "SelectedChildIndex": 4,
+          "DockedWidth": 353,
+          "SelectedChildIndex": 10,
           "Children": [
             {
               "$type": "Bookmark",
@@ -50,15 +78,93 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "UserFloss.csv",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Storage\\SeedData\\UserFloss.csv",
+              "RelativeDocumentMoniker": "Server\\Storage\\SeedData\\UserFloss.csv",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Storage\\SeedData\\UserFloss.csv",
+              "RelativeToolTip": "Server\\Storage\\SeedData\\UserFloss.csv",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002120|",
+              "WhenOpened": "2025-09-30T22:42:38.294Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "UserFloss.cs",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\UserFloss.cs",
+              "RelativeDocumentMoniker": "Server\\Models\\UserFloss.cs",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\UserFloss.cs",
+              "RelativeToolTip": "Server\\Models\\UserFloss.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-30T22:42:28.099Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Users.csv",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Storage\\SeedData\\Users.csv",
+              "RelativeDocumentMoniker": "Server\\Storage\\SeedData\\Users.csv",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Storage\\SeedData\\Users.csv",
+              "RelativeToolTip": "Server\\Storage\\SeedData\\Users.csv",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002120|",
+              "WhenOpened": "2025-09-30T22:27:29.409Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\User.cs",
+              "RelativeDocumentMoniker": "Server\\Models\\User.cs",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\User.cs",
+              "RelativeToolTip": "Server\\Models\\User.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-30T22:10:10.234Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "ProjectFloss.cs",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\ProjectFloss.cs",
+              "RelativeDocumentMoniker": "Server\\Models\\ProjectFloss.cs",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\ProjectFloss.cs",
+              "RelativeToolTip": "Server\\Models\\ProjectFloss.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-30T22:10:08.343Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Project.cs",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\Project.cs",
+              "RelativeDocumentMoniker": "Server\\Models\\Project.cs",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\Project.cs",
+              "RelativeToolTip": "Server\\Models\\Project.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-30T22:09:54.244Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\appsettings.json",
-              "RelativeDocumentMoniker": "Server\\appsettings.json",
-              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\appsettings.json*",
-              "RelativeToolTip": "Server\\appsettings.json*",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAEAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-09-19T21:25:20.46Z",
+              "Title": "SeedData.cs",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Data\\SeedData.cs",
+              "RelativeDocumentMoniker": "Server\\Data\\SeedData.cs",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Data\\SeedData.cs",
+              "RelativeToolTip": "Server\\Data\\SeedData.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-30T21:58:33.313Z",
               "EditorCaption": ""
             },
             {
@@ -67,50 +173,63 @@
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Program.cs",
               "RelativeDocumentMoniker": "Server\\Program.cs",
-              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Program.cs*",
-              "RelativeToolTip": "Server\\Program.cs*",
-              "ViewState": "AgIAAAoAAAAAAAAAAAAgwBMAAAAAAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Program.cs",
+              "RelativeToolTip": "Server\\Program.cs",
+              "ViewState": "AgIAACQAAAAAAAAAAAAEwEIAAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-19T21:24:29.914Z",
+              "WhenOpened": "2025-09-30T21:56:21.39Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "ProjectController.cs",
-              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Controllers\\ProjectController.cs",
-              "RelativeDocumentMoniker": "Server\\Controllers\\ProjectController.cs",
-              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Controllers\\ProjectController.cs",
-              "RelativeToolTip": "Server\\Controllers\\ProjectController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAzAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-19T21:22:24.508Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 9,
               "Title": "ThreadfolioContext.cs",
               "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Data\\ThreadfolioContext.cs",
               "RelativeDocumentMoniker": "Server\\Data\\ThreadfolioContext.cs",
               "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Data\\ThreadfolioContext.cs",
               "RelativeToolTip": "Server\\Data\\ThreadfolioContext.cs",
-              "ViewState": "AgIAAAIAAAAAAAAAAAAQwAwAAAA0AAAAAAAAAA==",
+              "ViewState": "AgIAAA8AAAAAAAAAAAA4wDYAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-19T21:21:42.359Z",
+              "WhenOpened": "2025-09-30T21:54:08.96Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "SeedData.cs",
-              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Data\\SeedData.cs",
-              "RelativeDocumentMoniker": "Server\\Data\\SeedData.cs",
-              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Data\\SeedData.cs",
-              "RelativeToolTip": "Server\\Data\\SeedData.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEQAAAAYAAAAAAAAAA==",
+              "DocumentIndex": 10,
+              "Title": "20250930213621_InitialCreate.cs",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Migrations\\20250930213621_InitialCreate.cs",
+              "RelativeDocumentMoniker": "Server\\Migrations\\20250930213621_InitialCreate.cs",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Migrations\\20250930213621_InitialCreate.cs",
+              "RelativeToolTip": "Server\\Migrations\\20250930213621_InitialCreate.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAB4AAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-19T21:21:04.817Z",
+              "WhenOpened": "2025-09-30T21:51:53.636Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "FlossController.cs",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Controllers\\FlossController.cs",
+              "RelativeDocumentMoniker": "Server\\Controllers\\FlossController.cs",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Controllers\\FlossController.cs",
+              "RelativeToolTip": "Server\\Controllers\\FlossController.cs",
+              "ViewState": "AgIAADUAAAAAAAAAAAAYwDYAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-19T21:50:07.066Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "ProjectController.cs",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Controllers\\ProjectController.cs",
+              "RelativeDocumentMoniker": "Server\\Controllers\\ProjectController.cs",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Controllers\\ProjectController.cs",
+              "RelativeToolTip": "Server\\Controllers\\ProjectController.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABQAAABSAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-19T21:22:24.508Z",
               "EditorCaption": ""
             }
           ]

@@ -23,7 +23,34 @@ namespace Server.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Project>().Property(e => e.IsCompleted).HasConversion<int>();
+            modelBuilder.Entity<Project>(entity =>
+            {
+                entity.Property(e => e.IsCompleted).HasConversion<int>();
+            });
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.Property(e => e.Role).HasConversion<string>();
+            });
+            modelBuilder.Entity<UserProjects>(entity =>
+            {
+                entity.HasKey(up => new { up.ProjectId, up.UserId });
+                entity.HasOne(up => up.User).WithMany(up => up.UserProjects).HasForeignKey(up => up.UserId);
+                entity.HasOne(up => up.Project).WithMany(up => up.UserProjects).HasForeignKey(up => up.ProjectId);
+            });
+                
+            modelBuilder.Entity<UserFloss>(entity =>
+            {
+                entity.HasKey(uf => new { uf.FlossId, uf.UserId });
+                entity.HasOne(uf => uf.User).WithMany(uf => uf.UserFloss).HasForeignKey(uf => uf.UserId);
+                entity.HasOne(uf => uf.Floss).WithMany(uf => uf.UserFloss).HasForeignKey(uf => uf.FlossId);
+            });
+            modelBuilder.Entity<ProjectFloss>(entity =>
+            {
+                entity.HasKey(pf => new { pf.ProjectId, pf.FlossId });
+                entity.HasOne(pf => pf.Project).WithMany(pf => pf.ProjectFloss).HasForeignKey(pf => pf.ProjectId);
+                entity.HasOne(pf => pf.Floss).WithMany(pf => pf.ProjectFloss).HasForeignKey(pf => pf.FlossId);
+            });
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

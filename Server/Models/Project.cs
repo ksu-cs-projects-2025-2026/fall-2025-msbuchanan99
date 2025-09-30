@@ -12,7 +12,7 @@ namespace Server.Models
 
         [Required]
         [StringLength(100)]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         [StringLength(100)]
         public string? FileName { get; set; }
@@ -27,10 +27,10 @@ namespace Server.Models
         public DateTime CreatedOn { get; set; }
 
         [Precision(0)]
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime LastModified { get; set; }
 
         public ICollection<ProjectFloss> ProjectFloss { get; set; } = [];
+        public ICollection<UserProjects> UserProjects { get; set; } = [];
 
         [NotMapped]
         public Dictionary<Floss, int> Floss =>

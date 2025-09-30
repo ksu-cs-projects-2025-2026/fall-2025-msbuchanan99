@@ -27,7 +27,10 @@ namespace Server.Models
         public DateTime CreatedOn { get; set; }
 
         [Precision(0)]
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime LastModified { get; set; }
+
+        public ICollection<UserFloss>? UserFloss { get; set; }
+        public ICollection<UserProjects>? UserProjects { get; set; }
+        public ICollection<ProjectFloss>? ProjectFloss { get; set; }
     }
 }

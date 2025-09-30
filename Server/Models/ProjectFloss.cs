@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 namespace Server.Models
 {
     public class ProjectFloss
     {
-        [Key]
+        [ForeignKey("Project")]
         public int ProjectId { get; set; }
-        [Key]
+        [ForeignKey("Floss")]
         public int FlossId { get; set; }
 
         [Required]
