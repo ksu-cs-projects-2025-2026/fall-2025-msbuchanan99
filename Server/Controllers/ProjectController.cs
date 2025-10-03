@@ -34,7 +34,7 @@ namespace Server.Controllers
                 return NotFound("No projects were found");
             }
 
-            return View(projects);
+            return Ok(projects);
         }
 
         //Get the view of an individual project
