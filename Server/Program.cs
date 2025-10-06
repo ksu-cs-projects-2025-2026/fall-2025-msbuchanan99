@@ -1,6 +1,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Server.Data;
+using Server.Middleware;
 
 namespace Server
 {
@@ -54,10 +55,15 @@ namespace Server
             }
 
             app.UseHttpsRedirection();
+
+            //Middleware
+            app.UseRequestLogging();
+            app.UseAuthentication();
+            app.UseAuthorizationLogging();
+
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
             app.UseRouting();
-            app.UseAuthorization();
 
 
             app.MapControllers();

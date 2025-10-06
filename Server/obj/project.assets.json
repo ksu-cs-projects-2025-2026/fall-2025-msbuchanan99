@@ -7511,23 +7511,25 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\megha\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\megha.WINDOWS-P1C2I8Q\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {},
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Server.csproj",
+      "projectUniqueName": "C:\\Users\\megha.WINDOWS-P1C2I8Q\\Source\\Repos\\fall-2025-msbuchanan99\\Server\\Server.csproj",
       "projectName": "Server",
-      "projectPath": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Server.csproj",
-      "packagesPath": "C:\\Users\\megha\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\obj\\",
+      "projectPath": "C:\\Users\\megha.WINDOWS-P1C2I8Q\\Source\\Repos\\fall-2025-msbuchanan99\\Server\\Server.csproj",
+      "packagesPath": "C:\\Users\\megha.WINDOWS-P1C2I8Q\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\megha.WINDOWS-P1C2I8Q\\Source\\Repos\\fall-2025-msbuchanan99\\Server\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
+        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\megha\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\megha.WINDOWS-P1C2I8Q\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -7554,8 +7556,7 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      },
-      "SdkAnalysisLevel": "9.0.300"
+      }
     },
     "frameworks": {
       "net8.0": {
@@ -7611,7 +7612,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.301/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.202/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
