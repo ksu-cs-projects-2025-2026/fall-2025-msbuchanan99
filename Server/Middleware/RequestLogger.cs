@@ -2,10 +2,10 @@
 {
     public class RequestLogger
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<RequestLogger> _logger;
         private readonly RequestDelegate _next;
 
-        public RequestLogger(ILogger logger, RequestDelegate next)
+        public RequestLogger(ILogger<RequestLogger> logger, RequestDelegate next)
         {
             _logger = logger;
             _next = next;

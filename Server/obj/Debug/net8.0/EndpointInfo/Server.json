@@ -227,6 +227,14 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "keyPage",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
           }
         ],
         "requestBody": {
@@ -270,14 +278,6 @@
               "type": "integer",
               "format": "int32"
             }
-          },
-          {
-            "name": "listPage",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
           }
         ],
         "responses": {
@@ -288,7 +288,8 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "type": "integer",
+                    "format": "int32"
                   }
                 }
               },
@@ -296,7 +297,8 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "type": "integer",
+                    "format": "int32"
                   }
                 }
               },
@@ -304,7 +306,8 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "type": "integer",
+                    "format": "int32"
                   }
                 }
               }
@@ -403,6 +406,11 @@
           "completionDate": {
             "type": "string",
             "format": "date-time",
+            "nullable": true
+          },
+          "keyPage": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           },
           "createdOn": {

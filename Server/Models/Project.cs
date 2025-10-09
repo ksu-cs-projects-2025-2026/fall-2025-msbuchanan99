@@ -22,6 +22,11 @@ namespace Server.Models
 
         public DateTime? CompletionDate { get; set; }
 
+        public int? KeyPage { get; set; }
+
+        [Required]
+        public int Aida { get; set; }
+
         [Precision(0)]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime CreatedOn { get; set; }

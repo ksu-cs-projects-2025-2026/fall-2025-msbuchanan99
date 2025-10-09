@@ -1,15 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Server.Data;
 using Server.Models;
-using Spire.Pdf;
-using Spire.Pdf.Texts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
+using UglyToad.PdfPig;
 using FileIO = System.IO.File;
+using pdfPage = UglyToad.PdfPig.Content.Page;
 
 namespace Server.Controllers
 {
@@ -18,7 +16,7 @@ namespace Server.Controllers
     public class ProjectController : Controller
     {
         private readonly ThreadfolioContext _dbContext;
-        private readonly string _pdfFolder = Path.Combine(AppContext.BaseDirectory, "Storage", "ProjectPDF");
+        private readonly string _pdfFolder = Path.Combine(Environment.CurrentDirectory, "Storage", "ProjectPDF");
         public ProjectController(ThreadfolioContext dbContext)
         {
             _dbContext = dbContext;
@@ -187,7 +185,7 @@ namespace Server.Controllers
         }
 
         [HttpPost("{id}/Pattern/Upload")]
-        public async Task<IActionResult> UploadPattern(int? id, IFormFile file)
+        public async Task<IActionResult> UploadPattern(int? id, int? keyPage, IFormFile file)
         {
             if (id == null) return NotFound("Id cannot be null");
             else if (file == null) return NotFound("File cannot be null");
@@ -197,6 +195,7 @@ namespace Server.Controllers
 
             try
             {
+                project.KeyPage = keyPage;
                 project.FileName = await UploadDocument(file);
                 _dbContext.Projects.Update(project);
                 await _dbContext.SaveChangesAsync();
@@ -209,34 +208,149 @@ namespace Server.Controllers
         }
 
         [HttpPost("{id}/Pattern/ReadPattern")]
-        public async Task<char[]> ReadPattern(int? id, int listPage)
+        public async Task<List<ProjectFloss>> ReadPattern(int? id)
         {
             if (id == null) return [];
 
             Project? project = await _dbContext.Projects.FirstAsync(p => p.Id == id);
-            if (project == null) return [];
+            if (project == null || project.KeyPage == null) return [];
 
-            string path = Path.Combine(_pdfFolder, project.FileName!);
-            using FileStream fs = new(path, FileMode.Open);
-            PdfDocument pdf = new();
-            pdf.LoadFromStream(fs);
-            char[] chars = new char[2000000];
-            int i = 0;
-            foreach(PdfPageBase page in pdf.Pages)
+            string path = Path.Combine(_pdfFolder, project.FileName! + ".pdf");
+            if (!FileIO.Exists(path)) return [];
+
+            //Read the file
+            using (PdfDocument pdf = PdfDocument.Open(path))
             {
-                PdfTextExtractor ext = new PdfTextExtractor(page);
-                PdfTextExtractOptions extractOptions = new PdfTextExtractOptions() { IsExtractAllText = true };
-                string text = ext.ExtractText(extractOptions);
-                foreach(char c in text)
+                List<int> characters = new();
+                List<Character> charactersDebug = new();
+                int keyPage = (int)project.KeyPage;
+
+                //Read each page to find the character symbols in the pattern
+                for (int i = 1; i < keyPage; i++)
                 {
-                    if(i < 2000000)
+                    pdfPage page = pdf.GetPage(i);
+                    var pageChars = GetPageChars(page, false, ref charactersDebug);
+                    characters.AddRange(pageChars);
+                }
+
+                //Read the key page to get key
+                Dictionary<int, Floss> flossKey = new();
+                List<int> ints = new();
+                List<Character> intsDebug = new();
+                for (int i = keyPage; i <= pdf.NumberOfPages; i++)
+                {
+                    pdfPage page = pdf.GetPage(i);
+                    var pageChars = GetPageChars(page, true, ref intsDebug);
+                    ints.AddRange(pageChars);
+                }
+
+                //split ints list into more lists by symbol numbers
+                List<List<int>> lines = new List<List<int>>();
+                List<int> currentLine = new List<int>();
+                foreach (int i in ints)
+                {
+                    if (i > 255)
                     {
-                        chars[i] = c;
-                        i++;
+                        if (currentLine.Count > 0)
+                        {
+                            lines.Add(currentLine);
+                            currentLine.Clear();
+                        }
+                        currentLine.Add(i);
+                    }
+                    else if (currentLine.Count > 0)
+                    {
+                        currentLine.Add(i);
                     }
                 }
+
+                //Go through each line in lines to create a dictionary of flosses and symbols
+                Dictionary<Floss, int> FlossSymbol = new();
+                Dictionary<int, int> SymbolAmount = new();
+                foreach (List<int> line in lines)
+                {
+                    int symbol = line[0]; //The symbol is the first int in each row
+                    SymbolAmount.Add(symbol, 0);
+
+                    //Go through list of ints to find 'words' (groups of numbers and groups of letters)
+                    List<string> words = new();
+                    StringBuilder currentWord = new();
+                    currentWord.Append(line[1]);
+                    for (int i = 2; i < line.Count; i++)
+                    {
+                        char curLetter = (char)line[i];
+                        char lastLetter = (char)line[i - 1];
+                        bool curIsDigit = Char.IsDigit(curLetter);
+                        bool lastIsDigit = Char.IsDigit(lastLetter);
+
+                        if (lastIsDigit == curIsDigit) currentWord.Append(curLetter);
+                        else
+                        {
+                            words.Add(currentWord.ToString());
+                            currentWord.Clear();
+                            currentWord.Append(curLetter);
+                        }
+                    }
+
+                    //One of the words should match a Floss's number, one should match the Floss's name
+                    //Or one of the words should be a concatenation of the number and name either way
+                    var AllFloss = _dbContext.Floss.AsQueryable();
+                    Floss? MatchingFloss = null;
+                    foreach (Floss f in AllFloss)
+                    {
+                        string NameNumber = f.Name + f.Name;
+                        string NumberName = f.Number + f.Name;
+                        bool matchOne = false;
+                        foreach(string w in words)
+                        {
+                            if(w == NameNumber || w == NumberName)
+                            {
+                                MatchingFloss = f;
+                                break;
+                            }
+                            else if(w == f.Name || w == f.Number)
+                            {
+                                if(!matchOne) matchOne = true;
+                                else
+                                {
+                                    MatchingFloss = f;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (MatchingFloss != null)
+                        {
+                            break;
+                        }
+                    }
+
+                    if (MatchingFloss == null) throw new Exception($"No match for Symbol {symbol} found.");
+                    FlossSymbol.Add(MatchingFloss, symbol);
+                }
+
+                //Go through characters list to get number of times each symbol is used
+                foreach(int i in characters)
+                {
+                    if (SymbolAmount.ContainsKey(i))
+                    {
+                        SymbolAmount[i] = SymbolAmount[i] + 1;
+                    }
+                }
+
+                //Check Aida number and apply the proper equation
+                List<ProjectFloss> projectFloss = new();
+                foreach (KeyValuePair<int, int> pair in SymbolAmount)
+                {
+                    Floss floss = FlossSymbol.Where(fs => fs.Value == pair.Key).FirstOrDefault().Key;
+                    ProjectFloss pf = new ProjectFloss(project, floss) { Strands = 2};
+                    int skeinsNeeded = GetSkeinAmount(pair.Value, project.Aida, pf.Strands); //2 is hardcoded for default and can be changed
+                    pf.Amount = skeinsNeeded;
+                    projectFloss.Add(pf);
+                }
+                
+                return projectFloss;
             }
-            return chars;
         }
 
         #region Helper Methods
@@ -287,6 +401,46 @@ namespace Server.Controllers
             return _dbContext.Projects.Any(p => p.Id == id);
         }
 
+        private List<int> GetPageChars(pdfPage page, bool getAll, ref List<Character> charDebug)
+        {
+            List<int> characters = new();
+            string text = page.Text;
+
+            //Read each character and add it to characters list
+            foreach (char c in text)
+            {
+                int cAsInt = (int)c;
+                if (getAll || (!getAll && cAsInt > 255))
+                {
+                    characters.Add(cAsInt);
+                    charDebug.Add(new Character { CharVersion = c, IntVersion = cAsInt });
+                }
+            }
+            return characters;
+        }
+
+        private int GetSkeinAmount(int numStitches, int Aida, int numStrands)
+        {
+            double oneSkein = 313.2; //Length of skein with all 6 strands lined up (not separated)
+            double skeinLength = oneSkein * (6 / numStrands); //Skein length with num strands end to end (eg if 2 strands used in stitch it would be oneSkein * (6 / 2) bc there are three groups of two strands from one skein)
+            double numerator = 2 * (1 + Math.Sqrt(2));
+            double inchesPerStitch = numerator / Aida;
+            double inchesOfStringNeeded = inchesPerStitch * numStitches;
+
+            int skeinsNeeded = 1;
+            while(skeinsNeeded * inchesOfStringNeeded < skeinLength)
+            {
+                skeinsNeeded++;
+            }
+            return skeinsNeeded;
+        }
+
         #endregion
+    }
+
+    public class Character
+    {
+        public char CharVersion { get; set; }
+        public int IntVersion { get; set; }
     }
 }

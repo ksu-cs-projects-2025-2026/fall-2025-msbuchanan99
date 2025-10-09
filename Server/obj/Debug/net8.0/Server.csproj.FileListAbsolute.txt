@@ -307,3 +307,10 @@ C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\runtimes\osx\native\l
 C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\runtimes\win-arm64\native\libHarfBuzzSharp.dll
 C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\runtimes\win-x64\native\libHarfBuzzSharp.dll
 C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\runtimes\win-x86\native\libHarfBuzzSharp.dll
+C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\UglyToad.PdfPig.Core.dll
+C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\UglyToad.PdfPig.DocumentLayoutAnalysis.dll
+C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\UglyToad.PdfPig.Fonts.dll
+C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\UglyToad.PdfPig.Package.dll
+C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\UglyToad.PdfPig.Tokenization.dll
+C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\UglyToad.PdfPig.Tokens.dll
+C:\Users\megha\Desktop\Threadfolio\Server\bin\Debug\net8.0\UglyToad.PdfPig.dll

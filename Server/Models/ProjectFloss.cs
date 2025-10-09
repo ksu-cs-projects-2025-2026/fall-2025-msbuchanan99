@@ -11,9 +11,19 @@ namespace Server.Models
 
         [Required]
         public int Amount { get; set; }
+        [Required]
+        public int Strands { get; set; }
 
         //Navigation Properties
         public Project Project { get; set; }
         public Floss Floss { get; set; }
+
+        public ProjectFloss(Project project, Floss floss)
+        {
+            Project = project;
+            ProjectId = project.Id;
+            Floss = floss;
+            FlossId = floss.Id;
+        }
     }
 }

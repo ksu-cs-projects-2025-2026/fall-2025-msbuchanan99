@@ -46,7 +46,8 @@
               "RelativeToolTip": "Server\\Controllers\\FlossController.cs",
               "ViewState": "AgIAADUAAAAAAAAAAAAYwDYAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-19T21:50:07.066Z"
+              "WhenOpened": "2025-09-19T21:50:07.066Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -54,9 +55,9 @@
               "Title": "ProjectController.cs",
               "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Controllers\\ProjectController.cs",
               "RelativeDocumentMoniker": "Server\\Controllers\\ProjectController.cs",
-              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Controllers\\ProjectController.cs",
-              "RelativeToolTip": "Server\\Controllers\\ProjectController.cs",
-              "ViewState": "AgIAAHIAAAAAAAAAAAAmwNIAAAATAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Controllers\\ProjectController.cs*",
+              "RelativeToolTip": "Server\\Controllers\\ProjectController.cs*",
+              "ViewState": "AgIAAPUAAAAAAAAAAAAEwA8BAAAvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-19T21:22:24.508Z",
               "EditorCaption": ""

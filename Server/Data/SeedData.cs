@@ -52,7 +52,9 @@ public static class SeedData
                     FileName = row["FileName"],
                     IsCompleted = row["Completed"] == "1",
                     CreatedOn = DateTime.Parse(row["CreatedOn"]),
-                    LastModified = DateTime.Parse(row["LastModified"])
+                    LastModified = DateTime.Parse(row["LastModified"]),
+                    KeyPage = int.Parse(row["KeyPage"]),
+                    Aida = int.Parse(row["Aida"])
                 };
                 if (project.IsCompleted) project.CompletionDate = DateTime.Parse(row["CompletionDate"]);
                 else project.CompletionDate = null;
@@ -72,7 +74,8 @@ public static class SeedData
                 {
                     ProjectId = int.Parse(row["ProjectId"]),
                     FlossId = int.Parse(row["FlossId"]),
-                    Amount = int.Parse(row["Amount"])
+                    Amount = int.Parse(row["Amount"]),
+                    Strands = int.Parse(row["Strands"])
                 };
 
                 context.ProjectFloss.Add(projectFloss);
