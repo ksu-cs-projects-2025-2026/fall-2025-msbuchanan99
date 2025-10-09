@@ -45,7 +45,6 @@ namespace Server.Models
     public enum UserType
     {
         Admin = 1,
-        User = 2,
-        Anon = 3
+        User = 2
     }
 }
