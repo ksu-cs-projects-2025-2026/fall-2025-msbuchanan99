@@ -10,6 +10,16 @@
         "tags": [
           "Project"
         ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -288,8 +298,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "integer",
-                    "format": "int32"
+                    "$ref": "#/components/schemas/ProjectFloss"
                   }
                 }
               },
@@ -297,8 +306,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "integer",
-                    "format": "int32"
+                    "$ref": "#/components/schemas/ProjectFloss"
                   }
                 }
               },
@@ -306,9 +314,59 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "integer",
-                    "format": "int32"
+                    "$ref": "#/components/schemas/ProjectFloss"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Project/download/{filename}": {
+      "get": {
+        "tags": [
+          "Project"
+        ],
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
                 }
               }
             }
@@ -380,6 +438,7 @@
       },
       "Project": {
         "required": [
+          "aida",
           "isCompleted",
           "name"
         ],
@@ -412,6 +471,10 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
+          },
+          "aida": {
+            "type": "integer",
+            "format": "int32"
           },
           "createdOn": {
             "type": "string",
@@ -449,7 +512,8 @@
       },
       "ProjectFloss": {
         "required": [
-          "amount"
+          "amount",
+          "strands"
         ],
         "type": "object",
         "properties": {
@@ -462,6 +526,10 @@
             "format": "int32"
           },
           "amount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "strands": {
             "type": "integer",
             "format": "int32"
           },

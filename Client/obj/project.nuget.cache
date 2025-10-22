@@ -1,18 +1,19 @@
 {
   "version": 2,
-  "dgSpecHash": "gkN7pE3NDXU=",
+  "dgSpecHash": "IMZLF1+4SeA=",
   "success": true,
   "projectFilePath": "C:\\Users\\megha\\Desktop\\Threadfolio\\Client\\Client.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\megha\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
-    "C:\\Users\\megha\\.nuget\\packages\\microsoft.aspnetcore.authorization\\8.0.17\\microsoft.aspnetcore.authorization.8.0.17.nupkg.sha512",
-    "C:\\Users\\megha\\.nuget\\packages\\microsoft.aspnetcore.components\\8.0.17\\microsoft.aspnetcore.components.8.0.17.nupkg.sha512",
-    "C:\\Users\\megha\\.nuget\\packages\\microsoft.aspnetcore.components.analyzers\\8.0.17\\microsoft.aspnetcore.components.analyzers.8.0.17.nupkg.sha512",
+    "C:\\Users\\megha\\.nuget\\packages\\microsoft.aspnetcore.authorization\\8.0.21\\microsoft.aspnetcore.authorization.8.0.21.nupkg.sha512",
+    "C:\\Users\\megha\\.nuget\\packages\\microsoft.aspnetcore.components\\8.0.21\\microsoft.aspnetcore.components.8.0.21.nupkg.sha512",
+    "C:\\Users\\megha\\.nuget\\packages\\microsoft.aspnetcore.components.analyzers\\8.0.21\\microsoft.aspnetcore.components.analyzers.8.0.21.nupkg.sha512",
+    "C:\\Users\\megha\\.nuget\\packages\\microsoft.aspnetcore.components.authorization\\8.0.21\\microsoft.aspnetcore.components.authorization.8.0.21.nupkg.sha512",
     "C:\\Users\\megha\\.nuget\\packages\\microsoft.aspnetcore.components.forms\\8.0.17\\microsoft.aspnetcore.components.forms.8.0.17.nupkg.sha512",
     "C:\\Users\\megha\\.nuget\\packages\\microsoft.aspnetcore.components.web\\8.0.17\\microsoft.aspnetcore.components.web.8.0.17.nupkg.sha512",
     "C:\\Users\\megha\\.nuget\\packages\\microsoft.aspnetcore.components.webassembly\\8.0.17\\microsoft.aspnetcore.components.webassembly.8.0.17.nupkg.sha512",
     "C:\\Users\\megha\\.nuget\\packages\\microsoft.aspnetcore.components.webassembly.devserver\\8.0.17\\microsoft.aspnetcore.components.webassembly.devserver.8.0.17.nupkg.sha512",
-    "C:\\Users\\megha\\.nuget\\packages\\microsoft.aspnetcore.metadata\\8.0.17\\microsoft.aspnetcore.metadata.8.0.17.nupkg.sha512",
+    "C:\\Users\\megha\\.nuget\\packages\\microsoft.aspnetcore.metadata\\8.0.21\\microsoft.aspnetcore.metadata.8.0.21.nupkg.sha512",
     "C:\\Users\\megha\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\7.0.0\\microsoft.bcl.asyncinterfaces.7.0.0.nupkg.sha512",
     "C:\\Users\\megha\\.nuget\\packages\\microsoft.build.framework\\17.8.3\\microsoft.build.framework.17.8.3.nupkg.sha512",
     "C:\\Users\\megha\\.nuget\\packages\\microsoft.build.locator\\1.7.8\\microsoft.build.locator.1.7.8.nupkg.sha512",
@@ -47,8 +48,8 @@
     "C:\\Users\\megha\\.nuget\\packages\\microsoft.extensions.primitives\\9.0.7\\microsoft.extensions.primitives.9.0.7.nupkg.sha512",
     "C:\\Users\\megha\\.nuget\\packages\\microsoft.jsinterop\\8.0.17\\microsoft.jsinterop.8.0.17.nupkg.sha512",
     "C:\\Users\\megha\\.nuget\\packages\\microsoft.jsinterop.webassembly\\8.0.17\\microsoft.jsinterop.webassembly.8.0.17.nupkg.sha512",
-    "C:\\Users\\megha\\.nuget\\packages\\microsoft.net.illink.tasks\\8.0.17\\microsoft.net.illink.tasks.8.0.17.nupkg.sha512",
-    "C:\\Users\\megha\\.nuget\\packages\\microsoft.net.sdk.webassembly.pack\\9.0.6\\microsoft.net.sdk.webassembly.pack.9.0.6.nupkg.sha512",
+    "C:\\Users\\megha\\.nuget\\packages\\microsoft.net.illink.tasks\\8.0.21\\microsoft.net.illink.tasks.8.0.21.nupkg.sha512",
+    "C:\\Users\\megha\\.nuget\\packages\\microsoft.net.sdk.webassembly.pack\\10.0.0-rc.2.25502.107\\microsoft.net.sdk.webassembly.pack.10.0.0-rc.2.25502.107.nupkg.sha512",
     "C:\\Users\\megha\\.nuget\\packages\\mono.texttemplating\\3.0.0\\mono.texttemplating.3.0.0.nupkg.sha512",
     "C:\\Users\\megha\\.nuget\\packages\\system.codedom\\6.0.0\\system.codedom.6.0.0.nupkg.sha512",
     "C:\\Users\\megha\\.nuget\\packages\\system.collections.immutable\\7.0.0\\system.collections.immutable.7.0.0.nupkg.sha512",
@@ -64,8 +65,7 @@
     "C:\\Users\\megha\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0\\system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",
     "C:\\Users\\megha\\.nuget\\packages\\system.text.encodings.web\\9.0.7\\system.text.encodings.web.9.0.7.nupkg.sha512",
     "C:\\Users\\megha\\.nuget\\packages\\system.text.json\\9.0.7\\system.text.json.9.0.7.nupkg.sha512",
-    "C:\\Users\\megha\\.nuget\\packages\\system.threading.channels\\7.0.0\\system.threading.channels.7.0.0.nupkg.sha512",
-    "C:\\Users\\megha\\.nuget\\packages\\microsoft.netcore.app.runtime.mono.browser-wasm\\8.0.17\\microsoft.netcore.app.runtime.mono.browser-wasm.8.0.17.nupkg.sha512"
+    "C:\\Users\\megha\\.nuget\\packages\\system.threading.channels\\7.0.0\\system.threading.channels.7.0.0.nupkg.sha512"
   ],
   "logs": []
 }

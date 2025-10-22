@@ -7,6 +7,34 @@
       "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\controllers\\projectcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\models\\userprojects.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\models\\userprojects.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\models\\userfloss.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\models\\userfloss.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\models\\project.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\models\\project.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\models\\projectfloss.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\models\\projectfloss.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\models\\floss.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\models\\floss.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\data\\seeddata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\data\\seeddata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\controllers\\flosscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\controllers\\flosscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
@@ -18,7 +46,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 353,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 12,
           "Children": [
             {
               "$type": "Bookmark",
@@ -39,6 +67,96 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "UserProjects.cs",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\UserProjects.cs",
+              "RelativeDocumentMoniker": "Server\\Models\\UserProjects.cs",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\UserProjects.cs",
+              "RelativeToolTip": "Server\\Models\\UserProjects.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-16T16:12:13.722Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "UserFloss.cs",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\UserFloss.cs",
+              "RelativeDocumentMoniker": "Server\\Models\\UserFloss.cs",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\UserFloss.cs",
+              "RelativeToolTip": "Server\\Models\\UserFloss.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-16T16:12:08.558Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\User.cs",
+              "RelativeDocumentMoniker": "Server\\Models\\User.cs",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\User.cs",
+              "RelativeToolTip": "Server\\Models\\User.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-16T16:09:57.14Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ProjectFloss.cs",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\ProjectFloss.cs",
+              "RelativeDocumentMoniker": "Server\\Models\\ProjectFloss.cs",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\ProjectFloss.cs",
+              "RelativeToolTip": "Server\\Models\\ProjectFloss.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-16T16:09:10.657Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Floss.cs",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\Floss.cs",
+              "RelativeDocumentMoniker": "Server\\Models\\Floss.cs",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\Floss.cs",
+              "RelativeToolTip": "Server\\Models\\Floss.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-16T16:08:39.516Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Project.cs",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\Project.cs",
+              "RelativeDocumentMoniker": "Server\\Models\\Project.cs",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Models\\Project.cs",
+              "RelativeToolTip": "Server\\Models\\Project.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-09T23:40:09.182Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "SeedData.cs",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Data\\SeedData.cs",
+              "RelativeDocumentMoniker": "Server\\Data\\SeedData.cs",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Data\\SeedData.cs",
+              "RelativeToolTip": "Server\\Data\\SeedData.cs",
+              "ViewState": "AgIAACUAAAAAAAAAAAAgwE0AAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-09T23:37:52.58Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
               "Title": "FlossController.cs",
               "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Controllers\\FlossController.cs",
               "RelativeDocumentMoniker": "Server\\Controllers\\FlossController.cs",
@@ -46,8 +164,7 @@
               "RelativeToolTip": "Server\\Controllers\\FlossController.cs",
               "ViewState": "AgIAADUAAAAAAAAAAAAYwDYAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-19T21:50:07.066Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-19T21:50:07.066Z"
             },
             {
               "$type": "Document",
@@ -55,9 +172,9 @@
               "Title": "ProjectController.cs",
               "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Controllers\\ProjectController.cs",
               "RelativeDocumentMoniker": "Server\\Controllers\\ProjectController.cs",
-              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Controllers\\ProjectController.cs*",
-              "RelativeToolTip": "Server\\Controllers\\ProjectController.cs*",
-              "ViewState": "AgIAAPUAAAAAAAAAAAAEwA8BAAAvAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Controllers\\ProjectController.cs",
+              "RelativeToolTip": "Server\\Controllers\\ProjectController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFsBAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-19T21:22:24.508Z",
               "EditorCaption": ""

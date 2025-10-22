@@ -1,4 +1,5 @@
 
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Server.Data;
 using Server.Middleware;
@@ -21,6 +22,18 @@ namespace Server
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(o =>
+                {
+                    o.LoginPath = "/login";
+                    o.LogoutPath = "/logout";
+                    o.SlidingExpiration = true;
+                    o.ExpireTimeSpan = TimeSpan.FromHours(8);
+                    o.Cookie.HttpOnly = true;
+                    o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    o.Cookie.SameSite = SameSiteMode.Lax;
+                });
+            builder.Services.AddAuthorization();
 
             var app = builder.Build();
 

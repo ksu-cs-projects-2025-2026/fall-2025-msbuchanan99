@@ -18,6 +18,7 @@ namespace Server.Models
         public Project Project { get; set; }
         public Floss Floss { get; set; }
 
+        public ProjectFloss() { }
         public ProjectFloss(Project project, Floss floss)
         {
             Project = project;

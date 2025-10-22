@@ -1,0 +1,124 @@
+﻿@page "/user/projects"
+@* @attribute [Authorize(Roles = "User,Admin")] *@
+
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<div class="flex-container-spread-out">
+    <h3>My Projects</h3>
+    <NavLink class="btn btn-primary" href="/user/projects/create">Create</NavLink>
+</div>
+<div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Completed</th>
+                <th>Date Completed</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Project p in projects)
+            {
+                <tr>
+                    <td>@p.Name</td>
+                    <td>
+                        @if (@p.IsCompleted){<i class="bi bi-check2"></i>}
+                        else { <i class="bi bi-x"></i>}
+                    </td>
+                    <td>@p.CompletionDatestring</td>
+                    <td>
+                        @*Download file button*@
+                        @if (@p.FileName != null)
+                        {
+                            <button type="button" class="btn btn-outline-secondary rounded-circle" @onclick="() => DownloadFile(p.FileName)" aria-label="Download File">
+                                <i class="bi bi-box-arrow-down"></i>
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-outline-secondary rounded-circle" disabled aria-label="Download File">
+                                <i class="bi bi-box-arrow-down"></i>
+                            </button>
+                        }
+                    </td>
+                    <td>
+                        @*View details*@
+                        <NavLink class="btn btn-outline-secondary rounded-circle" href="/user/projects/{id:int}" aria-label="View Details">
+                            <i class="bi bi-info"></i>
+                        </NavLink>
+                    </td> 
+                    <td>
+                        @*Delete*@
+                        <button class="btn btn-outline-danger rounded-circle" aria-label="Delete" @onclick="() => DeleteProject(p.Id)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .flex-container-spread-out{
+        display: flex;
+        justify-content: space-between;
+    }
+</style>
+
+@code {
+    private List<Project> projects;
+    private int userId;
+
+    protected override async Task OnInitializedAsync() => await LoadProjects();
+
+    private async Task LoadProjects()
+    {
+        var response = await Http.GetAsync($"api/projects?userId={userId}");
+        if (response.IsSuccessStatusCode)
+        {
+            projects = await response.Content.ReadFromJsonAsync<List<Project>>();
+        }
+        else
+        {
+            projects = new();
+        }
+    }
+
+    //Invoked by clicking a download button
+    private async Task DownloadFile (string filename)
+    {
+        var url = Nav.ToAbsoluteUri($"api/projects/download/{filename}");
+        await JS.InvokeVoidAsync("open", url, "_blank");
+    }
+
+    //Invoked by clicking a delete button
+    private async Task DeleteProject (int id)
+    {
+        //TODO: Add Confirmation
+        var response = await Http.DeleteAsync($"api/projects/{id}");
+        if (response.IsSuccessStatusCode) await LoadProjects();
+    }
+
+    public class Project
+    {
+        public int Id { get; set; }
+        public string? Name { get; set; }
+        public bool IsCompleted { get; set; }
+        public DateTime CompletionDate { get; set; }
+        public string CompletionDatestring
+        {
+            get
+            {
+                if (!IsCompleted) return "-";
+                else
+                {
+                    return CompletionDate.ToString("MMMM dd yyyy");
+                }
+            }    
+        }
+        public string? FileName { get; set; }
+    }
+}

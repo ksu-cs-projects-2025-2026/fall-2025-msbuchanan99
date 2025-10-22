@@ -1,4 +1,6 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@inject HttpClient Http
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Client</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -14,31 +16,73 @@
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="upload">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Upload
-            </NavLink>
-        </div>
+        @if (isLoggedIn && user!.role == UserType.User) //User
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/user/projects">
+                    <span class="bi bi-palette2-nav-menu" aria-hidden="true"></span> My Projects
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="logout">
+                    <span class="bi bi-door-open-fill-nav-menu" aria-hidden="true"></span> Log Out
+                </NavLink>
+            </div>
+        }
+        else if (isLoggedIn && user!.role == UserType.Admin) //Admin
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="logout">
+                    <span class="bi bi-door-open-fill-nav-menu" aria-hidden="true"></span> Log Out
+                </NavLink>
+            </div>
+        }
+        else if (!isLoggedIn) //Anonymous
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="login">
+                    <span class="bi bi-door-open-nav-menu" aria-hidden="true"></span> Log In
+                </NavLink>
+            </div>
+        }
     </nav>
 </div>
 
 @code {
     private bool collapseNavMenu = true;
-
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    private bool isLoggedIn = false;
+    private User? user;
+    protected override async Task OnInitializedAsync()
+    {
+        HttpResponseMessage response = await Http.GetAsync("api/users/me");
+        if (response.IsSuccessStatusCode)
+        {
+            isLoggedIn = true;
+            user = await response.Content.ReadFromJsonAsync<User>();
+        }
+        else
+        {
+            user = null;
+        }
+    }
+
+
+    public class User
+    {
+        public string? username{ get; set; }
+        public UserType? role { get; set; }
+    }
+    public enum UserType
+    {
+        Admin = 1,
+        User = 2,
+        Anon = 3
     }
 }

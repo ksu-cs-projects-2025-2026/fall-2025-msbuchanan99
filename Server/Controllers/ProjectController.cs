@@ -24,15 +24,28 @@ namespace Server.Controllers
 
         //Get the view of the list of projects
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? userId)
         {
-            var projects = await _dbContext.Projects.ToListAsync();
-            if (projects == null || projects.Count == 0)
+            if(userId == null) //used for admin
             {
-                return NotFound("No projects were found");
+                var projects = await _dbContext.Projects.ToListAsync();
+                if (projects == null || projects.Count == 0)
+                {
+                    return NotFound("No projects were found");
+                }
+                return Ok(projects);
             }
+            else //used for user getting their project
+            {
+                var userprojects = await _dbContext.UserProjects.Where(up => up.UserId == userId).ToListAsync();
+                if (userprojects == null || userprojects.Count == 0)
+                {
+                    return NotFound($"No projects for user {userId} found.");
+                }
 
-            return Ok(projects);
+                List<Project> projects = userprojects.Select(up => up.Project).ToList();
+                return Ok(projects);
+            }
         }
 
         //Get the view of an individual project
@@ -142,7 +155,7 @@ namespace Server.Controllers
             return View(project);
         }
 
-        // POST: Floss/Delete/5
+        // POST: Projects/5
         [HttpDelete("{id}"), ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -351,6 +364,18 @@ namespace Server.Controllers
                 
                 return projectFloss;
             }
+        }
+
+        [HttpGet("download/{filename}")]
+        public IActionResult Download(string filename)
+        {
+            var path = Path.Combine(_pdfFolder, filename);
+            if (!FileIO.Exists(path)) return NotFound($"File Not Found");
+
+            var fileBytes = FileIO.ReadAllBytes(path);
+            var contentType = "application/octet-stream";
+
+            return File(fileBytes, contentType, filename);
         }
 
         #region Helper Methods

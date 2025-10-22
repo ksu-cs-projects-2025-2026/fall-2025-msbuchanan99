@@ -1,7 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\Server",
+    "\\Server\\Controllers"
   ],
-  "SelectedNode": "\\Threadfolio.sln",
+  "SelectedNode": "\\Server\\Controllers\\ProjectController.cs",
   "PreviewInSolutionExplorer": false
 }
