@@ -22,6 +22,18 @@ namespace Server
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("DevCors", policy =>
+                {
+                    policy.WithOrigins("https://localhost:7296", "http://localhost:5190")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+            });
+
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(o =>
                 {
@@ -70,6 +82,7 @@ namespace Server
             app.UseHttpsRedirection();
 
             //Middleware
+            app.UseCors("DevCors"); 
             app.UseRequestLogging();
             app.UseAuthentication();
             app.UseAuthorizationLogging();

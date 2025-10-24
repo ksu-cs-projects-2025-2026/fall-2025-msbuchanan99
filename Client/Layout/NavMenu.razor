@@ -1,4 +1,5 @@
 ﻿@inject HttpClient Http
+@inject IJSRuntime JS
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -16,7 +17,7 @@
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        @if (isLoggedIn && user!.role == UserType.User) //User
+        @if (isLoggedIn && user!.role == "User") //User
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="/user/projects">
@@ -24,15 +25,15 @@
                 </NavLink>
             </div>
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="logout">
+                <NavLink class="nav-link" href="/logout">
                     <span class="bi bi-door-open-fill-nav-menu" aria-hidden="true"></span> Log Out
                 </NavLink>
             </div>
         }
-        else if (isLoggedIn && user!.role == UserType.Admin) //Admin
+        else if (isLoggedIn && user!.role == "Admin") //Admin
         {
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="logout">
+                <NavLink class="nav-link" href="/logout">
                     <span class="bi bi-door-open-fill-nav-menu" aria-hidden="true"></span> Log Out
                 </NavLink>
             </div>
@@ -40,7 +41,7 @@
         else if (!isLoggedIn) //Anonymous
         {
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="login">
+                <NavLink class="nav-link" href="/login">
                     <span class="bi bi-door-open-nav-menu" aria-hidden="true"></span> Log In
                 </NavLink>
             </div>
@@ -61,14 +62,18 @@
     private User? user;
     protected override async Task OnInitializedAsync()
     {
-        HttpResponseMessage response = await Http.GetAsync("api/users/me");
+        HttpResponseMessage response = await Http.GetAsync("/api/auth/me");
+        await JS.InvokeVoidAsync("console.log", response.StatusCode);
         if (response.IsSuccessStatusCode)
         {
             isLoggedIn = true;
+            await JS.InvokeVoidAsync("console.log", "meow");
             user = await response.Content.ReadFromJsonAsync<User>();
         }
-        else
+        else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
+            await JS.InvokeVoidAsync("console.log", "meow meow");
+            isLoggedIn = false;
             user = null;
         }
     }
@@ -77,12 +82,6 @@
     public class User
     {
         public string? username{ get; set; }
-        public UserType? role { get; set; }
-    }
-    public enum UserType
-    {
-        Admin = 1,
-        User = 2,
-        Anon = 3
+        public string? role { get; set; }
     }
 }

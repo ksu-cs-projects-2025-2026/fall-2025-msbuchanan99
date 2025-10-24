@@ -6,6 +6,7 @@ using System;
 using System.Formats.Asn1;
 using System.Globalization;
 using System.Linq;
+using System.Security.Cryptography;
 
 public static class SeedData
 {
@@ -18,6 +19,18 @@ public static class SeedData
 
             string folder = Path.Combine(AppContext.BaseDirectory, "..", "..", "..");
             folder = Path.Combine(folder, "Storage", "SeedData");
+
+            //Seed Encryption and Decryption Keys and Initialization Vector
+            byte[] EKByte = new byte[16];
+            byte[] IVByte = new byte[16];
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(EKByte);
+                rng.GetBytes(IVByte);
+            }
+            context.EncryptionKey = EKByte;
+            context.InitializationVector = IVByte;
+            context.SaveChanges();
 
             //Seed from Floss
             var FlossLines = File.ReadAllLines(Path.Combine(folder, "Floss.csv"));
@@ -99,11 +112,11 @@ public static class SeedData
                 var user = new User()
                 {
                     Username = row["Username"],
-                    Password = row["Password"],
                     Role = type,
                     CreatedOn = DateTime.Parse(row["CreatedOn"]),
                     LastModified = DateTime.Parse(row["LastModified"])
                 };
+                user.EncryptedPassword = user.EncryptText(row["Password"], context.EncryptionKey, context.InitializationVector);
 
                 context.Users.Add(user);
             }

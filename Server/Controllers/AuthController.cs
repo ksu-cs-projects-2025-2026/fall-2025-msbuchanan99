@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 namespace Server.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     public class AuthController : Controller
     {
         private readonly ThreadfolioContext _dbContext;
@@ -21,8 +21,11 @@ namespace Server.Controllers
         public async Task<IActionResult> Login([FromBody] LoginInfo body)
         {
             User? user = _dbContext.Users
-                .FirstOrDefault(u => u.Username == body.Username && u.Password == body.Password);
+                .FirstOrDefault(u => u.Username == body.Username);
             if (user == null) return Unauthorized("Invalid Credentials");
+
+            byte[] givenPasswordEncrypted = user.EncryptText(body.Password, _dbContext.EncryptionKey, _dbContext.InitializationVector);
+            if (givenPasswordEncrypted != user.EncryptedPassword) return Unauthorized("Invalid Credentials");
 
             var claims = new List<Claim>
             {

@@ -1,8 +1,44 @@
 ﻿@page "/login"
+@inject HttpClient http
+@inject NavigationManager nav
 
 <h3>Log In To Threadfolio</h3>
 
-<EditForm M
-@code {
+<EditForm Model="@form" OnValidSubmit="Submit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+        <label class="form-label">Username</label>
+        <InputText class="form-control" @bind-Value="form.Username" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <InputText class="form-control" type="password" @bind-Value="form.Password" />
+    </div>
+    <button class="btn btn-primary" type="submit" disabled="@busy">
+        @(busy ? "Logging in..." : "Login")
+    </button>
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <div class="text-danger mt-2">@error</div>
+    }
+</EditForm>
 
+@code {
+    private (string Username, string Password) form = ("", "");
+    private bool busy;
+    private string? error;
+
+    private async Task Submit()
+    {
+        busy = true;
+        error = null;
+
+        var response = await http.PostAsJsonAsync("api/auth/login", new { Username = form.Username, Password = form.Password });
+
+        if (response.IsSuccessStatusCode) nav.NavigateTo("/");
+        else error = await response.Content.ReadAsStringAsync();
+
+        busy = false;
+    }
 }

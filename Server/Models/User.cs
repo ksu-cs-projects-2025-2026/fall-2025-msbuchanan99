@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Cryptography;
 using Server.Models;
 
 namespace Server.Models
@@ -16,8 +17,7 @@ namespace Server.Models
         public string Username { get; set; } = "";
 
         [Required]
-        [MaxLength(50)]
-        public string Password { get; set; } = "";
+        public byte[]? EncryptedPassword { get; set; }
 
         [Required]
         public UserType Role { get; set; }
@@ -40,6 +40,54 @@ namespace Server.Models
         [NotMapped]
         public List<Project> Projects =>
             UserProjects?.Select(up => up.Project).ToList() ?? new List<Project>();
+
+        /// <summary>
+        /// Encrypts simpleText and sets it as the password
+        /// </summary>
+        /// <param name="simpleText">Unencrypted text</param>
+        /// <param name="key">key</param>
+        /// <param name="iv">initialization vector</param>
+        /// <returns></returns>
+        public byte[] EncryptText (string simpleText, byte[] key, byte[] iv)
+        {
+            byte[] cipheredText;
+            using(Aes aes = Aes.Create())
+            {
+                ICryptoTransform encryptor = aes.CreateEncryptor(key, iv);
+                using MemoryStream memoryStream = new();
+                using CryptoStream cryptoStream = new(memoryStream, encryptor, CryptoStreamMode.Write);
+
+                using (StreamWriter writer = new(cryptoStream))
+                {
+                    writer.Write(simpleText);
+                }
+                cipheredText = memoryStream.ToArray();
+
+                cryptoStream.Close();
+                memoryStream.Close();
+            }
+
+            return cipheredText;
+        }
+
+        public string DecryptPassword(byte[] key, byte[] iv)
+        {
+            string simpleText;
+            using (Aes aes = Aes.Create())
+            {
+                ICryptoTransform decryptor = aes.CreateDecryptor(key, iv);
+                using MemoryStream memoryStream = new MemoryStream(EncryptedPassword);
+                using CryptoStream cryptoStream = new(memoryStream, decryptor, CryptoStreamMode.Read);
+                using StreamReader reader = new StreamReader(cryptoStream);
+
+                simpleText = reader.ReadToEnd();
+
+                reader.Close();
+                cryptoStream.Close();
+                memoryStream.Close();
+            }
+            return simpleText;
+        }
     }
 
     public enum UserType
