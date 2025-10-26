@@ -43,7 +43,7 @@ namespace Server
                     o.ExpireTimeSpan = TimeSpan.FromHours(8);
                     o.Cookie.HttpOnly = true;
                     o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                    o.Cookie.SameSite = SameSiteMode.Lax;
+                    o.Cookie.SameSite = SameSiteMode.None;
                 });
             builder.Services.AddAuthorization();
 

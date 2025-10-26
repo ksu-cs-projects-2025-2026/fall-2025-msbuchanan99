@@ -20,9 +20,9 @@
   <ItemGroup>
     <Folder Include="Components\" />
     <Folder Include="Pages\Admin\" />
-    <Folder Include="Pages\User\Floss\" />
-    <Folder Include="Pages\User\Posts\" />
-    <Folder Include="Pages\User\User\" />
+    <Folder Include="Pages\UserPages\Floss\" />
+    <Folder Include="Pages\UserPages\Posts\" />
+    <Folder Include="Pages\UserPages\User\" />
   </ItemGroup>
 
 </Project>

@@ -4,6 +4,7 @@ using Server.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 
 namespace Server.Controllers
 {
@@ -24,8 +25,9 @@ namespace Server.Controllers
                 .FirstOrDefault(u => u.Username == body.Username);
             if (user == null) return Unauthorized("Invalid Credentials");
 
-            byte[] givenPasswordEncrypted = user.EncryptText(body.Password, _dbContext.EncryptionKey, _dbContext.InitializationVector);
-            if (givenPasswordEncrypted != user.EncryptedPassword) return Unauthorized("Invalid Credentials");
+            var hasher = new PasswordHasher<User>();
+            var result = hasher.VerifyHashedPassword(user, user.HashPassword, body.Password);
+            if (result == PasswordVerificationResult.Failed) return Unauthorized("Invalid Credentials");
 
             var claims = new List<Claim>
             {

@@ -1,19 +1,23 @@
 ﻿@page "/login"
-@inject HttpClient http
-@inject NavigationManager nav
+
+@using Client.Models
+@using Client.Services
+
+@inject UserService User
+
 
 <h3>Log In To Threadfolio</h3>
 
-<EditForm Model="@form" OnValidSubmit="Submit">
+<EditForm Model="@model" OnValidSubmit="Submit">
     <DataAnnotationsValidator />
     <ValidationSummary />
     <div class="mb-3">
         <label class="form-label">Username</label>
-        <InputText class="form-control" @bind-Value="form.Username" />
+        <InputText class="form-control w-25" @bind-Value="model.Username" />
     </div>
     <div class="mb-3">
         <label class="form-label">Password</label>
-        <InputText class="form-control" type="password" @bind-Value="form.Password" />
+        <InputText class="form-control w-25" type="password" @bind-Value="model.Password" />
     </div>
     <button class="btn btn-primary" type="submit" disabled="@busy">
         @(busy ? "Logging in..." : "Login")
@@ -24,8 +28,8 @@
     }
 </EditForm>
 
-@code {
-    private (string Username, string Password) form = ("", "");
+    @code {
+    private Client.Models.UserModel model = new();
     private bool busy;
     private string? error;
 
@@ -34,10 +38,7 @@
         busy = true;
         error = null;
 
-        var response = await http.PostAsJsonAsync("api/auth/login", new { Username = form.Username, Password = form.Password });
-
-        if (response.IsSuccessStatusCode) nav.NavigateTo("/");
-        else error = await response.Content.ReadAsStringAsync();
+        error = await User.LoginAsync(model);
 
         busy = false;
     }

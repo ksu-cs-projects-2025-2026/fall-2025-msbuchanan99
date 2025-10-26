@@ -1,9 +1,45 @@
 ﻿@page "/"
 
+@using Client.Services
+@using Client.Models
+
+@inject HttpClient Http
+@inject UserState AuthState
+
 <PageTitle>Home</PageTitle>
 
-<h1>Threadfolio</h1>
+<h1>Welcome to Threadfolio, @user.Username</h1>
 
 Welcome to Threadfolio - a place to manage your cross stitch projects.
 
 This will become the home of Threadfolio's social feed in a future update.
+
+@code{
+    public UserModel? user;
+    protected override async Task OnInitializedAsync()
+    {
+        AuthState.Changed += OnAuthChanged;
+
+        if(AuthState.CurrentUser is null)
+        {
+            var resp = await Http.GetAsync("api/auth/me");
+            if (resp.IsSuccessStatusCode)
+            {
+                var newuser = await resp.Content.ReadFromJsonAsync<UserModel>();
+                AuthState.Set(newuser);
+            }
+            else
+            {
+                AuthState.Set(null);
+            }
+        }
+    }
+
+    private void OnAuthChanged()
+    {
+        user = AuthState.CurrentUser;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose() => AuthState.Changed -= OnAuthChanged;
+}

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Server.Data;
 using Server.Models;
@@ -6,7 +7,6 @@ using System;
 using System.Formats.Asn1;
 using System.Globalization;
 using System.Linq;
-using System.Security.Cryptography;
 
 public static class SeedData
 {
@@ -20,17 +20,8 @@ public static class SeedData
             string folder = Path.Combine(AppContext.BaseDirectory, "..", "..", "..");
             folder = Path.Combine(folder, "Storage", "SeedData");
 
-            //Seed Encryption and Decryption Keys and Initialization Vector
-            byte[] EKByte = new byte[16];
-            byte[] IVByte = new byte[16];
-            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(EKByte);
-                rng.GetBytes(IVByte);
-            }
-            context.EncryptionKey = EKByte;
-            context.InitializationVector = IVByte;
-            context.SaveChanges();
+            //Seed Hash 
+            var hasher = new PasswordHasher<User>();
 
             //Seed from Floss
             var FlossLines = File.ReadAllLines(Path.Combine(folder, "Floss.csv"));
@@ -116,7 +107,8 @@ public static class SeedData
                     CreatedOn = DateTime.Parse(row["CreatedOn"]),
                     LastModified = DateTime.Parse(row["LastModified"])
                 };
-                user.EncryptedPassword = user.EncryptText(row["Password"], context.EncryptionKey, context.InitializationVector);
+
+                user.HashPassword = hasher.HashPassword(user, row["Password"]);
 
                 context.Users.Add(user);
             }

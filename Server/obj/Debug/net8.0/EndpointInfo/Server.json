@@ -584,7 +584,7 @@
       },
       "User": {
         "required": [
-          "encryptedPassword",
+          "hashPassword",
           "role",
           "username"
         ],
@@ -599,9 +599,9 @@
             "minLength": 1,
             "type": "string"
           },
-          "encryptedPassword": {
-            "type": "string",
-            "format": "byte"
+          "hashPassword": {
+            "minLength": 1,
+            "type": "string"
           },
           "role": {
             "$ref": "#/components/schemas/UserType"

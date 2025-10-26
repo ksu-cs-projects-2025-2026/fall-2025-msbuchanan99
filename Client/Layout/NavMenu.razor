@@ -1,5 +1,9 @@
-﻿@inject HttpClient Http
+﻿@using Client.Models
+@using Client.Services;
+
+@inject HttpClient Http
 @inject IJSRuntime JS
+@inject UserState AuthState
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -17,7 +21,7 @@
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        @if (isLoggedIn && user!.role == "User") //User
+        @if (AuthState.IsLoggedIn && AuthState.CurrentUser is not null && AuthState.CurrentUser!.Role == "User") //User
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="/user/projects">
@@ -30,7 +34,7 @@
                 </NavLink>
             </div>
         }
-        else if (isLoggedIn && user!.role == "Admin") //Admin
+        else if (AuthState.IsLoggedIn && AuthState.CurrentUser is not null && AuthState.CurrentUser!.Role == "Admin") //Admin
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="/logout">
@@ -38,7 +42,7 @@
                 </NavLink>
             </div>
         }
-        else if (!isLoggedIn) //Anonymous
+        else if (!AuthState.IsLoggedIn) //Anonymous
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="/login">
@@ -58,30 +62,9 @@
         collapseNavMenu = !collapseNavMenu;
     }
 
-    private bool isLoggedIn = false;
-    private User? user;
-    protected override async Task OnInitializedAsync()
-    {
-        HttpResponseMessage response = await Http.GetAsync("/api/auth/me");
-        await JS.InvokeVoidAsync("console.log", response.StatusCode);
-        if (response.IsSuccessStatusCode)
-        {
-            isLoggedIn = true;
-            await JS.InvokeVoidAsync("console.log", "meow");
-            user = await response.Content.ReadFromJsonAsync<User>();
-        }
-        else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-        {
-            await JS.InvokeVoidAsync("console.log", "meow meow");
-            isLoggedIn = false;
-            user = null;
-        }
-    }
+    protected override void OnInitialized() => AuthState.Changed += OnAuthChanged;
 
+    private void OnAuthChanged() => InvokeAsync(StateHasChanged);
 
-    public class User
-    {
-        public string? username{ get; set; }
-        public string? role { get; set; }
-    }
+    public void Dispose() => AuthState.Changed -= OnAuthChanged;
 }

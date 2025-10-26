@@ -38,24 +38,28 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTG9nSW4ucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/megha/Desktop/Threadfolio/Client/Pages/User/Project/Create.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxQcm9qZWN0XENyZWF0ZS5yYXpvcg==
+[C:/Users/megha/Desktop/Threadfolio/Client/Pages/LogOut.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTG9nT3V0LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/megha/Desktop/Threadfolio/Client/Pages/User/Project/Details.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxQcm9qZWN0XERldGFpbHMucmF6b3I=
+[C:/Users/megha/Desktop/Threadfolio/Client/Pages/UserPages/Project/Create.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclBhZ2VzXFByb2plY3RcQ3JlYXRlLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/megha/Desktop/Threadfolio/Client/Pages/User/Project/Edit.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxQcm9qZWN0XEVkaXQucmF6b3I=
+[C:/Users/megha/Desktop/Threadfolio/Client/Pages/UserPages/Project/Details.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclBhZ2VzXFByb2plY3RcRGV0YWlscy5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/megha/Desktop/Threadfolio/Client/Pages/User/Project/Index.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxQcm9qZWN0XEluZGV4LnJhem9y
+[C:/Users/megha/Desktop/Threadfolio/Client/Pages/UserPages/Project/Edit.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclBhZ2VzXFByb2plY3RcRWRpdC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/megha/Desktop/Threadfolio/Client/Pages/User/Project/ViewPattern.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxQcm9qZWN0XFZpZXdQYXR0ZXJuLnJhem9y
+[C:/Users/megha/Desktop/Threadfolio/Client/Pages/UserPages/Project/Index.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclBhZ2VzXFByb2plY3RcSW5kZXgucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Pages/UserPages/Project/ViewPattern.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclBhZ2VzXFByb2plY3RcVmlld1BhdHRlcm4ucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/megha/Desktop/Threadfolio/Client/_Imports.razor]

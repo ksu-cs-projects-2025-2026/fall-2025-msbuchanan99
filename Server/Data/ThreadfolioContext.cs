@@ -14,9 +14,6 @@ namespace Server.Data
         public DbSet<ProjectFloss> ProjectFloss { get; set; }
         public DbSet<UserFloss> UserFloss { get; set; }
         public DbSet<UserProjects> UserProjects { get; set; }
-        public byte[]? EncryptionKey { get; set; }
-        public byte[]? InitializationVector { get; set; }
-
 
         public ThreadfolioContext(DbContextOptions<ThreadfolioContext> options)
             : base(options)
