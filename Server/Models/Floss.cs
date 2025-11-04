@@ -30,7 +30,6 @@ namespace Server.Models
         public DateTime LastModified { get; set; }
 
         public ICollection<UserFloss>? UserFloss { get; set; }
-        public ICollection<UserProjects>? UserProjects { get; set; }
         public ICollection<ProjectFloss>? ProjectFloss { get; set; }
     }
 }

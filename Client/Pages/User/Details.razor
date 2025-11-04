@@ -1,0 +1,64 @@
+﻿@page "/user/profile"
+
+@using Client.Services
+@using Client.Models
+
+@inject UserService userService
+@inject NavigationManager Nav
+
+<h3>Profile</h3>
+<div class="mb-3">
+    <label class="form-label">Username: </label>
+    @if(userService.CurrentUser is not null)
+    {
+        <InputText class="form-control w-25" disabled @bind-value="userService.CurrentUser.Username"></InputText>
+
+    }
+</div>
+<div class="mb-3">
+    <label class="form-label">Settings: </label>
+    ...Under Construction...
+    <ul>
+        @*TODO: Add settings for account*@
+    </ul>
+</div>
+<button class="btn btn-primary" @onclick="EditAccount">Edit Account</button>
+<button class="btn btn-danger" type="submit" @onclick="DeleteAccount" disabled="@busy">
+    @(busy ? "Deleting Account..." : "Delete Account")
+</button>
+@if (!string.IsNullOrEmpty(error))
+{
+    <div class="text-danger mt-2">@error</div>
+}
+
+
+@code {
+    private string? error;
+    private bool busy = false;
+
+    public void EditAccount()
+    {
+        if(userService.CurrentUser is null)
+        {
+            error = "Can't Edit because user is null.";
+            return;
+        }
+
+        error = null;
+        Nav.NavigateTo("/user/profile/edit");
+    }
+
+    public async void DeleteAccount()
+    {
+        busy = true;
+        if(userService.CurrentUser is null)
+        {
+            error = "Can't Delete because user is null.";
+        }
+        else
+        {
+            error = await userService.DeleteAccountAsync();
+        }
+        busy = false;
+    }
+}

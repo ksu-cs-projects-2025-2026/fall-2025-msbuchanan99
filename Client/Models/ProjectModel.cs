@@ -2,7 +2,8 @@
 {
     public class ProjectModel
     {
-        public int? Id { get; set; }
+        public int Id { get; set; }
+        public int UserId { get; set; }
         public string? Name { get; set; }
         public string? FileName { get; set; }
         public bool? IsCompleted { get; set; }

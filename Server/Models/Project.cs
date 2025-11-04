@@ -10,6 +10,10 @@ namespace Server.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
+        [ForeignKey("User")]
+        [Required]
+        public int UserId { get; set; }
+
         [Required]
         [StringLength(100)]
         public required string Name { get; set; }
@@ -35,7 +39,6 @@ namespace Server.Models
         public DateTime LastModified { get; set; }
 
         public ICollection<ProjectFloss> ProjectFloss { get; set; } = [];
-        public ICollection<UserProjects> UserProjects { get; set; } = [];
 
         [NotMapped]
         public Dictionary<Floss, int> Floss =>

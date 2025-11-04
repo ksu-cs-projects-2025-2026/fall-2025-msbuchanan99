@@ -12,7 +12,7 @@ using pdfPage = UglyToad.PdfPig.Content.Page;
 namespace Server.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/projects")]
     public class ProjectController : Controller
     {
         private readonly ThreadfolioContext _dbContext;
@@ -22,31 +22,18 @@ namespace Server.Controllers
             _dbContext = dbContext;
         }
 
-        //Get the view of the list of projects
-        [HttpGet]
-        public async Task<IActionResult> Index(int? userId)
-        {
-            if(userId == null) //used for admin
-            {
-                var projects = await _dbContext.Projects.ToListAsync();
-                if (projects == null || projects.Count == 0)
-                {
-                    return NotFound("No projects were found");
-                }
-                return Ok(projects);
-            }
-            else //used for user getting their project
-            {
-                var userprojects = await _dbContext.UserProjects.Where(up => up.UserId == userId).ToListAsync();
-                if (userprojects == null || userprojects.Count == 0)
-                {
-                    return NotFound($"No projects for user {userId} found.");
-                }
+        #region admin routes
 
-                List<Project> projects = userprojects.Select(up => up.Project).ToList();
-                return Ok(projects);
-            }
-        }
+
+
+        #endregion
+
+        #region user routes
+
+ 
+
+        #endregion
+
 
         //Get the view of an individual project
         [HttpGet("{id}/details")]

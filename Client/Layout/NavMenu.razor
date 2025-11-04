@@ -3,7 +3,7 @@
 
 @inject HttpClient Http
 @inject IJSRuntime JS
-@inject UserState AuthState
+@inject UserService userService
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -21,7 +21,7 @@
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        @if (AuthState.IsLoggedIn && AuthState.CurrentUser is not null && AuthState.CurrentUser!.Role == "User") //User
+        @if (userService.IsLoggedIn && userService.CurrentUser is not null && userService.CurrentUser!.Role == "User") //User
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="/user/projects">
@@ -29,12 +29,17 @@
                 </NavLink>
             </div>
             <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/user/profile">
+                    <span class="bi bi-palette2-nav-menu" aria-hidden="true"></span> My Account
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
                 <NavLink class="nav-link" href="/logout">
                     <span class="bi bi-door-open-fill-nav-menu" aria-hidden="true"></span> Log Out
                 </NavLink>
             </div>
         }
-        else if (AuthState.IsLoggedIn && AuthState.CurrentUser is not null && AuthState.CurrentUser!.Role == "Admin") //Admin
+        else if (userService.IsLoggedIn && userService.CurrentUser is not null && userService.CurrentUser!.Role == "Admin") //Admin
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="/logout">
@@ -42,7 +47,7 @@
                 </NavLink>
             </div>
         }
-        else if (!AuthState.IsLoggedIn) //Anonymous
+        else if (!userService.IsLoggedIn) //Anonymous
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="/login">
@@ -62,9 +67,9 @@
         collapseNavMenu = !collapseNavMenu;
     }
 
-    protected override void OnInitialized() => AuthState.Changed += OnAuthChanged;
+    protected override void OnInitialized() => userService.UserChanged += OnAuthChanged;
 
     private void OnAuthChanged() => InvokeAsync(StateHasChanged);
 
-    public void Dispose() => AuthState.Changed -= OnAuthChanged;
+    public void Dispose() => userService.UserChanged -= OnAuthChanged;
 }

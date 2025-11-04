@@ -10,7 +10,7 @@ namespace Server.Controllers
 {
     [ApiController]
     [Route("api/auth")]
-    public class AuthController : Controller
+    public class AuthController : ControllerBase
     {
         private readonly ThreadfolioContext _dbContext;
         public AuthController(ThreadfolioContext dbContext)
@@ -33,7 +33,7 @@ namespace Server.Controllers
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Name, user.Username),
-                new(ClaimTypes.Role, ((UserType)user.Role).ToString())
+                new(ClaimTypes.Role, user.Role)
             };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

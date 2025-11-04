@@ -1,4 +1,4 @@
-﻿@page "/user/projects"
+﻿@page "/projects"
 @* @attribute [Authorize(Roles = "User,Admin")] *@
 
 @inject HttpClient Http
@@ -102,23 +102,5 @@
         if (response.IsSuccessStatusCode) await LoadProjects();
     }
 
-    public class Project
-    {
-        public int Id { get; set; }
-        public string? Name { get; set; }
-        public bool IsCompleted { get; set; }
-        public DateTime CompletionDate { get; set; }
-        public string CompletionDatestring
-        {
-            get
-            {
-                if (!IsCompleted) return "-";
-                else
-                {
-                    return CompletionDate.ToString("MMMM dd yyyy");
-                }
-            }    
-        }
-        public string? FileName { get; set; }
-    }
+    
 }

@@ -3,7 +3,8 @@
 @using Client.Models
 @using Client.Services
 
-@inject UserService User
+@inject UserService userService
+@inject NavigationManager Nav
 
 
 <h3>Log In To Threadfolio</h3>
@@ -19,9 +20,12 @@
         <label class="form-label">Password</label>
         <InputText class="form-control w-25" type="password" @bind-Value="model.Password" />
     </div>
-    <button class="btn btn-primary" type="submit" disabled="@busy">
-        @(busy ? "Logging in..." : "Login")
-    </button>
+    <div class="mb-3">
+        <button class="btn btn-primary" type="submit" disabled="@busy" @onclick="Submit">
+            @(busy ? "Logging in..." : "Login")
+        </button>
+        <button class="btn btn-primary" @onclick="CreateAccount">Create Account</button>
+    </div>
     @if (!string.IsNullOrEmpty(error))
     {
         <div class="text-danger mt-2">@error</div>
@@ -29,7 +33,7 @@
 </EditForm>
 
     @code {
-    private Client.Models.UserModel model = new();
+    private UserModel model = new();
     private bool busy;
     private string? error;
 
@@ -38,7 +42,17 @@
         busy = true;
         error = null;
 
-        error = await User.LoginAsync(model);
+        error = await userService.LoginAsync(model);
+
+        busy = false;
+    }
+
+    private async Task CreateAccount()
+    {
+        busy = true;
+        error = null;
+
+        Nav.NavigateTo("/CreateAccount");
 
         busy = false;
     }

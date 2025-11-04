@@ -43,6 +43,46 @@ public static class SeedData
             }
             context.SaveChanges();
 
+            //Seed from Users
+            var UserLines = File.ReadAllLines(Path.Combine(folder, "Users.csv"));
+            var UserHeaders = UserLines[0].Split(',');
+            foreach (var line in UserLines.Skip(1))
+            {
+                var cells = line.Split(",");
+                var row = UserHeaders.Zip(cells, (h, c) => new { Header = h, Value = c }).ToDictionary(x => x.Header, x => x.Value);
+
+                var user = new User()
+                {
+                    Username = row["Username"],
+                    Role = row["Role"],
+                    CreatedOn = DateTime.Parse(row["CreatedOn"]),
+                    LastModified = DateTime.Parse(row["LastModified"])
+                };
+
+                user.HashPassword = hasher.HashPassword(user, row["Password"]);
+
+                context.Users.Add(user);
+            }
+            context.SaveChanges();
+
+            //Seed from UserFloss
+            var UserFlossLines = File.ReadAllLines(Path.Combine(folder, "UserFloss.csv"));
+            var UFHeaders = UserFlossLines[0].Split(',');
+            foreach (var line in UserFlossLines.Skip(1))
+            {
+                var cells = line.Split(",");
+                var row = UFHeaders.Zip(cells, (h, c) => new { Header = h, Value = c }).ToDictionary(x => x.Header, x => x.Value);
+                var UserFloss = new UserFloss()
+                {
+                    UserId = int.Parse(row["UserId"]),
+                    FlossId = int.Parse(row["FlossId"]),
+                    Amount = int.Parse(row["Amount"])
+                };
+
+                context.UserFloss.Add(UserFloss);
+            }
+            context.SaveChanges();
+
             //Seed from Projects
             var ProjectLines = File.ReadAllLines(Path.Combine(folder, "Projects.csv"));
             var ProjectHeaders = ProjectLines[0].Split(',');
@@ -58,7 +98,8 @@ public static class SeedData
                     CreatedOn = DateTime.Parse(row["CreatedOn"]),
                     LastModified = DateTime.Parse(row["LastModified"]),
                     KeyPage = int.Parse(row["KeyPage"]),
-                    Aida = int.Parse(row["Aida"])
+                    Aida = int.Parse(row["Aida"]),
+                    UserId = int.Parse(row["UserId"])
                 };
                 if (project.IsCompleted) project.CompletionDate = DateTime.Parse(row["CompletionDate"]);
                 else project.CompletionDate = null;
@@ -83,69 +124,6 @@ public static class SeedData
                 };
 
                 context.ProjectFloss.Add(projectFloss);
-            }
-            context.SaveChanges();
-
-            //Seed from Users
-            var UserLines = File.ReadAllLines(Path.Combine(folder, "Users.csv"));
-            var UserHeaders = UserLines[0].Split(',');
-            foreach (var line in UserLines.Skip(1))
-            {
-                var cells = line.Split(",");
-                var row = UserHeaders.Zip(cells, (h, c) => new { Header = h, Value = c }).ToDictionary(x => x.Header, x => x.Value);
-
-                UserType type;
-                var cell = row["Role"];
-                if (cell == "1") type = UserType.Admin;
-                else if (cell == "2") type = UserType.User;
-                else type = UserType.Anon;
-
-                var user = new User()
-                {
-                    Username = row["Username"],
-                    Role = type,
-                    CreatedOn = DateTime.Parse(row["CreatedOn"]),
-                    LastModified = DateTime.Parse(row["LastModified"])
-                };
-
-                user.HashPassword = hasher.HashPassword(user, row["Password"]);
-
-                context.Users.Add(user);
-            }
-            context.SaveChanges();
-
-            //Seed from UserProjects
-            var UserProjectsLines = File.ReadAllLines(Path.Combine(folder, "UserProjects.csv"));
-            var UPHeaders = UserProjectsLines[0].Split(",");
-            foreach (var line in UserProjectsLines.Skip(1)) 
-            {
-                var cells = line.Split(",");
-                var row = UPHeaders.Zip(cells, (h, c) => new { Header = h, Value = c }).ToDictionary(x => x.Header, x => x.Value);
-                var UserProject = new UserProjects()
-                {
-                    UserId = int.Parse(row["UserId"]),
-                    ProjectId = int.Parse(row["ProjectId"])
-                };
-
-                context.UserProjects.Add(UserProject);
-            }
-            context.SaveChanges();
-
-            //Seed from UserFloss
-            var UserFlossLines = File.ReadAllLines(Path.Combine(folder, "UserFloss.csv"));
-            var UFHeaders = UserFlossLines[0].Split(',');
-            foreach (var line in UserFlossLines.Skip(1))
-            {
-                var cells = line.Split(",");
-                var row = UFHeaders.Zip(cells, (h, c) => new { Header = h, Value = c }).ToDictionary(x => x.Header, x => x.Value);
-                var UserFloss = new UserFloss()
-                {
-                    UserId = int.Parse(row["UserId"]),
-                    FlossId = int.Parse(row["FlossId"]),
-                    Amount = int.Parse(row["Amount"])
-                };
-
-                context.UserFloss.Add(UserFloss);
             }
             context.SaveChanges();
         }

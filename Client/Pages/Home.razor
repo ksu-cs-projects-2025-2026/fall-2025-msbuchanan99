@@ -4,42 +4,49 @@
 @using Client.Models
 
 @inject HttpClient Http
-@inject UserState AuthState
+@inject UserService userService
 
 <PageTitle>Home</PageTitle>
 
-<h1>Welcome to Threadfolio, @user.Username</h1>
+@if (isLoading)
+{
+    <h1>Loading...</h1>
+}
+else if(userService.CurrentUser is not null)
+{
+    <h1>Welcome to Threadfolio, @userService.CurrentUser.Username</h1>
+    <p>
+        Welcome to Threadfolio - a place to manage your cross stitch projects.
+    </p>
+    <p>
+        This will become the home of Threadfolio's social feed in a future update.
+    </p>
+}
+else
+{
+    <h1>Welcome to Threadfolio. Please log in.</h1>
+}
 
-Welcome to Threadfolio - a place to manage your cross stitch projects.
+@code {
+    private bool isLoading = true;
 
-This will become the home of Threadfolio's social feed in a future update.
-
-@code{
-    public UserModel? user;
     protected override async Task OnInitializedAsync()
     {
-        AuthState.Changed += OnAuthChanged;
+        // Re-render when the shared user changes
+        userService.UserChanged += OnAuthChanged;
 
-        if(AuthState.CurrentUser is null)
-        {
-            var resp = await Http.GetAsync("api/auth/me");
-            if (resp.IsSuccessStatusCode)
-            {
-                var newuser = await resp.Content.ReadFromJsonAsync<UserModel>();
-                AuthState.Set(newuser);
-            }
-            else
-            {
-                AuthState.Set(null);
-            }
-        }
+        isLoading = true;
+        await userService.UserLoadedAsync(); // centralizes /api/auth/me fetch & sets CurrentUser
+        isLoading = false;
     }
 
     private void OnAuthChanged()
     {
-        user = AuthState.CurrentUser;
         InvokeAsync(StateHasChanged);
     }
 
-    public void Dispose() => AuthState.Changed -= OnAuthChanged;
+    public void Dispose()
+    {
+        userService.UserChanged -= OnAuthChanged;
+    }
 }

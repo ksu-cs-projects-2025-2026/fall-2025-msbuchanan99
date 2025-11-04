@@ -20,7 +20,7 @@ namespace Server.Models
         public string? HashPassword { get; set; }
 
         [Required]
-        public UserType Role { get; set; }
+        public string? Role { get; set; }
 
         [Precision(0)]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -30,7 +30,6 @@ namespace Server.Models
         public DateTime LastModified { get; set; }
 
         public ICollection<UserFloss> UserFloss { get; set; } = [];
-        public ICollection<UserProjects> UserProjects { get; set; } = [];
 
         //Floss and amount
         [NotMapped]
@@ -39,13 +38,6 @@ namespace Server.Models
 
         [NotMapped]
         public List<Project> Projects =>
-            UserProjects?.Select(up => up.Project).ToList() ?? new List<Project>();
-    }
-
-    public enum UserType
-    {
-        Admin = 1,
-        User = 2,
-        Anon = 3
+            Projects.Where(p => p.UserId == Id).ToList() ?? new List<Project>();
     }
 }

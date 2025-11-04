@@ -1,16 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Server.Data;
 using Server.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Server.Controllers
 {
-    public class UsersController : Controller
+    [ApiController]
+    [Route("api/users")]
+    public class UsersController : ControllerBase
     {
         private readonly ThreadfolioContext _context;
 
@@ -19,139 +25,170 @@ namespace Server.Controllers
             _context = context;
         }
 
+        #region Admin Routes
+
         // GET: Users
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.Users.ToListAsync());
-        }
+        //public async Task<IActionResult> Index()
+        //{
+        //    return View(await _context.Users.ToListAsync());
+        //}
 
-        // GET: Users/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+        #endregion
 
-            var user = await _context.Users
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
+        #region User Routes
 
-            return View(user);
-        }
-
-        // GET: Users/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Users/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Username,Password,Role,CreatedOn,LastModified")] User user)
+        // POST: api/users/create
+        //HashPassword that is brought in isn't actually Hashed
+        [HttpPost("create")]
+        public async Task<IActionResult> Create([Bind("Username,HashPassword")] User user)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(user);
+                //Check for duplicate usernames
+                if (await _context.Users.AnyAsync(u => u.Username.ToLower() == user.Username.ToLower()))
+                    return BadRequest("That Username already exists.");
+
+                //Hash the password
+                var hasher = new PasswordHasher<User>();
+                user.HashPassword = hasher.HashPassword(user, user.HashPassword);
+
+                //Set Settings
+                user.Role = "User";
+                user.CreatedOn = DateTime.UtcNow;
+                user.LastModified = DateTime.UtcNow;
+
+                //Save new user
+                _context.Users.Add(user);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                return Ok();
             }
-            return View(user);
+            return BadRequest("Model State Invalid.");
         }
 
-        // GET: Users/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        // PUT: api/users/5
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Edit(int id, Dictionary<string, string> user)
         {
-            if (id == null)
-            {
+            User? currentUser;
+            if (!UserExists(id, out currentUser))
                 return NotFound();
-            }
-
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-            return View(user);
-        }
-
-        // POST: Users/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Username,Password,Role,CreatedOn,LastModified")] User user)
-        {
-            if (id != user.Id)
-            {
-                return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
-                try
+                //Check if username needs to be changed
+                if (user.ContainsKey("Username"))
                 {
-                    _context.Update(user);
-                    await _context.SaveChangesAsync();
+                    //Check if username matches
+                    if (user["Username"] != currentUser!.Username) currentUser.Username = user["Username"];
                 }
-                catch (DbUpdateConcurrencyException)
+
+                //Check if password needs to be changed
+                if(user.ContainsKey("Password"))
                 {
-                    if (!UserExists(user.Id))
+                    //Check if passwords match
+                    var hasher = new PasswordHasher<User>();
+                    var verifyResult = hasher.VerifyHashedPassword(currentUser, currentUser.HashPassword, user["Password"]);
+                    if (verifyResult == PasswordVerificationResult.Failed)
                     {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
+                        currentUser.HashPassword = hasher.HashPassword(currentUser, user["Password"]);
                     }
                 }
-                return RedirectToAction(nameof(Index));
+
+                currentUser!.LastModified = DateTime.UtcNow;
+
+                //Save Changes
+                await _context.SaveChangesAsync();
+
+                //refresh login cookies
+                await ReissueCookieForSelfEdit(currentUser);
+
+                //return
+                return Ok(new UserDTO(currentUser.Id, currentUser.Username, currentUser.Role.ToString()));
             }
-            return View(user);
+            return BadRequest("Model State not Valid");
         }
 
-        // GET: Users/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // DELETE: api/users/
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var user = await _context.Users
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
-        }
-
-        // POST: Users/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var user = await _context.Users.FindAsync(id);
-            if (user != null)
+            User? user;
+            if (UserExists(id, out user))
             {
                 _context.Users.Remove(user);
+
+                var userFlosses = await _context.UserFloss.Where(uf => uf.UserId == id).ToListAsync();
+                if (userFlosses != null && userFlosses!.Count != 0)
+                {
+                    _context.UserFloss.RemoveRange(userFlosses);
+                }
+
+                //var projects = await _context.Projects.Where(p => p.UserId == id).ToListAsync();
+                //if (projects != null && projects!.Count != 0)
+                //{
+                //    _context.UserProjects.RemoveRange(projects);
+                //}
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return Ok();
         }
 
-        private bool UserExists(int id)
+        [HttpGet("{id:int}/projects")]
+        public async Task<IActionResult> GetProjects(int id)
         {
-            return _context.Users.Any(e => e.Id == id);
+            User? user;
+            if(UserExists(id, out user))
+            {
+                return Ok(user!.Projects);
+            }
+            else
+            {
+                return NotFound("User not found");
+            }
         }
+
+        [HttpGet("{id:int}/floss")]
+        public async Task<IActionResult> GetFloss(int id)
+        {
+            User? user;
+            if (UserExists(id, out user))
+            {
+                return Ok(user!.Floss);
+            }
+            else
+            {
+                return NotFound("User not found");
+            }
+        }
+
+        #endregion
+
+        private bool UserExists(int id, out User? user)
+        {
+            user = _context.Users.Find(id);
+            return user is not null;
+        }
+
+        private async Task ReissueCookieForSelfEdit(User user)
+        {
+            var editedSelf = User.FindFirst(ClaimTypes.NameIdentifier)?.Value == user.Id.ToString();
+            if (editedSelf)
+            {
+                var claims = new List<Claim>
+                {
+                    new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new(ClaimTypes.Name, user.Username),
+                    new(ClaimTypes.Role, user.Role)
+                };
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(identity));
+            }
+        }
+
+        public record UserDTO(int Id, string Username, string Role);
     }
 }

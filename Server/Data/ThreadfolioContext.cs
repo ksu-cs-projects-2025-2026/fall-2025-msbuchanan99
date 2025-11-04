@@ -13,7 +13,6 @@ namespace Server.Data
         public DbSet<Project> Projects { get; set; }
         public DbSet<ProjectFloss> ProjectFloss { get; set; }
         public DbSet<UserFloss> UserFloss { get; set; }
-        public DbSet<UserProjects> UserProjects { get; set; }
 
         public ThreadfolioContext(DbContextOptions<ThreadfolioContext> options)
             : base(options)
@@ -29,12 +28,6 @@ namespace Server.Data
             modelBuilder.Entity<User>(entity =>
             {
                 entity.Property(e => e.Role).HasConversion<string>();
-            });
-            modelBuilder.Entity<UserProjects>(entity =>
-            {
-                entity.HasKey(up => new { up.ProjectId, up.UserId });
-                entity.HasOne(up => up.User).WithMany(up => up.UserProjects).HasForeignKey(up => up.UserId);
-                entity.HasOne(up => up.Project).WithMany(up => up.UserProjects).HasForeignKey(up => up.ProjectId);
             });
                 
             modelBuilder.Entity<UserFloss>(entity =>

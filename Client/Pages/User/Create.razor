@@ -1,0 +1,52 @@
+﻿@page "/CreateAccount"
+
+@using Client.Models
+@using Client.Services
+
+@inject UserService userService
+@inject NavigationManager Nav
+
+<h3>Create Account</h3>
+<EditForm Model="@user" OnValidSubmit="Submit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+        <label class="form-label">Username</label>
+        <InputText class="form-control w-25" @bind-Value="user.Username" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <InputText class="form-control w-25" type="password" @bind-Value="user.Password" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Confirm Password</label>
+        <InputText class="form-control w-25" type="password" @bind-Value="user.ConfirmPassword" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Settings</label>
+        @*TODO: Add Settings*@
+    </div>
+    <button class="btn btn-primary" type="submit" disabled="@busy" @onclick="Submit">
+        @(busy ? "Creating..." : "Create Account")
+    </button>
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <div class="text-danger mt-2">@error</div>
+    }
+</EditForm>
+
+    @code {
+    private UserModel user = new();
+    private bool busy = false;
+    private string? error;
+
+    private async Task Submit()
+    {
+        busy = true;
+        error = null;
+
+        error = await userService.CreateUserAsync(user);
+
+        busy = false;
+    }
+}
