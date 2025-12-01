@@ -14,8 +14,17 @@ namespace Server.Models
         [Required]
         public int Amount { get; set; }
 
+        public UserFloss() { }
+        public UserFloss(int userId, int flossId, int amount)
+        {
+            UserId = userId;
+            FlossId = flossId;
+            Amount = amount;
+        }
+
+
         //Navigation properties
-        public User User { get; set; }
-        public Floss Floss { get; set; }
+        public User? User { get; set; }
+        public Floss? Floss { get; set; }
     }
 }

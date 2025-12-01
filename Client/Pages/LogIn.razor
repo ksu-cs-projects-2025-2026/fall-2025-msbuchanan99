@@ -4,6 +4,7 @@
 @using Client.Services
 
 @inject UserService userService
+@inject UserState userState
 @inject NavigationManager Nav
 
 
@@ -42,7 +43,8 @@
         busy = true;
         error = null;
 
-        error = await userService.LoginAsync(model);
+        var result = await userService.LoginAsync(model);
+        
 
         busy = false;
     }

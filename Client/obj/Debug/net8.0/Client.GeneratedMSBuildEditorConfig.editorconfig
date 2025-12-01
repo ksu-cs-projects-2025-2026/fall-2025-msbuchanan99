@@ -30,6 +30,14 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/megha/Desktop/Threadfolio/Client/Components/FlossList.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xGbG9zc0xpc3QucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Components/UnAuthorized.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xVbkF1dGhvcml6ZWQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/megha/Desktop/Threadfolio/Client/Pages/Home.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSG9tZS5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
@@ -56,10 +64,6 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/megha/Desktop/Threadfolio/Client/Pages/Project/Index.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvamVjdFxJbmRleC5yYXpvcg==
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Users/megha/Desktop/Threadfolio/Client/Pages/Project/ViewPattern.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvamVjdFxWaWV3UGF0dGVybi5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/megha/Desktop/Threadfolio/Client/Pages/User/Create.razor]

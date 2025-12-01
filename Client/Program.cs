@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using System.Net.Http;
 using Client.Services;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Client
 {
@@ -32,6 +33,8 @@ namespace Client
 
             builder.Services.AddScoped<UserState>();
             builder.Services.AddScoped<UserService>();
+            builder.Services.AddScoped<ProjectState>();
+            builder.Services.AddScoped<ProjectService>();
 
             builder.RootComponents.Add<App>("#app");
             builder.RootComponents.Add<HeadOutlet>("head::after");

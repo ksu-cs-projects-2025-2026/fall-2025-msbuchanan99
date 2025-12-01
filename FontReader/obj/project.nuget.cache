@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "+DyyIBkZPp0=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\megha\\Desktop\\Threadfolio\\FontReader\\FontReader.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\megha\\.nuget\\packages\\pdfpig\\0.1.11\\pdfpig.0.1.11.nupkg.sha512"
+  ],
+  "logs": []
+}

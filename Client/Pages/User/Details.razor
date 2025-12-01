@@ -1,63 +1,71 @@
 ﻿@page "/user/profile"
 
-@using Client.Services
-@using Client.Models
-
 @inject UserService userService
+@inject UserState userState
 @inject NavigationManager Nav
 
-<h3>Profile</h3>
-<div class="mb-3">
-    <label class="form-label">Username: </label>
-    @if(userService.CurrentUser is not null)
-    {
-        <InputText class="form-control w-25" disabled @bind-value="userService.CurrentUser.Username"></InputText>
-
-    }
-</div>
-<div class="mb-3">
-    <label class="form-label">Settings: </label>
-    ...Under Construction...
-    <ul>
-        @*TODO: Add settings for account*@
-    </ul>
-</div>
-<button class="btn btn-primary" @onclick="EditAccount">Edit Account</button>
-<button class="btn btn-danger" type="submit" @onclick="DeleteAccount" disabled="@busy">
-    @(busy ? "Deleting Account..." : "Delete Account")
-</button>
-@if (!string.IsNullOrEmpty(error))
+@if (userState.IsLoading)
 {
-    <div class="text-danger mt-2">@error</div>
+    <h3>Loading...</h3>
+}
+else if(userState.User is null)
+{
+    <UnAuthorized/>
+}
+else
+{
+    <h3>Profile</h3>
+    <div class="mb-3">
+        <label class="form-label">Username: </label>
+        @if (userState.User is not null)
+        {
+            <InputText class="form-control w-25" disabled @bind-value="userState.User.Username"></InputText>
+
+        }
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Settings: </label>
+        ...Under Construction...
+        <ul>
+            @*TODO: Add settings for account*@
+        </ul>
+    </div>
+    <button class="btn btn-primary" @onclick="EditAccount">Edit Account</button>
+    <button class="btn btn-danger" type="submit" @onclick="DeleteAccount" disabled="@busy">
+        @(busy ? "Deleting Account..." : "Delete Account")
+    </button>
+    @if (!string.IsNullOrEmpty(userState.LastError))
+    {
+        <div class="text-danger mt-2">@userState.LastError</div>
+    }
 }
 
 
 @code {
-    private string? error;
     private bool busy = false;
 
     public void EditAccount()
     {
-        if(userService.CurrentUser is null)
+        if(userState.User is null)
         {
-            error = "Can't Edit because user is null.";
+            userState.SetError("Can't Edit because user is null.");
             return;
         }
 
-        error = null;
+        userState.BeginUpdate();
         Nav.NavigateTo("/user/profile/edit");
     }
 
     public async void DeleteAccount()
     {
         busy = true;
-        if(userService.CurrentUser is null)
+        if(userState.User is null)
         {
-            error = "Can't Delete because user is null.";
+            userState.SetError("Can't Delete because user is null.");
         }
         else
         {
-            error = await userService.DeleteAccountAsync();
+            var result = await userService.DeleteAccountAsync();
         }
         busy = false;
     }

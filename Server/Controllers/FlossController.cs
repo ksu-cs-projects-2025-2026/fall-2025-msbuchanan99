@@ -10,148 +10,137 @@ using Server.Models;
 
 namespace Server.Controllers
 {
+    [ApiController]
+    [Route("api/floss")]
     public class FlossController : Controller
     {
-        private readonly ThreadfolioContext _context;
+        private readonly ThreadfolioContext _dbContext;
 
         public FlossController(ThreadfolioContext context)
         {
-            _context = context;
+            _dbContext = context;
         }
 
-        // GET: Floss
-        public async Task<IActionResult> Index()
+        #region Admin
+
+        /// <summary>
+        /// Returns the list of floss
+        /// </summary>
+        /// <returns>result of the transaction</returns>
+        [HttpGet("admin")]
+        public async Task<IActionResult> GetAllFlossAsync_Admin()
         {
-            return View(await _context.Floss.ToListAsync());
+            try
+            {
+                List<Floss> floss = await _dbContext.Floss.ToListAsync();
+                return Ok(floss);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
-        // GET: Floss/Details/5
-        public async Task<IActionResult> Details(int? id)
+        /// <summary>
+        /// Update the floss with the given id to match the properties of updateFloss
+        /// </summary>
+        /// <param name="id">Id of the floss to update</param>
+        /// <param name="updateFloss">The changes to be made</param>
+        /// <returns>The result of the transaction</returns>
+        [HttpPut("admin/{id:int}")]
+        public async Task<IActionResult> UpdateFlossDetailsAsync_Admin(int id, Floss updateFloss)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
-            }
+                Floss? oldFloss = await _dbContext.Floss.FirstOrDefaultAsync(f => f.Id == id);
+                if (oldFloss is null) return NotFound($"Floss with Id {id} not found.");
 
-            var floss = await _context.Floss
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (floss == null)
+                updateFloss.Id = id;
+                _dbContext.Entry(updateFloss).State = EntityState.Modified;
+
+                await _dbContext.SaveChangesAsync();
+                return Ok();
+            }
+            catch(Exception e)
             {
-                return NotFound();
+                return BadRequest(e.Message);
             }
-
-            return View(floss);
         }
 
-        // GET: Floss/Create
-        public IActionResult Create()
+        /// <summary>
+        /// Creates a new Floss with the given information
+        /// </summary>
+        /// <param name="newFloss">floss to create</param>
+        /// <returns>The result of the transaction</returns>
+        [HttpPost("admin")]
+        public async Task<IActionResult> CreateFlossAsync_Admin(Floss newFloss)
         {
-            return View();
-        }
-
-        // POST: Floss/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Number,HexColor,CreatedOn,LastModified")] Floss floss)
-        {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(floss);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(floss);
-        }
+                await _dbContext.Floss.AddAsync(newFloss);
+                await _dbContext.SaveChangesAsync();
 
-        // GET: Floss/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+                var userIds = await _dbContext.Users.Where(u => u.Role == "User").Select(u => u.Id).ToListAsync();
 
-            var floss = await _context.Floss.FindAsync(id);
-            if (floss == null)
-            {
-                return NotFound();
-            }
-            return View(floss);
-        }
-
-        // POST: Floss/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Number,HexColor,CreatedOn,LastModified")] Floss floss)
-        {
-            if (id != floss.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+                var userFlosses = userIds.Select(userId => new UserFloss
                 {
-                    _context.Update(floss);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!FlossExists(floss.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                    UserId = userId,
+                    FlossId = newFloss.Id,
+                    Amount = 0
+                }).ToList();
+                await _dbContext.UserFloss.AddRangeAsync(userFlosses);
+
+                await _dbContext.SaveChangesAsync();
+                return Ok();
             }
-            return View(floss);
+            catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
-        // GET: Floss/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+
+        [HttpDelete("admin/{id:int}")]
+        public async Task<IActionResult> DeleteFlossAsync_Admin(int id)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
-            }
+                Floss? floss = await _dbContext.Floss.FirstOrDefaultAsync(f => f.Id == id);
+                if (floss is null) return NotFound($"Floss with Id {id} not found.");
 
-            var floss = await _context.Floss
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (floss == null)
+                _dbContext.Floss.Remove(floss);
+                await _dbContext.SaveChangesAsync();
+
+                return Ok();
+            }
+            catch(Exception e)
             {
-                return NotFound();
+                return BadRequest(e.Message);
             }
-
-            return View(floss);
         }
 
-        // POST: Floss/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        #endregion
+
+        #region User
+
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> Details(int id)
         {
-            var floss = await _context.Floss.FindAsync(id);
-            if (floss != null)
-            {
-                _context.Floss.Remove(floss);
-            }
+            var floss = await _dbContext.Floss.
+                FirstOrDefaultAsync(f => f.Id == id);
+            if (floss is not null) return NotFound($"Floss with id {id} not found");
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return Ok(floss);
         }
 
+
+
+        #endregion
+
+        
         private bool FlossExists(int id)
         {
-            return _context.Floss.Any(e => e.Id == id);
+            return _dbContext.Floss.Any(e => e.Id == id);
         }
     }
 }

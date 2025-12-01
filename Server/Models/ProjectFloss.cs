@@ -13,6 +13,7 @@ namespace Server.Models
         public int Amount { get; set; }
         [Required]
         public int Strands { get; set; }
+        //public char Symbol { get; set; }
 
         //Navigation Properties
         public Project Project { get; set; }

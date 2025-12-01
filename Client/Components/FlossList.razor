@@ -1,0 +1,73 @@
+﻿@code {
+    [Parameter] public IReadOnlyList<FlossInProjectModel>? floss { get; set; }
+}
+@if(floss is null)
+{
+    <div class="text-muted">Loading...</div>
+}
+else
+{
+    <div class="d-flex flex-row">
+        @*Header Row*@
+        <div class="w-10">Color</div>
+        <div class="w-20">Number</div>
+        <div class="w-40">Name</div>
+        <div class="w-15"># Strands</div>
+        <div class="w-15"># Skeins</div>
+    </div>
+    @foreach (FlossInProjectModel f in floss)
+    {
+        <div class="d-flex flex-row">
+            @*Symbol & HexColor in a cube*@
+            <div class="w-10">
+                <div class="symbol-cube" style="background-color:@($"#{f.HexColor}")">
+                </div>
+            </div>
+
+            @*Number*@
+            <div class="w-20">
+                @f.Number
+            </div>
+
+            @*Name*@
+            <div class="w-50">
+                @f.Name
+            </div>
+
+            @*Strands*@
+            <div class="w-10">
+                @f.Strands
+            </div>
+
+            @*Amount Needed*@
+            <div class="w-10">
+                @f.Amount
+            </div>
+        </div>
+    }
+}
+
+<style>
+    .w-10{
+        width: 10%;
+    }
+    .w-15 {
+        width: 15%;
+    }
+    .w-40 {
+        width: 40%;
+    }
+    .w-20{
+        width: 20%;
+    }
+    .symbol-cube{
+        width: 20px;
+        height: 20px;
+        border: #262626 solid 2px;
+        text-align: center;
+    }
+
+    .space-between {
+        justify-content: space-between
+    }
+</style>

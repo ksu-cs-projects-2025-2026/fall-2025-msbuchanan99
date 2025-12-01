@@ -1,21 +1,5 @@
 [
   {
-    "ContainingType": "Server.Controllers.ProjectController",
-    "Method": "GetProjects",
-    "RelativePath": "{userId}",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "userId",
-        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
     "ContainingType": "Server.Controllers.AuthController",
     "Method": "Login",
     "RelativePath": "api/auth/login",
@@ -52,10 +36,10 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "Server.Controllers.ProjectController",
-    "Method": "DeleteConfirmed",
-    "RelativePath": "api/projects/{id}",
-    "HttpMethod": "DELETE",
+    "ContainingType": "Server.Controllers.FlossController",
+    "Method": "Details",
+    "RelativePath": "api/floss/{id}",
+    "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
@@ -68,16 +52,63 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "Server.Controllers.ProjectController",
-    "Method": "Delete",
-    "RelativePath": "api/projects/{id}/delete",
+    "ContainingType": "Server.Controllers.FlossController",
+    "Method": "GetAllFlossAsync_Admin",
+    "RelativePath": "api/floss/admin",
     "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Server.Controllers.FlossController",
+    "Method": "CreateFlossAsync_Admin",
+    "RelativePath": "api/floss/admin",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "newFloss",
+        "Type": "Server.Models.Floss",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Server.Controllers.FlossController",
+    "Method": "UpdateFlossDetailsAsync_Admin",
+    "RelativePath": "api/floss/admin/{id}",
+    "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
         "Name": "id",
-        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "updateFloss",
+        "Type": "Server.Models.Floss",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Server.Controllers.FlossController",
+    "Method": "DeleteFlossAsync_Admin",
+    "RelativePath": "api/floss/admin/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
         "IsRequired": true
       }
     ],
@@ -101,36 +132,15 @@
   },
   {
     "ContainingType": "Server.Controllers.ProjectController",
-    "Method": "Edit",
-    "RelativePath": "api/projects/{id}/edit",
+    "Method": "Download",
+    "RelativePath": "api/projects/{id}/download",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
         "Name": "id",
-        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "Server.Controllers.ProjectController",
-    "Method": "Edit",
-    "RelativePath": "api/projects/{id}/edit",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
         "Type": "System.Int32",
-        "IsRequired": true
-      },
-      {
-        "Name": "project",
-        "Type": "Server.Models.Project",
         "IsRequired": true
       }
     ],
@@ -139,7 +149,7 @@
   {
     "ContainingType": "Server.Controllers.ProjectController",
     "Method": "ViewPattern",
-    "RelativePath": "api/projects/{id}/Pattern",
+    "RelativePath": "api/projects/{id}/pattern",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -154,8 +164,8 @@
   },
   {
     "ContainingType": "Server.Controllers.ProjectController",
-    "Method": "ReadPattern",
-    "RelativePath": "api/projects/{id}/Pattern/ReadPattern",
+    "Method": "ReadPattern_FullAuto",
+    "RelativePath": "api/projects/{id}/pattern/read-pattern/full-auto",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -168,7 +178,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.List\u00601[[Server.Models.ProjectFloss, Server, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.List\u00601[[Server.Controllers.ProjectFlossDTO, Server, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -181,7 +191,7 @@
   {
     "ContainingType": "Server.Controllers.ProjectController",
     "Method": "UploadPattern",
-    "RelativePath": "api/projects/{id}/Pattern/Upload",
+    "RelativePath": "api/projects/{id}/pattern/upload",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -206,8 +216,24 @@
   },
   {
     "ContainingType": "Server.Controllers.ProjectController",
-    "Method": "Create",
-    "RelativePath": "api/projects/create",
+    "Method": "GetFloss",
+    "RelativePath": "api/projects/{projectId}/floss",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "projectId",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Server.Controllers.ProjectController",
+    "Method": "GetAllProjectsAsync_Admin",
+    "RelativePath": "api/projects/admin",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -216,14 +242,14 @@
   },
   {
     "ContainingType": "Server.Controllers.ProjectController",
-    "Method": "Create",
-    "RelativePath": "api/projects/create",
+    "Method": "CreateProjectAsync_Admin",
+    "RelativePath": "api/projects/admin",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "project",
+        "Name": "newProject",
         "Type": "Server.Models.Project",
         "IsRequired": true
       }
@@ -232,15 +258,136 @@
   },
   {
     "ContainingType": "Server.Controllers.ProjectController",
-    "Method": "Download",
-    "RelativePath": "api/projects/download/{filename}",
+    "Method": "GetProjectsForUserAsync_Admin",
+    "RelativePath": "api/projects/admin/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "filename",
-        "Type": "System.String",
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Server.Controllers.ProjectController",
+    "Method": "UpdateProjectAsync_Admin",
+    "RelativePath": "api/projects/admin/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "updateProject",
+        "Type": "Server.Models.Project",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Server.Controllers.ProjectController",
+    "Method": "DeleteProjectAsync_Admin",
+    "RelativePath": "api/projects/admin/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Server.Controllers.ProjectController",
+    "Method": "GetProjectFlossAsync_Admin",
+    "RelativePath": "api/projects/admin/{id}/floss",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Server.Controllers.ProjectController",
+    "Method": "CreateProjectFlossAsync_Admin",
+    "RelativePath": "api/projects/admin/{projectId}/floss",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "projectId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "newPF",
+        "Type": "Server.Models.ProjectFloss",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Server.Controllers.ProjectController",
+    "Method": "UpdateProjectFlossAsync_Admin",
+    "RelativePath": "api/projects/admin/{projectId}/floss/{flossId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "projectId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "flossId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "update",
+        "Type": "Server.Models.ProjectFloss",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Server.Controllers.ProjectController",
+    "Method": "DeleteProjectFlossAsync_Admin",
+    "RelativePath": "api/projects/admin/{projectId}/floss/{flossId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "projectId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "flossId",
+        "Type": "System.Int32",
         "IsRequired": true
       }
     ],
@@ -279,6 +426,143 @@
         "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Server.Controllers.UsersController",
+    "Method": "GetFloss",
+    "RelativePath": "api/users/{id}/floss",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Server.Controllers.UsersController",
+    "Method": "GetProjects",
+    "RelativePath": "api/users/{id}/projects",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Server.Controllers.UsersController",
+    "Method": "GetAllUsersAsync_Admin",
+    "RelativePath": "api/users/admin",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Server.Controllers.UsersController",
+    "Method": "CreateUserAsync_Admin",
+    "RelativePath": "api/users/admin",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "newUser",
+        "Type": "Server.Models.User",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Server.Controllers.UsersController",
+    "Method": "UpdateUserAsync_Admin",
+    "RelativePath": "api/users/admin/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "updateUser",
+        "Type": "Server.Models.User",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Server.Controllers.UsersController",
+    "Method": "DeleteUserAsync_Admin",
+    "RelativePath": "api/users/admin/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Server.Controllers.UsersController",
+    "Method": "GetUserFlossAsync_Admin",
+    "RelativePath": "api/users/admin/{id}/floss",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Server.Controllers.UsersController",
+    "Method": "UpdateUserFlossAsync_Admin",
+    "RelativePath": "api/users/admin/{userId}/floss/{flossId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "flossId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "amount",
+        "Type": "System.Int32",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []

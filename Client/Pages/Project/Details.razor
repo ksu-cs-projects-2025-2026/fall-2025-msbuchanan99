@@ -1,6 +1,169 @@
 ﻿@page "/projects/{id:int}"
-<h3>Details</h3>
+
+@inject ProjectService projectService
+@inject ProjectState projectState
+@inject UserState userState
+@inject UserService userService
+@inject NavigationManager nav
+
+@if (projectState.IsLoading || userState.IsLoading)
+{
+    <h3>Loading...</h3>
+}
+else if(userState.User is null)
+{
+    <UnAuthorized/>
+}
+else if(projectState.Selected is null)
+{
+    <p>Projects count -> @projectState.Projects.Count</p>
+    <p>Selected project id -> @projectState.SelectedProjectId</p>
+    <p>Error -> @projectState.LastError</p>
+}
+else
+{
+    <div class="d-flex flex-column">
+        <div>
+            <h3>@projectState.Selected.Name</h3>
+        </div>
+        <div>
+            <p class="text-danger">@projectState.LastError</p>
+        </div>
+        <div class="d-flex flex-row underline">
+            <button class="btn btn-primary btn-row" @onclick="EditProject" type="button" disabled="@busy">Edit</button>
+            <button class="btn btn-primary btn-row" @onclick="MarkCompleted" type="button" disabled="@busy">Mark Completed</button>
+            <button class="btn btn-primary btn-row" @onclick="DownloadFile" type="button" disabled="@busy">Download PDF</button>
+        </div>
+        <div class="d-flex flex-row spacearound">
+            <div class="outer-outer-container">
+                @if(projectState.Floss.Count == 0)
+                {
+                    <div class="d-flex flex-column floss-container">
+                        <h4>No Floss Found</h4>
+                        <div class="d-flex flex-row">
+                            @*Buttons?*@
+                            <button class="btn btn-secondary" type="button" disabled="@busy">Auto Floss</button>
+                            <button class="btn btn-secondary" type="button" disabled="@busy">Enter Floss</button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column floss-container">
+                        <FlossList floss="projectState.Floss"></FlossList>
+                        <div class="d-flex flex-row">
+                            @*Buttons?*@
+                            <button class="btn btn-secondary" type="button" disabled="@busy">Edit Floss</button>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="outer-outer-container">
+                <div class="pdf-container">
+                    @if (projectState.PdfDataUrl is not null)
+                    {
+                        <iframe src="@projectState.PdfDataUrl" class="pdf-frame"></iframe>
+                    }
+                    else
+                    {
+                        <h4>No Pdf Found</h4>
+                        <button class="btn btn-secondary" type="button" disabled="@busy">Upload</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .btn-row{
+        margin-left:1rem;
+    }
+    .floss-container{
+        justify-content: center;
+    }
+    .spacearound{
+        justify-content: space-around;
+        margin-top: 2rem;
+
+    }
+    .underline{
+        padding-bottom: 0.5rem;
+        border-bottom: #262626 2px double
+    }
+    .outer-outer-container {
+        padding: 1rem;
+        border: solid black 2px;
+        background-color: darkgray;
+        width: 45%
+    }
+    .pdf-container{
+        width: 100%;
+        height: 100%;
+    }
+    .pdf-frame{
+        width: 100%;
+        height: 100%;
+    }
+</style>
 
 @code {
+    bool busy = false;
+    [Parameter] public int id { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        projectState.Changed += OnProjectStateChanged;
+        userState.Changed += OnUserStateChanged;
+        await userService.UserLoadedAsync();
 
+        if (userState.User is not null)
+        {
+            _ = await projectService.LoadForCurrentUserAsync();
+            var result = await projectService.LoadCurrentProject(id);
+            if(projectState.Selected is not null)
+            {
+                var flossResult = await projectService.LoadCurrentProjectFloss(true);
+            }
+        }
+        else
+        {
+            projectState.Clear();
+        }
+    }
+
+    private void OnProjectStateChanged() => InvokeAsync(StateHasChanged);
+    private void OnUserStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        projectState.Changed -= OnProjectStateChanged;
+        userState.Changed -= OnUserStateChanged;
+    }
+
+    public void EditProject()
+    {
+        busy = true;
+
+        nav.NavigateTo($"/projects/{id}/edit");
+
+        busy = false;
+    }
+
+    public async Task MarkCompleted()
+    {
+        busy = true;
+
+
+
+        busy = false;
+    }
+
+    public async Task DownloadFile()
+    {
+        busy = true;
+
+
+
+        busy = false;
+    }
 }

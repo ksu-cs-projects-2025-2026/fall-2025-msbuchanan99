@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "KZpesMRfuXI=",
+  "dgSpecHash": "LrlNPkAo/4A=",
   "success": true,
   "projectFilePath": "C:\\Users\\megha\\Desktop\\Threadfolio\\Client\\Client.csproj",
   "expectedPackageFiles": [
@@ -49,8 +49,8 @@
     "C:\\Users\\megha\\.nuget\\packages\\microsoft.extensions.primitives\\8.0.0\\microsoft.extensions.primitives.8.0.0.nupkg.sha512",
     "C:\\Users\\megha\\.nuget\\packages\\microsoft.jsinterop\\8.0.21\\microsoft.jsinterop.8.0.21.nupkg.sha512",
     "C:\\Users\\megha\\.nuget\\packages\\microsoft.jsinterop.webassembly\\8.0.21\\microsoft.jsinterop.webassembly.8.0.21.nupkg.sha512",
-    "C:\\Users\\megha\\.nuget\\packages\\microsoft.net.illink.tasks\\8.0.21\\microsoft.net.illink.tasks.8.0.21.nupkg.sha512",
-    "C:\\Users\\megha\\.nuget\\packages\\microsoft.net.sdk.webassembly.pack\\10.0.0-rc.2.25502.107\\microsoft.net.sdk.webassembly.pack.10.0.0-rc.2.25502.107.nupkg.sha512",
+    "C:\\Users\\megha\\.nuget\\packages\\microsoft.net.illink.tasks\\8.0.22\\microsoft.net.illink.tasks.8.0.22.nupkg.sha512",
+    "C:\\Users\\megha\\.nuget\\packages\\microsoft.net.sdk.webassembly.pack\\10.0.0\\microsoft.net.sdk.webassembly.pack.10.0.0.nupkg.sha512",
     "C:\\Users\\megha\\.nuget\\packages\\mono.texttemplating\\2.2.1\\mono.texttemplating.2.2.1.nupkg.sha512",
     "C:\\Users\\megha\\.nuget\\packages\\system.codedom\\4.4.0\\system.codedom.4.4.0.nupkg.sha512",
     "C:\\Users\\megha\\.nuget\\packages\\system.collections.immutable\\6.0.0\\system.collections.immutable.6.0.0.nupkg.sha512",

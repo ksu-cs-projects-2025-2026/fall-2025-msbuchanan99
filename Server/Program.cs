@@ -39,13 +39,13 @@ namespace Server
                 {
                     o.LoginPath = "/login";
                     o.LogoutPath = "/logout";
+                    o.AccessDeniedPath = "/";
                     o.SlidingExpiration = true;
                     o.ExpireTimeSpan = TimeSpan.FromHours(8);
                     o.Cookie.HttpOnly = true;
                     o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                     o.Cookie.SameSite = SameSiteMode.None;
                 });
-            builder.Services.AddAuthorization();
 
             var app = builder.Build();
 

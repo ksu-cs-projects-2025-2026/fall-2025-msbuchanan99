@@ -1,26 +1,24 @@
 ﻿@page "/CreateAccount"
 
-@using Client.Models
-@using Client.Services
-
 @inject UserService userService
+@inject UserState userState
 @inject NavigationManager Nav
 
 <h3>Create Account</h3>
-<EditForm Model="@user" OnValidSubmit="Submit">
+<EditForm Model="@userState.Draft" OnValidSubmit="Submit">
     <DataAnnotationsValidator />
     <ValidationSummary />
     <div class="mb-3">
         <label class="form-label">Username</label>
-        <InputText class="form-control w-25" @bind-Value="user.Username" />
+        <InputText class="form-control w-25" @bind-Value="userState.Draft.Username" />
     </div>
     <div class="mb-3">
         <label class="form-label">Password</label>
-        <InputText class="form-control w-25" type="password" @bind-Value="user.Password" />
+        <InputText class="form-control w-25" type="password" @bind-Value="userState.Draft.Password" />
     </div>
     <div class="mb-3">
         <label class="form-label">Confirm Password</label>
-        <InputText class="form-control w-25" type="password" @bind-Value="user.ConfirmPassword" />
+        <InputText class="form-control w-25" type="password" @bind-Value="userState.Draft.ConfirmPassword" />
     </div>
     <div class="mb-3">
         <label class="form-label">Settings</label>
@@ -29,23 +27,23 @@
     <button class="btn btn-primary" type="submit" disabled="@busy" @onclick="Submit">
         @(busy ? "Creating..." : "Create Account")
     </button>
-    @if (!string.IsNullOrEmpty(error))
+    @if (!string.IsNullOrEmpty(userState.LastError))
     {
-        <div class="text-danger mt-2">@error</div>
+        <div class="text-danger mt-2">@userState.LastError</div>
     }
 </EditForm>
 
     @code {
-    private UserModel user = new();
     private bool busy = false;
-    private string? error;
+    private Result? result;
 
     private async Task Submit()
     {
         busy = true;
-        error = null;
 
-        error = await userService.CreateUserAsync(user);
+        result = await userService.CreateUserAsync();
+        if (result.Ok) { }
+        else { }
 
         busy = false;
     }

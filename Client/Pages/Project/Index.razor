@@ -1,106 +1,172 @@
-﻿@page "/projects"
-@* @attribute [Authorize(Roles = "User,Admin")] *@
+﻿@page "/user/projects"
 
-@inject HttpClient Http
+@inject ProjectService projectService
+@inject ProjectState projectState
+@inject UserService userService
+@inject UserState userState
 @inject NavigationManager Nav
-@inject IJSRuntime JS
 
-<div class="flex-container-spread-out">
-    <h3>My Projects</h3>
-    <NavLink class="btn btn-primary" href="/user/projects/create">Create</NavLink>
-</div>
-<div>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Completed</th>
-                <th>Date Completed</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (Project p in projects)
-            {
+@if (projectState.IsLoading || userState.IsLoading)
+{
+    <div class="flex-container-spread-out">
+        <h3>My Projects</h3>
+        <NavLink class="btn btn-primary" disabled>Create</NavLink>
+    </div>
+    <div class="mb-2">
+        <p class="text-danger">@projectState.LastError</p>
+    </div>
+    <div class="mb-2">
+        <table class="table">
+            <thead>
                 <tr>
-                    <td>@p.Name</td>
-                    <td>
-                        @if (@p.IsCompleted){<i class="bi bi-check2"></i>}
-                        else { <i class="bi bi-x"></i>}
-                    </td>
-                    <td>@p.CompletionDatestring</td>
-                    <td>
-                        @*Download file button*@
-                        @if (@p.FileName != null)
-                        {
-                            <button type="button" class="btn btn-outline-secondary rounded-circle" @onclick="() => DownloadFile(p.FileName)" aria-label="Download File">
-                                <i class="bi bi-box-arrow-down"></i>
-                            </button>
-                        }
-                        else
-                        {
-                            <button type="button" class="btn btn-outline-secondary rounded-circle" disabled aria-label="Download File">
-                                <i class="bi bi-box-arrow-down"></i>
-                            </button>
-                        }
-                    </td>
-                    <td>
-                        @*View details*@
-                        <NavLink class="btn btn-outline-secondary rounded-circle" href="/user/projects/{id:int}" aria-label="View Details">
-                            <i class="bi bi-info"></i>
-                        </NavLink>
-                    </td> 
-                    <td>
-                        @*Delete*@
-                        <button class="btn btn-outline-danger rounded-circle" aria-label="Delete" @onclick="() => DeleteProject(p.Id)">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
+                    <th>Name</th>
+                    <th>Completed</th>
+                    <th>Date Completed</th>
+                    <th>Download</th>
+                    <th>View Details</th>
+                    <th>Delete</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-</div>
+            </thead>
+        </table>
+        Loading...
+    </div>
+}
+else if (userState.User is null)
+{
+    <UnAuthorized/>
+}
+else
+{
+    <div class="flex-container-spread-out">
+        <h3>My Projects</h3>
+        <NavLink class="btn btn-primary" href="/projects/create">Create</NavLink>
+    </div>
+    <div class="mb-2">
+        <p class="text-danger">@projectState.LastError</p>
+    </div>
+    <div class="mb-2">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Completed</th>
+                    <th>Date Completed</th>
+                    <th>Download</th>
+                    <th>View Details</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (ProjectModel p in projectState.Projects)
+                {
+                    <tr>
+                        <td>@p.Name</td>
+                        <td>
+                            @if (@p.IsCompleted)
+                            {
+                                <i class="bi bi-check2"></i>
+                            }
+                            else
+                            {
+
+                                <i class="bi bi-x"></i>
+                            }
+                        </td>
+                        <td>@p.CompletionDate</td>
+                        <td>
+                            @*Download file button*@
+                            <button type="button" class="btn btn-outline-secondary dot" disabled="@busy" aria-label="Download File" @onclick="() => DownloadFile(p.Id)">
+                                <i class="bi bi-box-arrow-down"></i>
+                            </button>
+                        </td>
+                        <td>
+                            @*View details*@
+                            <button type="button" class="btn btn-outline-secondary dot" disabled="@busy" aria-label="Download File" @onclick="() => ViewDetails(p.Id)">
+                                <i class="bi bi-info"></i>
+                            </button>
+                        </td>
+                        <td>
+                            @*Delete*@
+                            <button class="btn btn-outline-danger dot" aria-label="Delete" disabled="@busy" @onclick="() => DeleteProject(p.Id)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
 
 <style>
     .flex-container-spread-out{
         display: flex;
         justify-content: space-between;
     }
+    .dot{
+        height: 1.7rem;
+        width: 1.7rem;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .dot i {
+
+    }
 </style>
 
 @code {
-    private List<Project> projects;
-    private int userId;
-
-    protected override async Task OnInitializedAsync() => await LoadProjects();
-
-    private async Task LoadProjects()
+    bool busy = false;
+    protected override async Task OnInitializedAsync()
     {
-        var response = await Http.GetAsync($"api/projects?userId={userId}");
-        if (response.IsSuccessStatusCode)
+        projectState.Changed += OnProjectStateChanged;
+        userState.Changed += OnUserStateChanged;
+        await userService.UserLoadedAsync();
+
+        if(userState.User is not null)
         {
-            projects = await response.Content.ReadFromJsonAsync<List<Project>>();
+            _ = await projectService.LoadForCurrentUserAsync();
         }
         else
         {
-            projects = new();
+            projectState.Clear();
         }
     }
 
-    //Invoked by clicking a download button
-    private async Task DownloadFile (string filename)
+    private void OnProjectStateChanged() => InvokeAsync(StateHasChanged);
+    private void OnUserStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
     {
-        var url = Nav.ToAbsoluteUri($"api/projects/download/{filename}");
-        await JS.InvokeVoidAsync("open", url, "_blank");
+        projectState.Changed -= OnProjectStateChanged;
+        userState.Changed -= OnUserStateChanged;
     }
 
-    //Invoked by clicking a delete button
-    private async Task DeleteProject (int id)
+    public void ViewDetails(int id)
     {
-        //TODO: Add Confirmation
-        var response = await Http.DeleteAsync($"api/projects/{id}");
-        if (response.IsSuccessStatusCode) await LoadProjects();
+        busy = true;
+
+        Nav.NavigateTo($"/projects/{id}");
+
+        busy = false;
     }
 
-    
-}
+    public async Task DeleteProject(int id)
+    {
+        busy = true;
+
+        var result = await projectService.DeleteAsync(id);
+
+        busy = false;
+    }
+
+    public async Task DownloadFile(int id)
+    {
+        busy = true;
+
+        var result = await projectService.DownloadFile(id);
+
+        busy = false;
+    }
+} 

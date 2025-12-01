@@ -5,6 +5,7 @@
 
 @inject HttpClient Http
 @inject UserService userService
+@inject UserState userState
 
 <PageTitle>Home</PageTitle>
 
@@ -12,9 +13,9 @@
 {
     <h1>Loading...</h1>
 }
-else if(userService.CurrentUser is not null)
+else if(userState.User is not null)
 {
-    <h1>Welcome to Threadfolio, @userService.CurrentUser.Username</h1>
+    <h1>Welcome to Threadfolio, @userState.User.Username</h1>
     <p>
         Welcome to Threadfolio - a place to manage your cross stitch projects.
     </p>
@@ -33,7 +34,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         // Re-render when the shared user changes
-        userService.UserChanged += OnAuthChanged;
+        userState.Changed += OnAuthChanged;
 
         isLoading = true;
         await userService.UserLoadedAsync(); // centralizes /api/auth/me fetch & sets CurrentUser
@@ -47,6 +48,6 @@ else
 
     public void Dispose()
     {
-        userService.UserChanged -= OnAuthChanged;
+        userState.Changed -= OnAuthChanged;
     }
 }

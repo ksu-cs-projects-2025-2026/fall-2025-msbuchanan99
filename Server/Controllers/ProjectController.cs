@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using Server.Data;
 using Server.Models;
 using System.Text;
 using UglyToad.PdfPig;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using FileIO = System.IO.File;
 using pdfPage = UglyToad.PdfPig.Content.Page;
 
@@ -24,18 +26,197 @@ namespace Server.Controllers
 
         #region admin routes
 
+        [HttpGet("admin")]
+        public async Task<IActionResult> GetAllProjectsAsync_Admin()
+        {
+            try
+            {
+                List<Project> projects = await _dbContext.Projects.ToListAsync();
+                return Ok(projects);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
+        [HttpGet("admin/{id:int}")]
+        public async Task<IActionResult> GetProjectsForUserAsync_Admin(int id)
+        {
+            try
+            {
+                List<Project> projects = await _dbContext.Projects.Where(p => p.UserId == id).ToListAsync();
+                return Ok(projects);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPost("admin")]
+        public async Task<IActionResult> CreateProjectAsync_Admin(Project newProject)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
+            {
+                await _dbContext.Projects.AddAsync(newProject);
+                await _dbContext.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("admin/{id:int}")]
+        public async Task<IActionResult> UpdateProjectAsync_Admin(int id, Project updateProject)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
+            {
+                Project? current = await _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == id);
+                if (current is null) return NotFound($"Project with Id {id} not found");
+
+                current.Name = updateProject.Name;
+                current.Aida = updateProject.Aida;
+                current.KeyPage = updateProject.KeyPage;
+                current.IsCompleted = updateProject.IsCompleted;
+                current.CompletionDate = updateProject.CompletionDate;
+                current.CreatedOn = updateProject.CreatedOn;
+                current.LastModified = updateProject.LastModified;
+
+                await _dbContext.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpDelete("admin/{id:int}")]
+        public async Task<IActionResult> DeleteProjectAsync_Admin(int id)
+        {
+            try
+            {
+                Project? project = await _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == id);
+                if (project is null) return NotFound($"Project with Id {id} not found");
+
+                _dbContext.Projects.Remove(project);
+                await _dbContext.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        //Project Floss Routes
+        [HttpGet("admin/{id:int}/floss")]
+        public async Task<IActionResult> GetProjectFlossAsync_Admin(int id)
+        {
+            try
+            {
+                Project? project = await _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == id);
+                if (project is null) return NotFound($"Project with Id {id} not found.");
+
+                List<ProjectFlossDTO> flosses = new();
+                foreach (ProjectFloss pf in _dbContext.ProjectFloss.Where(pf => pf.ProjectId == id))
+                {
+                    Floss f = _dbContext.Floss.First(f => f.Id == pf.FlossId);
+                    flosses.Add(new
+                        (pf.FlossId, f.Name, f.Number, f.HexColor, pf.Amount, pf.Strands)
+                    );
+                }
+
+                return Ok(flosses);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPost("admin/{projectId:int}/floss")]
+        public async Task<IActionResult> CreateProjectFlossAsync_Admin(int projectId, ProjectFloss newPF)
+        {
+            try
+            {
+                bool projectExists = await _dbContext.Projects.AnyAsync(p => p.Id == projectId);
+                if (projectExists) return BadRequest($"Project with Id {projectId} does not exist.");
+
+                bool PFexists = await _dbContext.ProjectFloss.AnyAsync(
+                    pf => pf.ProjectId == projectId && pf.FlossId == newPF.FlossId);
+                if (PFexists) return BadRequest("This floss already exists in the project");
+
+                await _dbContext.ProjectFloss.AddAsync(newPF);
+                await _dbContext.SaveChangesAsync();
+                return Ok();
+            }
+            catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("admin/{projectId:int}/floss/{flossId:int}")]
+        public async Task<IActionResult> UpdateProjectFlossAsync_Admin(int projectId, int flossId, ProjectFloss update)
+        {
+            try
+            {
+                bool projectExists = await _dbContext.Projects.AnyAsync(p => p.Id == projectId);
+                if (projectExists) return BadRequest($"Project with Id {projectId} does not exist.");
+
+                ProjectFloss? projectFloss = await _dbContext.ProjectFloss.FirstOrDefaultAsync(
+                    pf => pf.ProjectId == projectId && pf.FlossId == flossId);
+                if (projectFloss is null) return NotFound("UserFloss not found.");
+
+                if (projectFloss.Amount == update.Amount && projectFloss.Strands == update.Strands) return Ok();
+                if (update.Amount <= 0) return BadRequest("Amount cannot be less than or equal to 0.");
+                if (update.Strands <= 0) return BadRequest("Strands cannot be less than or equal to 0.");
+
+                projectFloss.Amount = update.Amount;
+                projectFloss.Strands = update.Strands;
+                await _dbContext.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpDelete("admin/{projectId:int}/floss/{flossId:int}")]
+        public async Task<IActionResult> DeleteProjectFlossAsync_Admin(int projectId, int flossId)
+        {
+            try
+            {
+                bool projectExists = await _dbContext.Projects.AnyAsync(p => p.Id == projectId);
+                if (projectExists) return BadRequest($"Project with Id {projectId} does not exist.");
+
+                ProjectFloss? projectFloss = await _dbContext.ProjectFloss.FirstOrDefaultAsync(
+                    pf => pf.ProjectId == projectId && pf.FlossId == flossId);
+                if (projectFloss is null) return NotFound("UserFloss not found.");
+
+                _dbContext.Remove(projectFloss);
+                await _dbContext.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
         #endregion
 
         #region user routes
 
- 
-
-        #endregion
-
-
-        //Get the view of an individual project
         [HttpGet("{id}/details")]
         public async Task<IActionResult> Details(int? id)
         {
@@ -50,148 +231,194 @@ namespace Server.Controllers
                 return NotFound($"Project with Id {id} not found");
             }
 
-            return View(project);
+            return Ok(new ProjectDTO(project.Id, project.UserId, project.Name, project.IsCompleted,
+                project.CompletionDate, project.KeyPage, project.Aida));
         }
 
-        //Get the create view
-        [HttpGet("create")]
-        public IActionResult Create()
+        [HttpPost]
+        public async Task<IActionResult> CreateProjectAsync(Project newProject)
         {
-            return View();
-        }
-
-        [HttpPost("create")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,FileName,IsCompleted,CompletionDate,CreatedOn,LastModified")] Project project)
-        {
-            if (ModelState.IsValid)
+            if(!ModelState.IsValid) return BadRequest(ModelState);
+            try
             {
-                _dbContext.Add(project);
+                await _dbContext.Projects.AddAsync(newProject);
                 await _dbContext.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return Ok();
             }
-            return View(project);
+            catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
-        //Get the view to edit the given project
-        [HttpGet("{id}/edit")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int? id)
+        [HttpPut("{projectId:int}")]
+        public async Task<IActionResult> UpdateProjectAsync(int projectId, Project updateProject)
         {
-            if(id == null)
-            {
-                return NotFound("Project Id cannot be null");
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var project = await _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == id);
-            if (project == null)
+            try
             {
-                return NotFound($"Project with Id {id} not found");
-            }
+                Project? project = await _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
+                if (project is null) return NotFound($"Project with id {projectId} not found");
 
-            return View(project);
+                project.Name = updateProject.Name;
+                project.Aida = updateProject.Aida;
+                project.KeyPage = updateProject.KeyPage;
+                project.IsCompleted = updateProject.IsCompleted;
+                if (project.IsCompleted) project.CompletionDate = DateTime.Now;
+                project.LastModified = DateTime.Now;
+
+                await _dbContext.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
-        //Post the edit of the project
-        [HttpPost("{id}/edit")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id, Name, FileName, IsCompleted, CompletionDate")] Project project)
+        [HttpDelete("{projectId:int}")]
+        public async Task<IActionResult> DeleteProject(int projectId)
         {
-            if (id != project.Id) return NotFound("Id cannot be null");
-
-            if (ModelState.IsValid)
+            try
             {
-                try
-                {
-                    _dbContext.Update(project);
-                    await _dbContext.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProjectExists(project.Id))
-                    {
-                        return NotFound($"Project with id {id} not found");
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-
-                return RedirectToAction(nameof(Index)); //on success redirect to Index
-            }
-            return View(project); //If model's properties dont follow [] guidelines go back to project view
-        }
-
-
-        // GET: Project/Delete/5
-        [HttpGet("{id}/delete")]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var project = await _dbContext.Projects
-                .FirstOrDefaultAsync(p => p.Id == id);
-            if (project == null)
-            {
-                return NotFound();
-            }
-
-            return View(project);
-        }
-
-        // POST: Projects/5
-        [HttpDelete("{id}"), ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var project = await _dbContext.Projects.FindAsync(id);
-            if (project != null)
-            {
-                //Delete connected ProjectFloss
-                foreach (var pf in project.ProjectFloss)
-                {
-                    _dbContext.ProjectFloss.Remove(pf);
-                }
-
-                //delete pdf file
-                if(!string.IsNullOrWhiteSpace(project.FileName)) DeleteDocument(project.FileName);
+                Project? project = _dbContext.Projects.FirstOrDefault(p => p.Id == projectId);
+                if (project is null) return NotFound($"Project with id {projectId} not found");
 
                 _dbContext.Projects.Remove(project);
+                await _dbContext.SaveChangesAsync();
+                return Ok();
             }
-
-            await _dbContext.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
-        [HttpGet("{id}/Pattern")]
+        [HttpGet("{projectId:int}/floss")]
+        public async Task<IActionResult> GetFloss(int? projectId)
+        {
+            if (projectId == null) return NotFound("ProjectId cannot be null");
+
+            var projectExists = _dbContext.Projects.Any(p => p.Id == projectId);
+            if (!projectExists) return NotFound($"Project with Id {projectId} not found");
+
+            IEnumerable<ProjectFloss> projectFloss = _dbContext.ProjectFloss.Where(pf => pf.ProjectId == projectId);
+            List<FlossDTO> Flosses = new();
+            foreach (var pf in projectFloss)
+            {
+                var floss = await _dbContext.Floss.FirstOrDefaultAsync(f => f.Id == pf.FlossId);
+                var flossDTO = new FlossDTO(floss.Id, floss.Name, floss.Number, floss.HexColor, pf.Amount, pf.Strands, (int)projectId);
+                Flosses.Add(flossDTO);
+            }
+
+            return Ok(Flosses);
+        }
+
+        [HttpPost("{projectId:int}/floss")]
+        public async Task<IActionResult> AddFloss(int projectId, int flossId, int amount, int strands)
+        {
+            try
+            {
+                Project? project = await _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
+                if(project is null) return NotFound($"Project with Id {projectId} not found");
+
+                ProjectFloss? projectFloss = await _dbContext.ProjectFloss.
+                    FirstOrDefaultAsync(pf => pf.ProjectId == projectId && pf.FlossId == flossId);
+                if (projectFloss is not null) return BadRequest($"This project already has the floss added to it already.");
+
+                projectFloss = new()
+                {
+                    ProjectId = projectId,
+                    FlossId = flossId,
+                    Amount = amount,
+                    Strands = strands
+                };
+
+                await _dbContext.ProjectFloss.AddAsync(projectFloss);
+                await _dbContext.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("{projectId:int}/floss/{flossId:int}")]
+        public async Task<IActionResult> UpdateFloss(int projectId, int flossId, int amount, int strands)
+        {
+            try
+            {
+                Project? project = await _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
+                if (project is null) return NotFound($"Project with Id {projectId} not found");
+
+                ProjectFloss? projectFloss = await _dbContext.ProjectFloss.
+                    FirstOrDefaultAsync(pf => pf.ProjectId == projectId && pf.FlossId == flossId);
+                if (projectFloss is null) return NotFound($"This project doesn't have this floss in it.");
+
+                projectFloss.Amount = amount;
+                projectFloss.Strands = strands;
+
+                _dbContext.Update(projectFloss);
+                await _dbContext.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpDelete("{projectId}/floss/{flossId:int}")]
+        public async Task<IActionResult> DeleteFloss(int projectId, int flossId)
+        {
+            try
+            {
+                Project? project = await _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
+                if (project is null) return NotFound($"Project with Id {projectId} not found");
+
+                ProjectFloss? projectFloss = await _dbContext.ProjectFloss.
+                    FirstOrDefaultAsync(pf => pf.ProjectId == projectId && pf.FlossId == flossId);
+                if (projectFloss is null) return NotFound($"This project doesn't have this floss in it.");
+
+                _dbContext.Remove(projectFloss);
+                await _dbContext.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("{id}/pattern")]
         public async Task<IActionResult> ViewPattern(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound("Id is null");
 
-            var project = await _dbContext.Projects
-                .FirstOrDefaultAsync(p => p.Id == id);
-            if (project == null)
-            {
-                return NotFound();
-            }
+            var project = await _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == id);
+            if (project == null) return NotFound($"Project with id {id} not found.");
 
-            return View("PatternView", project);
+            if (project.FileName is null) return NotFound("Project does not have a file.");
+
+            var path = Path.Combine(_pdfFolder, project.FileName + ".pdf");
+            if (!FileIO.Exists(path)) return NotFound("File not found in server storage.");
+
+            var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var result = File(stream, "application/pdf");
+
+            return result;
         }
 
-        [HttpPost("{id}/Pattern/Upload")]
+        [HttpPost("{id}/pattern/upload")]
         public async Task<IActionResult> UploadPattern(int? id, int? keyPage, IFormFile file)
         {
             if (id == null) return NotFound("Id cannot be null");
             else if (file == null) return NotFound("File cannot be null");
 
             var project = _dbContext.Projects.Find(id);
-            if(project == null) return NotFound($"Project with Id {id} found");
+            if (project == null) return NotFound($"Project with Id {id} found");
 
             try
             {
@@ -207,163 +434,130 @@ namespace Server.Controllers
             return RedirectToAction(nameof(ViewPattern));
         }
 
-        [HttpPost("{id}/Pattern/ReadPattern")]
-        public async Task<List<ProjectFloss>> ReadPattern(int? id)
+        [HttpGet("{id:int}/download")]
+        public IActionResult DownloadPattern (int id)
         {
-            if (id == null) return [];
+            var project = _dbContext.Projects.FirstOrDefault(p => p.Id == id);
+            if (project is null) return NotFound($"Project with id {id} not found.");
 
-            Project? project = await _dbContext.Projects.FirstAsync(p => p.Id == id);
-            if (project == null || project.KeyPage == null) return [];
-
-            string path = Path.Combine(_pdfFolder, project.FileName! + ".pdf");
-            if (!FileIO.Exists(path)) return [];
-
-            //Read the file
-            using (PdfDocument pdf = PdfDocument.Open(path))
-            {
-                List<int> characters = new();
-                List<Character> charactersDebug = new();
-                int keyPage = (int)project.KeyPage;
-
-                //Read each page to find the character symbols in the pattern
-                for (int i = 1; i < keyPage; i++)
-                {
-                    pdfPage page = pdf.GetPage(i);
-                    var pageChars = GetPageChars(page, false, ref charactersDebug);
-                    characters.AddRange(pageChars);
-                }
-
-                //Read the key page to get key
-                Dictionary<int, Floss> flossKey = new();
-                List<int> ints = new();
-                List<Character> intsDebug = new();
-                for (int i = keyPage; i <= pdf.NumberOfPages; i++)
-                {
-                    pdfPage page = pdf.GetPage(i);
-                    var pageChars = GetPageChars(page, true, ref intsDebug);
-                    ints.AddRange(pageChars);
-                }
-
-                //split ints list into more lists by symbol numbers
-                List<List<int>> lines = new List<List<int>>();
-                List<int> currentLine = new List<int>();
-                foreach (int i in ints)
-                {
-                    if (i > 255)
-                    {
-                        if (currentLine.Count > 0)
-                        {
-                            lines.Add(currentLine);
-                            currentLine.Clear();
-                        }
-                        currentLine.Add(i);
-                    }
-                    else if (currentLine.Count > 0)
-                    {
-                        currentLine.Add(i);
-                    }
-                }
-
-                //Go through each line in lines to create a dictionary of flosses and symbols
-                Dictionary<Floss, int> FlossSymbol = new();
-                Dictionary<int, int> SymbolAmount = new();
-                foreach (List<int> line in lines)
-                {
-                    int symbol = line[0]; //The symbol is the first int in each row
-                    SymbolAmount.Add(symbol, 0);
-
-                    //Go through list of ints to find 'words' (groups of numbers and groups of letters)
-                    List<string> words = new();
-                    StringBuilder currentWord = new();
-                    currentWord.Append(line[1]);
-                    for (int i = 2; i < line.Count; i++)
-                    {
-                        char curLetter = (char)line[i];
-                        char lastLetter = (char)line[i - 1];
-                        bool curIsDigit = Char.IsDigit(curLetter);
-                        bool lastIsDigit = Char.IsDigit(lastLetter);
-
-                        if (lastIsDigit == curIsDigit) currentWord.Append(curLetter);
-                        else
-                        {
-                            words.Add(currentWord.ToString());
-                            currentWord.Clear();
-                            currentWord.Append(curLetter);
-                        }
-                    }
-
-                    //One of the words should match a Floss's number, one should match the Floss's name
-                    //Or one of the words should be a concatenation of the number and name either way
-                    var AllFloss = _dbContext.Floss.AsQueryable();
-                    Floss? MatchingFloss = null;
-                    foreach (Floss f in AllFloss)
-                    {
-                        string NameNumber = f.Name + f.Name;
-                        string NumberName = f.Number + f.Name;
-                        bool matchOne = false;
-                        foreach(string w in words)
-                        {
-                            if(w == NameNumber || w == NumberName)
-                            {
-                                MatchingFloss = f;
-                                break;
-                            }
-                            else if(w == f.Name || w == f.Number)
-                            {
-                                if(!matchOne) matchOne = true;
-                                else
-                                {
-                                    MatchingFloss = f;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (MatchingFloss != null)
-                        {
-                            break;
-                        }
-                    }
-
-                    if (MatchingFloss == null) throw new Exception($"No match for Symbol {symbol} found.");
-                    FlossSymbol.Add(MatchingFloss, symbol);
-                }
-
-                //Go through characters list to get number of times each symbol is used
-                foreach(int i in characters)
-                {
-                    if (SymbolAmount.ContainsKey(i))
-                    {
-                        SymbolAmount[i] = SymbolAmount[i] + 1;
-                    }
-                }
-
-                //Check Aida number and apply the proper equation
-                List<ProjectFloss> projectFloss = new();
-                foreach (KeyValuePair<int, int> pair in SymbolAmount)
-                {
-                    Floss floss = FlossSymbol.Where(fs => fs.Value == pair.Key).FirstOrDefault().Key;
-                    ProjectFloss pf = new ProjectFloss(project, floss) { Strands = 2};
-                    int skeinsNeeded = GetSkeinAmount(pair.Value, project.Aida, pf.Strands); //2 is hardcoded for default and can be changed
-                    pf.Amount = skeinsNeeded;
-                    projectFloss.Add(pf);
-                }
-                
-                return projectFloss;
-            }
-        }
-
-        [HttpGet("download/{filename}")]
-        public IActionResult Download(string filename)
-        {
+            var filename = project.FileName;
             var path = Path.Combine(_pdfFolder, filename);
             if (!FileIO.Exists(path)) return NotFound($"File Not Found");
 
             var fileBytes = FileIO.ReadAllBytes(path);
-            var contentType = "application/octet-stream";
+            var contentType = "application/pdf";
 
-            return File(fileBytes, contentType, filename);
+            return File(fileBytes, contentType, project.Name.Replace(" ", string.Empty));
         }
+
+        [HttpGet("{projectId:int}/pattern/read-key/full-auto")]
+        public async Task<IActionResult> ReadPatternKey(int? projectId)
+        {
+            if (projectId == null) return BadRequest("Id cannot be null");
+
+            Project? project = await _dbContext.Projects.FirstAsync(p => p.Id == projectId);
+            if (project == null || project.KeyPage == null) return NotFound($"Project with id {projectId} not found");
+
+            string path = Path.Combine(_pdfFolder, project.FileName! + ".pdf");
+            if (!FileIO.Exists(path)) return NotFound("File not found");
+
+            List<List<int>> KeyPageLines = ReadKeyPage(path, (int)project.KeyPage);
+
+            Dictionary<int, SymbolData> SymbolDictionary = new();
+            List<Floss> AllFloss = _dbContext.Floss.ToList();
+            foreach (List<int> Line in KeyPageLines)
+            {
+                int symbol = Line[0];
+                SymbolData data = new();
+
+                List<string> WordsInLine = GetLineWords(Line);
+
+                Floss? MatchingFloss = MatchWordsToFloss(WordsInLine, AllFloss);
+                data.Floss = MatchingFloss;
+
+                SymbolDictionary.Add(symbol, data);
+            }
+
+            return Ok(SymbolDictionary);
+        }
+
+        [HttpPost("{projectId:int}/pattern/read-key/manual")]
+        public async Task<IActionResult> ReadPatternKey_GivenListOfFloss(int projectId, List<int> FlossIds)
+        {
+            if (FlossIds.Count < 1) return BadRequest("List of flosses must have at least one entry");
+
+            Project? project = await _dbContext.Projects.FirstAsync(p => p.Id == projectId);
+            if (project == null || project.KeyPage == null) return NotFound($"Project with id {projectId} not found");
+
+            string path = Path.Combine(_pdfFolder, project.FileName! + ".pdf");
+            if (!FileIO.Exists(path)) return NotFound("File not found");
+
+            List<List<int>> KeyPagesLines = ReadKeyPage(path, (int)project.KeyPage);
+
+            Dictionary<int, SymbolData> SymbolDictionary = new();
+            for(int i = 0; i < KeyPagesLines.Count; i++)
+            {
+                int symbol = KeyPagesLines[i][0];
+                Floss floss = _dbContext.Floss.First(f => f.Id == FlossIds[i]);
+
+                SymbolDictionary.Add(symbol, new(floss));
+            }
+
+            return Ok(SymbolDictionary);
+        }
+
+        [HttpPost("{projectId:int}/pattern/read-pattern")]
+        public async Task<IActionResult> ReadPattern(int projectId, Dictionary<int, SymbolData> symbolDictionary)
+        {
+            if (symbolDictionary.Count < 1) return BadRequest("Invalid symbol entries");
+
+            Project? project = await _dbContext.Projects.FirstAsync(p => p.Id == projectId);
+            if (project == null || project.KeyPage == null) return NotFound($"Project with id {projectId} not found");
+
+            string path = Path.Combine(_pdfFolder, project.FileName! + ".pdf");
+            if (!FileIO.Exists(path)) return NotFound("File not found");
+
+            List<int> characters = new();
+            using(PdfDocument pdf = PdfDocument.Open(path))
+            {
+                int keyPage = (int)project.KeyPage;
+                //Read each page to find the character symbols in the pattern
+                for (int i = 1; i < keyPage; i++)
+                {
+                    pdfPage page = pdf.GetPage(i);
+                    foreach(char c in page.Text)
+                    {
+                        int cAsInt = c;
+                        if(cAsInt > 255)
+                        {
+                            if(symbolDictionary.TryGetValue(cAsInt, out var symbolData))
+                            {
+                                symbolData.Count++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            List<ProjectFlossDTO> returnable = new();
+            foreach (var kvp in symbolDictionary)
+            {
+                SymbolData data = kvp.Value;
+                int symbol = kvp.Key;
+
+                if (data.Count <= 0) continue;
+                if (data.Floss is null) continue;
+
+                Floss floss = data.Floss;
+
+                ProjectFlossDTO dto = new(floss.Id, floss.Name, floss.Number, floss.HexColor, data.Count, 2);
+                returnable.Add(dto);
+            }
+
+            return Ok(returnable);
+        }
+
+        #endregion
 
         #region Helper Methods
 
@@ -391,6 +585,114 @@ namespace Server.Controllers
                 await file.CopyToAsync(filestream);
             }
             return uniqueFileName;
+        }
+
+        private List<List<int>> ReadKeyPage(string path, int keyPage)
+        {
+            Dictionary<int, Floss> flossKey = new();
+            List<int> ints = new();
+            List<Character> intsDebug = new();
+
+            using (PdfDocument pdf = PdfDocument.Open(path))
+            {
+                //Read each key page to get key
+                for (int i = keyPage; i <= pdf.NumberOfPages; i++)
+                {
+                    pdfPage page = pdf.GetPage(i);
+                    var pageChars = GetPageChars(page, true, ref intsDebug);
+                    ints.AddRange(pageChars);
+                }
+            }
+
+            List<List<int>> lines = new List<List<int>>();
+            List<int> currentLine = new List<int>();
+            foreach (int i in ints)
+            {
+                char c = (char)i;
+                if (i > 255)
+                {
+                    if (currentLine.Count > 0)
+                    {
+                        lines.Add(currentLine);
+                        currentLine = new();
+
+                    }
+                    currentLine.Add(i);
+                }
+                else if (currentLine.Count > 0)
+                {
+                    currentLine.Add(i);
+                }
+            }
+            lines.Add(currentLine);
+
+            return lines;
+        }
+
+        private List<string> GetLineWords(List<int> line)
+        {
+            //Go through list of ints to find 'words' (groups of numbers and groups of letters)
+            List<string> words = new();
+            StringBuilder currentWord = new();
+            currentWord.Append((char)line[1]);
+            for (int i = 2; i < line.Count; i++)
+            {
+                char curLetter = (char)line[i];
+                char lastLetter = (char)line[i - 1];
+                bool curIsDigit = Char.IsDigit(curLetter);
+                bool lastIsDigit = Char.IsDigit(lastLetter);
+
+                if (lastIsDigit == curIsDigit) currentWord.Append(curLetter);
+                else
+                {
+                    words.Add(currentWord.ToString());
+                    currentWord = new();
+                    currentWord.Append(curLetter);
+                }
+            }
+            words.Add(currentWord.ToString());
+
+            return words;
+        }
+
+        private Floss? MatchWordsToFloss(List<string> Words, List<Floss> AllFloss)
+        {
+            Floss? MatchingFloss = null;
+            Floss? MatchOneFloss = null;
+            foreach (Floss f in AllFloss)
+            {
+                string NameNumber = f.Name + f.Number;
+                string NumberName = f.Number + f.Name;
+                bool matchOne = false;
+                foreach (string w in Words)
+                {
+                    if (w == NameNumber || w == NumberName || w.Contains(NumberName) || w.Contains(NameNumber))
+                    {
+                        MatchingFloss = f;
+                        break;
+                    }
+                    else if (w == f.Name || w == f.Number)
+                    {
+                        if (!matchOne)
+                        {
+                            matchOne = true;
+                            MatchOneFloss = f;
+                        }
+                        else
+                        {
+                            MatchingFloss = f;
+                            break;
+                        }
+                    }
+                }
+
+                if (MatchingFloss != null)
+                {
+                    break;
+                }
+            }
+
+            return MatchingFloss ?? MatchOneFloss;
         }
 
         private void DeleteDocument(string oldFileName)
@@ -455,4 +757,35 @@ namespace Server.Controllers
         public char CharVersion { get; set; }
         public int IntVersion { get; set; }
     }
+    public class SymbolData
+    {
+        public Floss? Floss { get; set; }
+        public int Count { get; set; }
+        public SymbolData()
+        {
+            Count = 0;
+            Floss = null;
+        }
+        public SymbolData(Floss floss)
+        {
+            Count = 0;
+            Floss = floss;
+        }
+    }
+    public record FlossDTO(int Id, string? Name, string? Number, string? HexColor, 
+        /*char Symbol,*/ int? Amount, int? Strands, int ProjectId);
+    public record ProjectWithFlossDTO(int Id, int UserId, string? Name, bool IsCompleted, 
+        DateTime? CompletionDate, int? KeyPage, int? Aida, IEnumerable<FlossDTO>? Floss);
+    public record ProjectDTO(int Id, int UserId, string? Name, bool IsCompleted, DateTime? CompletionDate, int? KeyPage, int? Aida);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="Id"></param>
+    /// <param name="Name"></param>
+    /// <param name="Number"></param>
+    /// <param name="HexColor"></param>
+    /// <param name="Amount">Can refer to number of skeins needed or number of stitches</param>
+    /// <param name="Strands"></param>
+    public record ProjectFlossDTO(int Id, string? Name, string? Number, string? HexColor, int Amount, int Strands);
 }

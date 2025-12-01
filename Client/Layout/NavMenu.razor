@@ -4,6 +4,7 @@
 @inject HttpClient Http
 @inject IJSRuntime JS
 @inject UserService userService
+@inject UserState userState
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -21,7 +22,7 @@
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        @if (userService.IsLoggedIn && userService.CurrentUser is not null && userService.CurrentUser!.Role == "User") //User
+        @if (userState.IsLoggedIn && userState.User is not null && userState.User!.Role == "User") //User
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="/user/projects">
@@ -39,7 +40,7 @@
                 </NavLink>
             </div>
         }
-        else if (userService.IsLoggedIn && userService.CurrentUser is not null && userService.CurrentUser!.Role == "Admin") //Admin
+        else if (userState.IsLoggedIn && userState.User is not null && userState.User!.Role == "Admin") //Admin
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="/logout">
@@ -47,7 +48,7 @@
                 </NavLink>
             </div>
         }
-        else if (!userService.IsLoggedIn) //Anonymous
+        else if (!userState.IsLoggedIn) //Anonymous
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="/login">
@@ -67,9 +68,9 @@
         collapseNavMenu = !collapseNavMenu;
     }
 
-    protected override void OnInitialized() => userService.UserChanged += OnAuthChanged;
+    protected override void OnInitialized() => userState.Changed += OnAuthChanged;
 
     private void OnAuthChanged() => InvokeAsync(StateHasChanged);
 
-    public void Dispose() => userService.UserChanged -= OnAuthChanged;
+    public void Dispose() => userState.Changed -= OnAuthChanged;
 }

@@ -3,11 +3,12 @@
     public sealed class Result
     {
         public bool Ok { get; }
-        public string? Error { get; }
-        private Result(bool ok, string? error) { Ok = ok; Error = error; }
+        public string? FailType { get; }
+        private Result(bool ok, string? failType) { Ok = ok; FailType = failType; }
 
         public static Result Success() => new(true, null);
-        public static Result Fail(string error) => new(false, error);
+        public static Result Fail() => new(false, null);
+        public static Result NotAuthorized() => new(false, "Not Authorized");
     }
 
     public sealed class Result<T>

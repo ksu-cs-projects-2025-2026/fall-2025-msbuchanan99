@@ -18,8 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Components\" />
-    <Folder Include="Pages\Admin\" />
+    <Folder Include="Pages\Admin\Floss\" />
+    <Folder Include="Pages\Admin\Users\" />
+    <Folder Include="Pages\Admin\Projects\" />
     <Folder Include="Pages\Floss\" />
     <Folder Include="Pages\Posts\" />
   </ItemGroup>
