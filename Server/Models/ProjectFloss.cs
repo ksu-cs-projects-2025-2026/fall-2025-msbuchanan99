@@ -27,5 +27,12 @@ namespace Server.Models
             Floss = floss;
             FlossId = floss.Id;
         }
+        public ProjectFloss(int projectId, int flossId, int amount, int strands)
+        {
+            ProjectId = projectId;
+            FlossId = flossId;
+            Amount = amount;
+            Strands = strands;
+        }
     }
 }

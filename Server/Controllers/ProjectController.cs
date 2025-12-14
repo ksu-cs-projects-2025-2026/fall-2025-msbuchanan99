@@ -1,13 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Server.Data;
 using Server.Models;
+using System.IO;
+using System.Linq;
 using System.Text;
 using UglyToad.PdfPig;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using FileIO = System.IO.File;
 using pdfPage = UglyToad.PdfPig.Content.Page;
 
@@ -125,14 +124,7 @@ namespace Server.Controllers
                 Project? project = await _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == id);
                 if (project is null) return NotFound($"Project with Id {id} not found.");
 
-                List<ProjectFlossDTO> flosses = new();
-                foreach (ProjectFloss pf in _dbContext.ProjectFloss.Where(pf => pf.ProjectId == id))
-                {
-                    Floss f = _dbContext.Floss.First(f => f.Id == pf.FlossId);
-                    flosses.Add(new
-                        (pf.FlossId, f.Name, f.Number, f.HexColor, pf.Amount, pf.Strands)
-                    );
-                }
+                List<ProjectFlossDTO> flosses = GetProjectFlossAsDTO(id);
 
                 return Ok(flosses);
             }
@@ -241,9 +233,15 @@ namespace Server.Controllers
             if(!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
+                var now = DateTime.Now;
+                newProject.CreatedOn = now;
+                newProject.LastModified = now;
+                Console.WriteLine($"[CreateProjectAsync] Incoming KeyPage = {newProject.KeyPage}");
                 await _dbContext.Projects.AddAsync(newProject);
-                await _dbContext.SaveChangesAsync();
-                return Ok();
+                await _dbContext.SaveChangesAsync(); 
+                await _dbContext.Entry(newProject).ReloadAsync();
+                Console.WriteLine($"[CreateProjectAsync] After save/reload, KeyPage = {newProject.KeyPage}");
+                return Ok(newProject);
             }
             catch(Exception e)
             {
@@ -277,6 +275,27 @@ namespace Server.Controllers
             }
         }
 
+        [HttpPut("{projectId:int}/mark-completed")]
+        public async Task<IActionResult> MarkProjectCompleted(int projectId)
+        {
+            try
+            {
+                var project = await _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
+                if (project is null) return NotFound($"Project with id {projectId} not found");
+
+                var now = DateTime.Now;
+                project.IsCompleted = true;
+                project.CompletionDate = now;
+                project.LastModified = now;
+                await _dbContext.SaveChangesAsync();
+                return Ok(now);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpDelete("{projectId:int}")]
         public async Task<IActionResult> DeleteProject(int projectId)
         {
@@ -284,6 +303,11 @@ namespace Server.Controllers
             {
                 Project? project = _dbContext.Projects.FirstOrDefault(p => p.Id == projectId);
                 if (project is null) return NotFound($"Project with id {projectId} not found");
+
+                //try to delete the file
+                string? fileName = project.FileName;
+                if (fileName is not null) DeleteDocument(fileName);
+
 
                 _dbContext.Projects.Remove(project);
                 await _dbContext.SaveChangesAsync();
@@ -304,18 +328,22 @@ namespace Server.Controllers
             if (!projectExists) return NotFound($"Project with Id {projectId} not found");
 
             IEnumerable<ProjectFloss> projectFloss = _dbContext.ProjectFloss.Where(pf => pf.ProjectId == projectId);
-            List<FlossDTO> Flosses = new();
-            foreach (var pf in projectFloss)
+            List<FlossDTO>? Flosses = new();
+            if(projectFloss.Count() > 0)
             {
-                var floss = await _dbContext.Floss.FirstOrDefaultAsync(f => f.Id == pf.FlossId);
-                var flossDTO = new FlossDTO(floss.Id, floss.Name, floss.Number, floss.HexColor, pf.Amount, pf.Strands, (int)projectId);
-                Flosses.Add(flossDTO);
+                Flosses = new();
+                foreach (var pf in projectFloss)
+                {
+                    var floss = await _dbContext.Floss.FirstOrDefaultAsync(f => f.Id == pf.FlossId);
+                    var flossDTO = new FlossDTO(floss!.Id, floss.Name, floss.Number, floss.HexColor, pf.Amount, pf.Strands, (int)projectId);
+                    Flosses.Add(flossDTO);
+                }
             }
 
             return Ok(Flosses);
         }
 
-        [HttpPost("{projectId:int}/floss")]
+        [HttpPost("{projectId:int}/floss/{flossId:int}/{amount:int}/{strands:int}")]
         public async Task<IActionResult> AddFloss(int projectId, int flossId, int amount, int strands)
         {
             try
@@ -337,7 +365,11 @@ namespace Server.Controllers
 
                 await _dbContext.ProjectFloss.AddAsync(projectFloss);
                 await _dbContext.SaveChangesAsync();
-                return Ok();
+
+                Floss floss = await _dbContext.Floss.FirstAsync(f => f.Id == flossId);
+                ProjectFlossDTO newPF = new(flossId, floss.Name, floss.Number, floss.HexColor, amount, strands);
+                
+                return Ok(newPF);
             }
             catch (Exception e)
             {
@@ -345,7 +377,7 @@ namespace Server.Controllers
             }
         }
 
-        [HttpPut("{projectId:int}/floss/{flossId:int}")]
+        [HttpPut("{projectId:int}/floss/{flossId:int}/{amount:int}/{strands:int}")]
         public async Task<IActionResult> UpdateFloss(int projectId, int flossId, int amount, int strands)
         {
             try
@@ -392,6 +424,18 @@ namespace Server.Controllers
             }
         }
 
+        [HttpDelete("{projectId}/floss/reset")]
+        public async Task<IActionResult> ResetFloss(int projectId)
+        {
+            var projectFloss = await _dbContext.ProjectFloss.Where(pf => pf.ProjectId == projectId).ToArrayAsync();
+            if (projectFloss.Length > 0)
+            {
+                _dbContext.ProjectFloss.RemoveRange(projectFloss);
+                _dbContext.SaveChanges();
+            }
+            return Ok();
+        }
+
         [HttpGet("{id}/pattern")]
         public async Task<IActionResult> ViewPattern(int? id)
         {
@@ -402,7 +446,9 @@ namespace Server.Controllers
 
             if (project.FileName is null) return NotFound("Project does not have a file.");
 
-            var path = Path.Combine(_pdfFolder, project.FileName + ".pdf");
+            var fileName = project.FileName;
+            if (!fileName.EndsWith(".pdf")) fileName += ".pdf";
+            var path = Path.Combine(_pdfFolder, fileName);
             if (!FileIO.Exists(path)) return NotFound("File not found in server storage.");
 
             var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -422,7 +468,7 @@ namespace Server.Controllers
 
             try
             {
-                project.KeyPage = keyPage;
+                if(keyPage is not null) project.KeyPage = keyPage;
                 project.FileName = await UploadDocument(file);
                 _dbContext.Projects.Update(project);
                 await _dbContext.SaveChangesAsync();
@@ -431,7 +477,7 @@ namespace Server.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            return RedirectToAction(nameof(ViewPattern));
+            return Ok();
         }
 
         [HttpGet("{id:int}/download")]
@@ -440,8 +486,8 @@ namespace Server.Controllers
             var project = _dbContext.Projects.FirstOrDefault(p => p.Id == id);
             if (project is null) return NotFound($"Project with id {id} not found.");
 
-            var filename = project.FileName;
-            var path = Path.Combine(_pdfFolder, filename);
+            var filename = project.FileName + ".pdf";
+            var path = Path.Combine(_pdfFolder, filename!);
             if (!FileIO.Exists(path)) return NotFound($"File Not Found");
 
             var fileBytes = FileIO.ReadAllBytes(path);
@@ -458,7 +504,9 @@ namespace Server.Controllers
             Project? project = await _dbContext.Projects.FirstAsync(p => p.Id == projectId);
             if (project == null || project.KeyPage == null) return NotFound($"Project with id {projectId} not found");
 
-            string path = Path.Combine(_pdfFolder, project.FileName! + ".pdf");
+            var filename = project.FileName;
+            if (!filename.EndsWith(".pdf")) filename += ".pdf";
+            string path = Path.Combine(_pdfFolder, filename);
             if (!FileIO.Exists(path)) return NotFound("File not found");
 
             List<List<int>> KeyPageLines = ReadKeyPage(path, (int)project.KeyPage);
@@ -481,29 +529,26 @@ namespace Server.Controllers
             return Ok(SymbolDictionary);
         }
 
-        [HttpPost("{projectId:int}/pattern/read-key/manual")]
-        public async Task<IActionResult> ReadPatternKey_GivenListOfFloss(int projectId, List<int> FlossIds)
+        [HttpGet("{projectId:int}/pattern/read-key/manual")]
+        public async Task<IActionResult> ReadPatternKeyForSymbols(int projectId)
         {
-            if (FlossIds.Count < 1) return BadRequest("List of flosses must have at least one entry");
+            
 
-            Project? project = await _dbContext.Projects.FirstAsync(p => p.Id == projectId);
-            if (project == null || project.KeyPage == null) return NotFound($"Project with id {projectId} not found");
-
-            string path = Path.Combine(_pdfFolder, project.FileName! + ".pdf");
-            if (!FileIO.Exists(path)) return NotFound("File not found");
-
-            List<List<int>> KeyPagesLines = ReadKeyPage(path, (int)project.KeyPage);
-
-            Dictionary<int, SymbolData> SymbolDictionary = new();
-            for(int i = 0; i < KeyPagesLines.Count; i++)
+            try
             {
-                int symbol = KeyPagesLines[i][0];
-                Floss floss = _dbContext.Floss.First(f => f.Id == FlossIds[i]);
+                Project proj = _dbContext.Projects.First(p => p.Id == projectId);
 
-                SymbolDictionary.Add(symbol, new(floss));
+                string filename = proj.FileName;
+                if (!filename.EndsWith(".pdf")) filename += ".pdf";
+                string path = Path.Combine(_pdfFolder, filename);
+
+                var SymbolDictionary = ReadKeyForSymbols(5, path);
+                return Ok(SymbolDictionary);
             }
-
-            return Ok(SymbolDictionary);
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         [HttpPost("{projectId:int}/pattern/read-pattern")]
@@ -548,13 +593,77 @@ namespace Server.Controllers
                 if (data.Count <= 0) continue;
                 if (data.Floss is null) continue;
 
-                Floss floss = data.Floss;
+                Floss floss;
+                if (data.Floss.Name is null) floss = await _dbContext.Floss.FirstAsync(f => f.Id == data.Floss.Id);
+                else floss = data.Floss;
 
                 ProjectFlossDTO dto = new(floss.Id, floss.Name, floss.Number, floss.HexColor, data.Count, 2);
                 returnable.Add(dto);
             }
 
             return Ok(returnable);
+        }
+
+        [HttpPost("{projectId:int}/save-calculated-floss")]
+        public async Task<IActionResult> SaveCalculatedFloss(int projectId, List<ProjectFlossDTO> flossDTOs)
+        {
+            try
+            {
+                Project p = _dbContext.Projects.First(p => p.Id == projectId);
+                List<ProjectFloss> flosses = new();
+                foreach(var floss in flossDTOs)
+                {
+                    ProjectFloss pf = new(projectId, floss.Id, floss.Amount, floss.Strands);
+                    flosses.Add(pf);
+                }
+                await _dbContext.ProjectFloss.AddRangeAsync(flosses);
+                await _dbContext.SaveChangesAsync();
+
+                var returnable = GetProjectFlossAsDTO(projectId);
+                return Ok(returnable);
+            }
+            catch
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet("{projectId:int}/calculate-floss-needed")]
+        public async Task<IActionResult> CalculateFlossNeeded(int projectId)
+        {
+            var project = _dbContext.Projects.FirstOrDefault(p => p.Id == projectId);
+            if (project is null) return NotFound("Project not found");
+
+            int userId = project.UserId;
+            var Me = _dbContext.Users.FirstOrDefault(u => u.Id == userId);
+            if (Me is null) return NotFound("User not found");
+
+            Dictionary<int, int> MyFloss = await _dbContext.UserFloss
+                .Where(uf => uf.UserId == Me.Id)
+                .ToDictionaryAsync(uf => uf.FlossId, uf => uf.Amount);
+            Dictionary<int, int> ProjectFloss = await _dbContext.ProjectFloss
+                .Where(pf => pf.ProjectId == projectId)
+                .ToDictionaryAsync(pf => pf.FlossId, pf => pf.Amount);
+
+            List<ProjectFlossDTO> FlossToBuy = new();
+            foreach((int pf_flossId, int pf_amount) in ProjectFloss)
+            {
+                Floss f = _dbContext.Floss.First(f => f.Id == pf_flossId);
+                if(MyFloss.TryGetValue(pf_flossId, out int uf_amount))
+                {
+                    var difference = pf_amount - uf_amount;
+                    if (difference >= 0)
+                    {
+                        FlossToBuy.Add(new(f.Id, f.Name, f.Number, f.HexColor, difference, 0));
+                    }
+                }
+                else
+                {
+                    FlossToBuy.Add(new(f.Id, f.Name, f.Number, f.HexColor, pf_amount, 0));
+                }
+            }
+
+            return Ok(FlossToBuy);
         }
 
         #endregion
@@ -589,7 +698,6 @@ namespace Server.Controllers
 
         private List<List<int>> ReadKeyPage(string path, int keyPage)
         {
-            Dictionary<int, Floss> flossKey = new();
             List<int> ints = new();
             List<Character> intsDebug = new();
 
@@ -627,6 +735,57 @@ namespace Server.Controllers
             lines.Add(currentLine);
 
             return lines;
+        }
+        private Dictionary<int, SymbolData> ReadKeyForSymbols(int pageToRead, string path)
+        {
+            Dictionary<int, SymbolData?> BeeDictionary = new()
+            {
+                {35, new SymbolData(_dbContext.Floss.First(f => f.Number == "712")) },
+                {43, new SymbolData(_dbContext.Floss.First(f => f.Number == "822")) },
+                {36, new SymbolData(_dbContext.Floss.First(f => f.Number == "739")) },
+                {38, new SymbolData(_dbContext.Floss.First(f => f.Number == "437")) },
+                {37, new SymbolData(_dbContext.Floss.First(f => f.Number == "433")) },
+                {44, new SymbolData(_dbContext.Floss.First(f => f.Number == "3013")) },
+                {45, new SymbolData(_dbContext.Floss.First(f => f.Number == "3011")) },
+                {39, new SymbolData(_dbContext.Floss.First(f => f.Number == "3820")) },
+                {40, new SymbolData(_dbContext.Floss.First(f => f.Number == "3033")) },
+                {42, new SymbolData(_dbContext.Floss.First(f => f.Number == "3865")) },
+                {48, new SymbolData(_dbContext.Floss.First(f => f.Number == "420")) },
+                {41, new SymbolData(_dbContext.Floss.First(f => f.Number == "976")) },
+                {51, new SymbolData(_dbContext.Floss.First(f => f.Number == "3782")) },
+                {52, new SymbolData(_dbContext.Floss.First(f => f.Number == "840")) },
+                {55, new SymbolData(_dbContext.Floss.First(f => f.Number == "3031")) }
+            };
+
+            using (var pdf = PdfDocument.Open(path))
+            {
+                if (pageToRead < 1 || pageToRead > pdf.NumberOfPages)
+                    throw new ArgumentOutOfRangeException(nameof(pageToRead));
+
+                var page = pdf.GetPage(pageToRead);
+                string text = page.Text;
+
+                // Split into rows
+                var lines = text.Split('\n');
+
+                for (int row = 0; row < lines.Length; row++)
+                {
+                    var line = lines[row];
+
+                    for (int col = 0; col < line.Length; col++)
+                    {
+                        int c = (int)line[col];
+
+                        // Your requirement:
+                        if (BeeDictionary.ContainsKey(c))
+                        {
+                            BeeDictionary[c].Count++;
+                        }
+                    }
+                }
+            }
+
+            return results;
         }
 
         private List<string> GetLineWords(List<int> line)
@@ -699,6 +858,7 @@ namespace Server.Controllers
         {
             if (string.IsNullOrEmpty(oldFileName)) throw new ArgumentNullException("Old File name is not valid");
 
+            if (!oldFileName.EndsWith(".pdf")) oldFileName += ".pdf";
             string path = Path.Combine(_pdfFolder, oldFileName);
             if (FileIO.Exists(path)) 
             {
@@ -708,11 +868,6 @@ namespace Server.Controllers
             {
                 throw new ArgumentException("File with that name was not found");
             }
-        }
-
-        private bool ProjectExists (int id)
-        {
-            return _dbContext.Projects.Any(p => p.Id == id);
         }
 
         private List<int> GetPageChars(pdfPage page, bool getAll, ref List<Character> charDebug)
@@ -733,20 +888,17 @@ namespace Server.Controllers
             return characters;
         }
 
-        private int GetSkeinAmount(int numStitches, int Aida, int numStrands)
+        private List<ProjectFlossDTO> GetProjectFlossAsDTO(int projectId)
         {
-            double oneSkein = 313.2; //Length of skein with all 6 strands lined up (not separated)
-            double skeinLength = oneSkein * (6 / numStrands); //Skein length with num strands end to end (eg if 2 strands used in stitch it would be oneSkein * (6 / 2) bc there are three groups of two strands from one skein)
-            double numerator = 2 * (1 + Math.Sqrt(2));
-            double inchesPerStitch = numerator / Aida;
-            double inchesOfStringNeeded = inchesPerStitch * numStitches;
-
-            int skeinsNeeded = 1;
-            while(skeinsNeeded * inchesOfStringNeeded < skeinLength)
+            List<ProjectFlossDTO> flosses = new();
+            foreach (ProjectFloss pf in _dbContext.ProjectFloss.Where(pf => pf.ProjectId == projectId))
             {
-                skeinsNeeded++;
+                Floss f = _dbContext.Floss.First(f => f.Id == pf.FlossId);
+                flosses.Add(new
+                    (pf.FlossId, f.Name, f.Number, f.HexColor, pf.Amount, pf.Strands)
+                );
             }
-            return skeinsNeeded;
+            return flosses;
         }
 
         #endregion
@@ -788,4 +940,6 @@ namespace Server.Controllers
     /// <param name="Amount">Can refer to number of skeins needed or number of stitches</param>
     /// <param name="Strands"></param>
     public record ProjectFlossDTO(int Id, string? Name, string? Number, string? HexColor, int Amount, int Strands);
+
+    
 }

@@ -9,6 +9,8 @@
         public static Result Success() => new(true, null);
         public static Result Fail() => new(false, null);
         public static Result NotAuthorized() => new(false, "Not Authorized");
+        public static Result NoKey() => new(false, "Failed key read");
+        public static Result PartialKey() => new(true, "Key partially filled out");
     }
 
     public sealed class Result<T>

@@ -31,10 +31,27 @@ namespace Client
             builder.Services.AddScoped(sp =>
                 sp.GetRequiredService<IHttpClientFactory>().CreateClient("ServerAPI"));
 
-            builder.Services.AddScoped<UserState>();
-            builder.Services.AddScoped<UserService>();
+
+            builder.Services.AddScoped<Admin_FlossState>();
+            builder.Services.AddScoped<Admin_FlossService>();
+            builder.Services.AddScoped<Admin_ProjectFlossState>();
+            builder.Services.AddScoped<Admin_ProjectFlossService>();
+            builder.Services.AddScoped<Admin_ProjectState>();
+            builder.Services.AddScoped<Admin_ProjectService>();
+            builder.Services.AddScoped<Admin_UserFlossState>();
+            builder.Services.AddScoped<Admin_UserFlossService>();
+            builder.Services.AddScoped<Admin_UserState>();
+            builder.Services.AddScoped<Admin_UserService>();
+            builder.Services.AddScoped<FlossState>();
+            builder.Services.AddScoped<FlossService>();
+            builder.Services.AddScoped<ProjectFlossService>();
+            builder.Services.AddScoped<ProjectFlossState>();
             builder.Services.AddScoped<ProjectState>();
             builder.Services.AddScoped<ProjectService>();
+            builder.Services.AddScoped<UserFlossState>();
+            builder.Services.AddScoped<UserFlossService>();
+            builder.Services.AddScoped<UserState>();
+            builder.Services.AddScoped<UserService>();
 
             builder.RootComponents.Add<App>("#app");
             builder.RootComponents.Add<HeadOutlet>("head::after");

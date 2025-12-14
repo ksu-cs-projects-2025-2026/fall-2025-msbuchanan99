@@ -39,7 +39,7 @@ else
 {
     <div class="flex-container-spread-out">
         <h3>My Projects</h3>
-        <NavLink class="btn btn-primary" href="/projects/create">Create</NavLink>
+        <NavLink class="btn btn-primary" disabled="@busy" @onclick="BeginCreate">Create</NavLink>
     </div>
     <div class="mb-2">
         <p class="text-danger">@projectState.LastError</p>
@@ -81,7 +81,7 @@ else
                         </td>
                         <td>
                             @*View details*@
-                            <button type="button" class="btn btn-outline-secondary dot" disabled="@busy" aria-label="Download File" @onclick="() => ViewDetails(p.Id)">
+                            <button type="button" class="btn btn-outline-secondary dot" disabled="@busy" aria-label="View Project Details" @onclick="() => ViewDetails(p.Id)">
                                 <i class="bi bi-info"></i>
                             </button>
                         </td>
@@ -96,6 +96,8 @@ else
             </tbody>
         </table>
     </div>
+
+    <ConfirmationModal Message="@Message" NumberRequired="false" OnConfirm="Confirm" OnDeny="Deny"></ConfirmationModal>
 }
 
 <style>
@@ -118,6 +120,9 @@ else
 
 @code {
     bool busy = false;
+    private string? Message;
+    private ConfirmMode confirmMode;
+
     protected override async Task OnInitializedAsync()
     {
         projectState.Changed += OnProjectStateChanged;
@@ -127,6 +132,7 @@ else
         if(userState.User is not null)
         {
             _ = await projectService.LoadForCurrentUserAsync();
+            projectState.SetSelectedProjectId(null);
         }
         else
         {
@@ -143,6 +149,16 @@ else
         userState.Changed -= OnUserStateChanged;
     }
 
+    public void BeginCreate()
+    {
+        busy = true;
+
+        projectService.BeginCreate(userState.User.Id);
+        Nav.NavigateTo($"/projects/create");
+
+        busy = false;
+    }
+
     public void ViewDetails(int id)
     {
         busy = true;
@@ -156,7 +172,10 @@ else
     {
         busy = true;
 
-        var result = await projectService.DeleteAsync(id);
+        projectService.BeginDelete(id);
+
+        confirmMode = ConfirmMode.DeleteConfirm;
+        Message = $"Are you sure you want to delete {projectState.Selected!.Name}?";
 
         busy = false;
     }
@@ -166,6 +185,36 @@ else
         busy = true;
 
         var result = await projectService.DownloadFile(id);
+
+        busy = false;
+    }
+
+    public async Task Confirm()
+    {
+        busy = true;
+
+        Result result = Result.Success();
+        if(confirmMode == ConfirmMode.DeleteConfirm)
+        {
+            result = await projectService.ApplyDeleteAsync();
+        }
+
+        if (result.Ok)
+        {
+            Message = null;
+        }
+
+        busy = false;
+    }
+
+    public async Task Deny()
+    {
+        busy = true;
+
+        if(confirmMode == ConfirmMode.GeneralConfirm)
+        {
+            Message = null;
+        }
 
         busy = false;
     }

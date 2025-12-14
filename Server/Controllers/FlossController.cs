@@ -133,7 +133,19 @@ namespace Server.Controllers
             return Ok(floss);
         }
 
-
+        [HttpGet("")]
+        public async Task<IActionResult> GetAllFloss()
+        {
+            try
+            {
+                List<Floss> floss = await _dbContext.Floss.ToListAsync();
+                return Ok(floss);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
         #endregion
 

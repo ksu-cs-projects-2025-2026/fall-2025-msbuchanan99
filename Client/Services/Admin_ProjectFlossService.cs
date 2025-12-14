@@ -224,7 +224,7 @@ namespace Client.Services
         }
 
         public void BeginCreate() => _state.BeginCreate();
-        public void CancelEdit() => _state.CancelEdit();
+        public void CancelCreate() => _state.CancelCreate();
         public async Task<Result> SaveCreateAsync()
         {
             var draft = _state.Draft;

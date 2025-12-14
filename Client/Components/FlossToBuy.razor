@@ -1,0 +1,39 @@
+﻿@if(FlossToBuyList is not null)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Floss you need to buy...</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex flex-column">
+                        <div class="d-flex flex-row">
+                            <p>Number</p>
+                            <p>Skeins Needed</p>
+                        </div>
+                        @foreach(var floss in FlossToBuyList)
+                        {
+                            <div class="d-flex flex-row border-top pt-2 justify-content-around">
+                                <p>@floss.Number</p>
+                                <p>@floss.Amount</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="d-flex flex-row-reverse">
+                        <button type="button" class="btn btn-secondary" @onclick="Close">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public List<FlossInProjectModel>? FlossToBuyList { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    public async Task Close() => await OnClose.InvokeAsync();
+}

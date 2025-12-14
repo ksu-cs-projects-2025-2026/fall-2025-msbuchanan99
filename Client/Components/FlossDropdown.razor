@@ -1,0 +1,127 @@
+﻿@*Derived from code from https://codepen.io/LukyVj/pen/meJqor*@
+
+<div class="md-select @(isOpen ? "active" : "") w-100">
+    <label for="ul-id" class="w-100">
+        <button type="button" @onclick="ToggleOpen" disabled="@Disabled">@selectedText</button>
+    </label>
+    <ul role="listbox" id="ul-id" class="md-whiteframe-z1">
+        @foreach((int id, string floss) in Dict)
+        {
+            <li role="option" class="@(selectedText == floss ? "active" : "")" tabindex="-1" aria-selected="@(selectedText == floss)" @onclick="() => SelectItem(id)">
+                @floss
+            </li>
+        }
+    </ul>
+</div>
+
+@code {
+    [Parameter] public EventCallback<int> OnSelect { get; set; }
+    [Parameter] public Dictionary<int, string> Dict { get; set; } = new();
+    [Parameter] public int Selected { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    private string selectedText = "Select One";
+    private bool isOpen;
+
+    protected override void OnParametersSet()
+    {
+        if (Selected == -1 || Selected == 0) selectedText = "Select One";
+        else selectedText = Dict[Selected];
+    }
+
+    private async Task SelectItem(int id)
+    {
+        selectedText = Dict[id];
+        isOpen = false;
+        await OnSelect.InvokeAsync(id);
+    }
+
+    private void ToggleOpen()
+    {
+        isOpen = !isOpen;
+    }
+}
+
+<style>
+
+
+    body {
+        background: #eff0f2;
+    }
+
+    .md-select {
+        *, :after, :before {
+            box-sizing: border-box;
+        }
+
+        display: block;
+        margin: 10px 0 8px 0;
+        padding-bottom: 2px;
+        /*  position: relative;*/
+        min-width: 180px;
+
+        [type=button] {
+            background: lightgrey;
+            border-color: rgba(0, 0, 0, 0.12);
+            border-width: 0 0 1px 0;
+            color: rgba(0, 0, 0, 0.73);
+            cursor: default;
+            display: block;
+            line-height: 48px;
+            padding: 2px 0 1px 16px;
+            position: relative;
+            text-align: left;
+            text-shadow: none;
+            width: 100%;
+            z-index: 1;
+            outline: none;
+            overflow: hidden;
+
+
+            &:focus, &:hover {
+                background: rgba(0,0,0,0.1);
+            }
+
+            &:after {
+                content: '\25be';
+                float: right;
+                padding-right: 16px;
+            }
+        }
+
+        ul[role=listbox] {
+            background-color: white;
+            cursor: default;
+            list-style: none;
+            line-height: 26px;
+            overflow: hidden;
+            margin: 0;
+            max-height: 0;
+            position: absolute;
+            padding: 0;
+            transform: translateY(-50%);
+            transition: all 0.15s cubic-bezier(0.35, 0, 0.25, 1);
+            width: 100%;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24) !important;
+
+            li {
+                height: 48px;
+                margin: 0;
+                padding: 10px 16px;
+                outline: none;
+                overflow: hidden;
+
+                &:focus, &:hover, &.active {
+                    background: rgba(0,0,0,0.1);
+                }
+            }
+        }
+
+        &.active ul {
+            max-height: 200px;
+            overflow: auto;
+            padding: 8px 0 16px 0px;
+            z-index: 2;
+            transition: all .2s ease
+        }
+    }
+</style>

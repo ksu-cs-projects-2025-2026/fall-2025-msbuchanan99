@@ -1,6 +1,150 @@
 ﻿@page "/projects/create"
-<h3>Create</h3>
+
+@inject ProjectService projectService
+@inject ProjectState projectState
+@inject UserService userService
+@inject UserState userState
+@inject NavigationManager Nav
+
+<h3>Creating a new Project</h3>
+
+@if (Loading)
+{
+    <h4>Loading...</h4>
+}
+else if(userState.User is null)
+{
+    <UnAuthorized/>
+}
+else
+{
+    <p class="alert-danger">@projectState.LastError</p>
+    <EditForm Model="projectState.Draft">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+        <div class="d-flex flex-column">
+            <div class="mb-3">
+                <div class="mb-3">
+                    <label class="form-label">Name:</label>
+                    <InputText class="form-control w-25" @bind-Value="projectState.Draft.Name" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Key Page:</label>
+                    <InputNumber class="form-control w-25" @bind-Value="projectState.Draft.KeyPage" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Aida:</label>
+                    <InputNumber class="form-control w-25" @bind-Value="projectState.Draft.Aida" />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Pattern PDF</label>
+                <InputFile OnChange="OnFileSelected" accept="application/pdf" disabled="@busy" />
+
+                @if (!string.IsNullOrEmpty(projectState.DraftFileName))
+                {
+                    <div class="form-text">
+                        Selected File: @projectState.DraftFileName
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(projectState.DraftPdfUrl))
+                {
+                    <div class="mb-3">
+                        <div class="border" style="height: 400px">
+                            <iframe src="@projectState.DraftPdfUrl" style="width:100%;height:100%;border:none;"></iframe>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mb-1" @onclick="SaveProject" disabled="@busy">Save</button>
+        <button type="submit" class="btn btn-secondary mb-1" @onclick="CancelProject" disabled="@busy">Cancel</button>
+    </EditForm>
+    @debugMessage
+}
 
 @code {
+    private bool Loading => userState.IsLoading || projectState.IsLoading;
+    private bool busy = false;
+    private string? debugMessage;
 
+    protected override async Task OnInitializedAsync()
+    {
+        projectState.Changed += OnProjectStateChanged;
+        userState.Changed += OnUserStateChanged;
+        await userService.UserLoadedAsync();
+    }
+
+    private void OnProjectStateChanged() => InvokeAsync(StateHasChanged);
+    private void OnUserStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        projectState.Changed -= OnProjectStateChanged;
+        userState.Changed -= OnUserStateChanged;
+    }
+
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
+    {
+        busy = true;
+
+        var file = e.File;
+        await projectState.SetDraftPDF(file);
+
+        busy = false;
+    }
+
+    private async Task SaveProject()
+    {
+        busy = true;
+        debugMessage = "SaveProject started.";
+
+        try
+        {
+            if (projectState.DraftFile is null)
+            {
+                debugMessage = "DraftFile is null – not calling CreateAsync.";
+                return;
+            }
+
+            debugMessage = "DraftFile present. Calling projectService.CreateAsync...";
+            Result result = await projectService.CreateAsync();
+
+            debugMessage = $"CreateAsync finished. Ok={result.Ok}";
+
+            if (result.Ok)
+            {
+                debugMessage += $", navigating to /projects/{projectState.SelectedProjectId}";
+                Nav.NavigateTo($"/projects/{projectState.SelectedProjectId}");
+            }
+            else
+            {
+                // If your Result has an error message, include it
+                debugMessage += projectState.LastError is not null
+                    ? $", error: {projectState.LastError}"
+                    : ", but result.Ok is false with no message.";
+            }
+        }
+        catch (Exception ex)
+        {
+            debugMessage = $"Exception in SaveProject: {ex.Message}";
+            Console.WriteLine(ex); // shows in browser DevTools console
+        }
+        finally
+        {
+            busy = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task CancelProject()
+    {
+        busy = true;
+
+        Nav.NavigateTo($"/user/projects");
+        projectService.CancelCreate();
+
+        busy = false;
+    }
 }

@@ -2,8 +2,12 @@
 
 @inject ProjectService projectService
 @inject ProjectState projectState
+@inject ProjectFlossService pfService
+@inject ProjectFlossState pfState
 @inject UserState userState
 @inject UserService userService
+@inject FlossState flossState
+@inject FlossService flossService
 @inject NavigationManager nav
 
 @if (projectState.IsLoading || userState.IsLoading)
@@ -14,46 +18,64 @@ else if(userState.User is null)
 {
     <UnAuthorized/>
 }
-else if(projectState.Selected is null)
-{
-    <p>Projects count -> @projectState.Projects.Count</p>
-    <p>Selected project id -> @projectState.SelectedProjectId</p>
-    <p>Error -> @projectState.LastError</p>
-}
 else
 {
     <div class="d-flex flex-column">
         <div>
-            <h3>@projectState.Selected.Name</h3>
+            @if(projectState.Selected is null)
+            {
+                <h3>Loading...</h3>
+            }
+            else if (projectState.Selected.IsCompleted)
+            {
+                <h3>@projectState.Selected.Name - Completed</h3>
+            }
+            else
+            { 
+                <h3>@projectState.Selected.Name</h3>
+            }
         </div>
         <div>
             <p class="text-danger">@projectState.LastError</p>
         </div>
         <div class="d-flex flex-row underline">
             <button class="btn btn-primary btn-row" @onclick="EditProject" type="button" disabled="@busy">Edit</button>
-            <button class="btn btn-primary btn-row" @onclick="MarkCompleted" type="button" disabled="@busy">Mark Completed</button>
+            <button class="btn btn-primary btn-row" @onclick="CalculateFlossNeeded" type="button" disabled="@busy">Buy Guide</button>
+            <button class="btn btn-primary btn-row" @onclick="BeginMarkCompleted" type="button" disabled="@busy">Mark Completed</button>
             <button class="btn btn-primary btn-row" @onclick="DownloadFile" type="button" disabled="@busy">Download PDF</button>
+            <button class="btn btn-primary btn-row" @onclick="ResetFloss" type="button" disabled="@busy">Recalculate Floss</button>
         </div>
         <div class="d-flex flex-row spacearound">
             <div class="outer-outer-container">
-                @if(projectState.Floss.Count == 0)
+                @if(pfState.Floss is null && pfState.SymbolDictionary is null)
                 {
                     <div class="d-flex flex-column floss-container">
                         <h4>No Floss Found</h4>
                         <div class="d-flex flex-row">
                             @*Buttons?*@
-                            <button class="btn btn-secondary" type="button" disabled="@busy">Auto Floss</button>
-                            <button class="btn btn-secondary" type="button" disabled="@busy">Enter Floss</button>
+                            <button class="btn btn-secondary mb-2" type="button" disabled="@busy" @onclick="StartAddFlossManually">Add Floss</button>
+                            <button class="btn btn-secondary mb-2" type="button" disabled="@busy" @onclick="BeginKeyRead">Auto Floss</button>
+                            <button class="btn btn-secondary mb-2" type="button" disabled="@busy" @onclick="NoReadPattern">Don't Read Pattern</button>
                         </div>
                     </div>
+                }
+                else if(pfState.SymbolDictionary is not null)
+                {
+                    <FlossKeyList FlossDictionary="flossState.FlossDictionary"
+                                  OnCalculateAmount="BeginPatternRead"
+                                  OnFlossSelect="UpdateSymbolDictionary"
+                                  busy="@busy"
+                                  OnSave="CompletePatternRead"
+                                  SymbolDictionary="pfState.SymbolDictionary" />
                 }
                 else
                 {
                     <div class="d-flex flex-column floss-container">
-                        <FlossList floss="projectState.Floss"></FlossList>
+                        <FlossList floss="pfState.Floss" OnSelected="HandleSelect"></FlossList>
                         <div class="d-flex flex-row">
-                            @*Buttons?*@
-                            <button class="btn btn-secondary" type="button" disabled="@busy">Edit Floss</button>
+                            <button class="btn btn-secondary btn-row" type="button" disabled="@busy" @onclick="BeginFlossCreate">Add</button>
+                            <button class="btn btn-secondary btn-row" type="button" disabled="@(busy || pfState.SelectedFlossId is null)" @onclick="BeginFlossEdit">Edit</button>
+                            <button class="btn btn-secondary btn-row" type="button" disabled="@(busy || pfState.SelectedFlossId is null)" @onclick="BeginFlossDelete">Delete</button>
                         </div>
                     </div>
                 }
@@ -73,6 +95,25 @@ else
             </div>
         </div>
     </div>
+
+    <FlossEditAndCreate 
+        floss="pfState.Draft" 
+        DefaultStrands="pfState.DefaultStrand" 
+        Show="ShowEditFlossModal" 
+        FlossDictionary="flossState.FlossDictionary" 
+        OnCancel="CancelFlossChange" 
+        OnSave="ApplyFlossChange" 
+        IsEdit="@(flossMode == FlossModalMode.Edit)"
+    />
+
+    <ConfirmationModal 
+        Message="@Message" 
+        NumberRequired="@NumberRequired" 
+        OnConfirm="Confirm" 
+        OnDeny="Deny" 
+    />
+
+    <FlossToBuy FlossToBuyList="pfState.FlossToBuy" OnClose="CloseFlossNeeded" />
 }
 
 <style>
@@ -80,12 +121,15 @@ else
         margin-left:1rem;
     }
     .floss-container{
-        justify-content: center;
+        justify-content: flex-start;
+        flex: 1 1 auto;
+        min-height: 0
     }
     .spacearound{
         justify-content: space-around;
         margin-top: 2rem;
-
+        min-height: 70vh;
+        align-items: stretch;
     }
     .underline{
         padding-bottom: 0.5rem;
@@ -95,7 +139,11 @@ else
         padding: 1rem;
         border: solid black 2px;
         background-color: darkgray;
-        width: 45%
+        width: 45%;
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        box-sizing: border-box;
     }
     .pdf-container{
         width: 100%;
@@ -110,19 +158,31 @@ else
 @code {
     bool busy = false;
     [Parameter] public int id { get; set; }
+
+    private bool ShowEditFlossModal = false;
+    private FlossModalMode flossMode;
+    private string? Message = null;
+    private ConfirmMode confirmMode;
+    private bool NumberRequired = false;
+    private string debug = "";
+    private bool IsManualEntry = false;
+
     protected override async Task OnInitializedAsync()
     {
         projectState.Changed += OnProjectStateChanged;
         userState.Changed += OnUserStateChanged;
+        flossState.Changed += OnFlossStateChanged;
+        pfState.Changed += OnPFStateChanged;
         await userService.UserLoadedAsync();
 
         if (userState.User is not null)
         {
             _ = await projectService.LoadForCurrentUserAsync();
             var result = await projectService.LoadCurrentProject(id);
-            if(projectState.Selected is not null)
+            if(projectState.SelectedProjectId is not null)
             {
-                var flossResult = await projectService.LoadCurrentProjectFloss(true);
+                _ = await pfService.LoadForProjectAsync((int)projectState.SelectedProjectId, true);
+                _ = await flossService.LoadFlosses();
             }
         }
         else
@@ -133,36 +193,346 @@ else
 
     private void OnProjectStateChanged() => InvokeAsync(StateHasChanged);
     private void OnUserStateChanged() => InvokeAsync(StateHasChanged);
+    private void OnFlossStateChanged() => InvokeAsync(StateHasChanged);
+    private void OnPFStateChanged() => InvokeAsync(StateHasChanged);
 
     public void Dispose()
     {
         projectState.Changed -= OnProjectStateChanged;
         userState.Changed -= OnUserStateChanged;
+        flossState.Changed -= OnFlossStateChanged;
+        pfState.Changed -= OnPFStateChanged;
     }
 
     public void EditProject()
     {
         busy = true;
 
+        projectState.BeginUpdate(id);
         nav.NavigateTo($"/projects/{id}/edit");
 
         busy = false;
     }
 
-    public async Task MarkCompleted()
+    public async Task BeginMarkCompleted()
     {
         busy = true;
 
-
-
-        busy = false;
+        projectService.BeginMarkCompleted(id);
+        confirmMode = ConfirmMode.MarkCompleted;
+        NumberRequired = false;
+        Message = "Are you sure you want to complete your project?";
     }
 
     public async Task DownloadFile()
     {
         busy = true;
 
+        var result = projectService.DownloadFile(id);
 
+        busy = false;
+    }
+
+    public async Task HandleSelect(FlossInProjectModel f)
+    {
+        pfService.SetSelectedId(f.Id);
+    }
+
+    public void BeginFlossEdit()
+    {
+        busy = true;
+
+        var success = pfService.BeginEdit((int)pfState.SelectedFlossId!);
+
+        busy = false;
+        if (success)
+        {
+            flossMode = FlossModalMode.Edit;
+            ShowEditFlossModal = true;
+        }
+        else ShowEditFlossModal = false;
+    }
+
+    public void BeginFlossCreate()
+    {
+        busy = true;
+
+        pfService.BeginCreate();
+
+        busy = false;
+
+        flossMode = FlossModalMode.Create;
+        ShowEditFlossModal = true;
+    }
+
+    public void BeginFlossDelete()
+    {
+        busy = true;
+
+        var success = pfService.BeginDelete((int)pfState.SelectedFlossId!);
+
+        if (success)
+        {
+            NumberRequired = false;
+            confirmMode = ConfirmMode.DeleteFloss;
+            Message = $"Are you sure you want to delete {pfState.Selected!.Name} from this project?";
+        }
+        else Message = null;
+    }
+
+    public void CancelFlossChange()
+    {
+        if(flossMode == FlossModalMode.Create)
+        {
+            pfService.CancelCreate();
+        }
+        else if(flossMode == FlossModalMode.Edit)
+        {
+            pfService.CancelEdit();
+        }
+
+        ShowEditFlossModal = false;
+        busy = false;
+    }
+
+    public async Task ApplyFlossChange(FlossInProjectModel editing)
+    {
+        debug = "In Apply floss change";
+        Result result = Result.Success();
+        if(flossMode == FlossModalMode.Create)
+        {
+            debug += "\ncreate";
+            result = await pfService.SaveCreateAsync();
+        }
+        else if (flossMode == FlossModalMode.Edit)
+        {
+            debug += "\nedit";
+            result = await pfService.SaveEditAsync();
+            pfService.SetSelectedId(null);
+        }
+
+        if (result.Ok)
+        {
+            ShowEditFlossModal = false;
+        }
+        else
+        {
+            NumberRequired = false;
+            confirmMode = ConfirmMode.ReadMessage;
+            Message = pfState.LastError;
+        }
+
+        busy = false;
+    }
+
+    public async Task Confirm(int? number)
+    {
+        Result result = Result.Success();
+
+        switch (confirmMode)
+        {
+            case ConfirmMode.DeleteFloss:
+                result = await pfService.DeleteAsync((int)pfState.SelectedFlossId!);
+                break;
+            case ConfirmMode.MarkCompleted:
+                result = await projectService.MarkCompletedAsync();
+                break;
+            case ConfirmMode.StrandsConfirm:
+                result = pfService.StartNoReadCase(number);
+                break;
+            case ConfirmMode.NumFlossConfirm:
+                result = await projectService.ReadPatternKeyManually(number);
+                break;
+            case ConfirmMode.ReadMessage:
+                break;
+            case ConfirmMode.ResetConfirm:
+                result = await pfService.ApplyResetAsync();
+                break;
+            case ConfirmMode.GeneralConfirm:
+                result = await pfService.SaveCalculation(null, false);
+                break;
+        }
+
+        if (result.Ok)
+        {
+            Message = null;
+        }
+        else { }
+
+        busy = false;
+    }
+
+    public async Task Deny()
+    {
+        switch (confirmMode)
+        {
+            case ConfirmMode.DeleteFloss:
+                pfService.CancelDelete();
+                Message = null;
+                busy = false;
+                break;
+            case ConfirmMode.MarkCompleted:
+                Message = null;
+                busy = false;
+                break;
+            case ConfirmMode.ResetConfirm:
+                pfService.CancelReset();
+                Message = null;
+                busy = false;
+                break;
+            case ConfirmMode.StrandsConfirm:
+            case ConfirmMode.NumFlossConfirm:
+            case ConfirmMode.ReadMessage:
+            case ConfirmMode.GeneralConfirm:
+                Message = null;
+                NumberRequired = false;
+                busy = false;
+                break;
+        }
+    }
+
+    public void UpdateSymbolDictionary((int, int) keyFlossId){
+        busy = true;
+        pfState.DeNullSymbolDictionaryEntry(keyFlossId);
+        busy = false;
+    }
+
+    //Calculating Key
+    public async Task BeginKeyRead()
+    {
+        busy = true;
+
+        IsManualEntry = false;
+        Result result = await projectService.ReadPatternKey();
+        NumberRequired = false;
+        if (result.Ok)
+        {
+            confirmMode = ConfirmMode.ReadMessage;
+            if (result.FailType == "Key partially filled out")
+            {
+                Message = "The key was only able to be read partially. There are some empty Floss entries. Please manually enter them to continue.";
+            }
+            else
+            {
+                Message = "The key was successfully read but please make sure everything looks correct.";
+            }
+        }
+        else
+        {
+            confirmMode = ConfirmMode.ReadMessage;
+            if(result.FailType == "Failed key read")
+            {
+                Message = "The algorithm failed to read the key. You can add floss in the same order of the key to try again or nothave the Threadfolio auto calculate.";
+            }
+            else
+            {
+                Message = "Something went wrong: " + projectState.LastError;
+            }
+        }
+
+        busy = false;
+    }
+
+    public async Task BeginPatternRead(Dictionary<int, SymbolData> symbolDictionary)
+    {
+        busy = true;
+
+        if (IsManualEntry)
+        {
+            //projectService.HardCodeBeePattern();
+        }
+        else
+        {
+            pfState.SetSymbolDictionary(symbolDictionary);
+            Result result = await projectService.ReadPattern();
+
+            if (result.Ok)
+            {
+
+            }
+            else
+            {
+                confirmMode = ConfirmMode.ReadMessage;
+                NumberRequired = false;
+                Message = projectState.LastError;
+            }
+        }
+
+        busy = false;
+    }
+
+    public async Task CompletePatternRead(List<FlossInProjectModel> FlossList)
+    {
+        busy = true;
+
+        Result result = await pfService.SaveCalculation(FlossList);
+
+        if (result.Ok)
+        {
+            if (result.FailType == "Key partially filled out")
+            {
+                confirmMode = ConfirmMode.GeneralConfirm;
+                NumberRequired = false;
+                Message = "There are some flosses that have 0 as their amount. Please confirm to continue.";
+            }
+            else
+            {
+
+            }
+        }
+        else
+        {
+            confirmMode = ConfirmMode.ReadMessage;
+            NumberRequired = false;
+            Message = projectState.LastError;
+        }
+
+        busy = false;
+    }
+
+    public void NoReadPattern()
+    {
+        busy = true;
+
+        confirmMode = ConfirmMode.StrandsConfirm;
+        NumberRequired = true;
+        Message = "How many strands are used for each floss? (You can change it later)";
+    }
+
+    public void StartAddFlossManually()
+    {
+        busy = true;
+
+        IsManualEntry = true;
+        confirmMode = ConfirmMode.NumFlossConfirm;
+        NumberRequired = true;
+        Message = "How many flosses are used in this project?";
+    }
+
+    public void ResetFloss()
+    {
+        //Resets the floss
+        busy = true;
+
+        pfService.BeginReset();
+        confirmMode = ConfirmMode.ResetConfirm;
+        Message = "Are you sure you want to recalculate the floss? This will delete all floss that is currently listed.";
+    }
+
+    public async Task CalculateFlossNeeded()
+    {
+        busy = true;
+
+        await pfService.CalculateFlossNeeded();
+
+        busy = false;
+    }
+
+    public void CloseFlossNeeded()
+    {
+        busy = true;
+
+        pfState.SetFlossToBuy(null);
 
         busy = false;
     }

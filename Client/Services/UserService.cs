@@ -11,6 +11,7 @@ namespace Client.Services
         public UserModel? User { get; private set; }
         public UserModel? Draft { get; private set; }
         public bool IsLoggedIn => User is not null;
+        public double WasteFactor => 0.9;
 
         public string? LastError { get; private set; }
         public bool IsLoading { get; private set; }

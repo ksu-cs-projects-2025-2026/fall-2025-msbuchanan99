@@ -30,8 +30,28 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/megha/Desktop/Threadfolio/Client/Components/ConfirmationModal.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xDb25maXJtYXRpb25Nb2RhbC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Components/FlossDropdown.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xGbG9zc0Ryb3Bkb3duLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Components/FlossEditAndCreate.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xGbG9zc0VkaXRBbmRDcmVhdGUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Components/FlossKeyList.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xGbG9zc0tleUxpc3QucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/megha/Desktop/Threadfolio/Client/Components/FlossList.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xGbG9zc0xpc3QucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Components/FlossToBuy.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xGbG9zc1RvQnV5LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/megha/Desktop/Threadfolio/Client/Components/UnAuthorized.razor]

@@ -1,9 +1,12 @@
 ﻿using Client.Models;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Reflection;
+using static Client.Services.ProjectService;
+using static System.Reflection.Metadata.BlobBuilder;
 namespace Client.Services
 {
     public class ProjectState
@@ -18,11 +21,13 @@ namespace Client.Services
         public int? SelectedProjectId { get; private set; }
         public ProjectModel? Selected => SelectedProjectId is int id ? 
             _projects.FirstOrDefault(p => p.Id == id) : null;
-        public ProjectModel? Draft { get; private set;  }
-
-        public List<FlossInProjectModel> _floss = new();
-        public IReadOnlyList<FlossInProjectModel> Floss => _floss;
         public string? PdfDataUrl { get; private set; }
+        public ProjectModel? Draft { get; private set;  }
+        public IBrowserFile? DraftFile { get; private set; }
+        public string? DraftFileName { get; private set; }
+        public string? DraftPdfUrl { get; private set; }
+        public double InchesPerStrand => GetInchPerStitch();
+        
 
         //Utilities
         public bool IsLoading { get; private set; }
@@ -36,6 +41,12 @@ namespace Client.Services
         public void BeginLoad()
         {
             IsLoading = true;
+            Changed?.Invoke();
+        }
+
+        public void EndLoad()
+        {
+            IsLoading = false;
             Changed?.Invoke();
         }
 
@@ -53,16 +64,9 @@ namespace Client.Services
             Changed?.Invoke();
         }
 
-        public void SetSelectedProjectId(int projectId)
+        public void SetSelectedProjectId(int? projectId)
         {
             SelectedProjectId = projectId;
-            IsLoading = false;
-            Changed?.Invoke();
-        }
-
-        public void SetFloss(IEnumerable<FlossInProjectModel> floss)
-        {
-            _floss = floss?.ToList() ?? new();
             IsLoading = false;
             Changed?.Invoke();
         }
@@ -71,6 +75,31 @@ namespace Client.Services
         {
             PdfDataUrl = dataUrl;
             Changed?.Invoke();
+        }
+
+        public async Task SetDraftPDF(IBrowserFile file)
+        {
+            DraftFile = file;
+            DraftFileName = file.Name;
+            var contentType = string.IsNullOrWhiteSpace(file.ContentType)
+            ? "application/pdf"
+            : file.ContentType;
+
+            await using var stream = file.OpenReadStream(maxAllowedSize: 20 * 1024 * 1024);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            var bytes = ms.ToArray();
+
+            var base64 = Convert.ToBase64String(bytes);
+            DraftPdfUrl = $"data:{contentType};base64,{base64}";
+
+            Changed?.Invoke();
+        }
+
+        public double GetInchPerStitch() 
+        {
+            double numerator = 2 * (1 + Math.Sqrt(2));
+            return numerator / (int)Selected.Aida;
         }
 
         #region cache utilities
@@ -95,7 +124,6 @@ namespace Client.Services
             LoadedForUserWithId = null;
             SelectedProjectId = null;
             Draft = null;
-            _floss.Clear();
             PdfDataUrl = null;
             IsLoading = false;
             LastError = null;
@@ -207,17 +235,57 @@ namespace Client.Services
                 KeyPage = null,
                 Aida = null
             };
-            IsLoading = true;
             Changed?.Invoke();
         }
 
+        public void CancelCreate()
+        {
+            Draft = null;
+            DraftFile = null;
+            DraftFileName = null;
+            DraftPdfUrl = null;
+            Changed?.Invoke();
+        }
 
         public void ApplyCreate(ProjectModel created)
         {
             UpdateInsert(created);
-            Draft = null;
             SelectedProjectId = created.Id;
+            PdfDataUrl = DraftPdfUrl;
+            Draft = null;
+            DraftFile = null;
+            DraftFileName = null;
+            DraftPdfUrl = null;
+            LastError = null;
             IsLoading = false;
+            Changed?.Invoke();
+        }
+
+        public bool BeginDelete(int id)
+        {
+
+            var current = _projects.FirstOrDefault(f => f.Id == id);
+            if (current is null) return false;
+
+            SelectedProjectId = id;
+            LastError = null;
+            Changed?.Invoke();
+            return true;
+        }
+
+        public void CancelDelete()
+        {
+            SelectedProjectId = null;
+            LastError = null;
+            Changed?.Invoke();
+        }
+
+        public void ApplyDelete(int id)
+        {
+            _projects.RemoveAll(f => f.Id == id);
+            Draft = null;
+            SelectedProjectId = null;
+            LastError = null;
             Changed?.Invoke();
         }
 
@@ -229,13 +297,17 @@ namespace Client.Services
     {
         private readonly ProjectState _state;
         private readonly UserState _userState;
+        private readonly ProjectFlossState _pfState;
+        private readonly ProjectFlossService _pfService;
         private readonly HttpClient _http;
         private readonly IJSRuntime _js;
         private IJSObjectReference? _module;
-        public ProjectService(ProjectState state, UserState userState, HttpClient http, IJSRuntime js)
+        public ProjectService(ProjectState state, UserState userState, ProjectFlossState pfState, ProjectFlossService pfService, HttpClient http, IJSRuntime js)
         {
             _state = state;
             _userState = userState;
+            _pfState = pfState;
+            _pfService = pfService;
             _http = http;
             _js = js;
         }
@@ -271,8 +343,7 @@ namespace Client.Services
             }
             else
             {
-                var msg = await response.Content.ReadAsStringAsync();
-                _state.SetError(msg);
+                await SetErrorFromResponse(response);
                 return Result.Fail();
             }
         }
@@ -318,8 +389,7 @@ namespace Client.Services
             }
             else
             {
-                var msg = await response.Content.ReadAsStringAsync();
-                _state.SetError(msg);
+                await SetErrorFromResponse(response);
                 return Result.Fail();
             }
         }
@@ -341,59 +411,6 @@ namespace Client.Services
             }
         }
 
-        public async Task<Result> LoadCurrentProjectFloss(bool forceRefresh = false)
-        {
-            if (_userState.User is null) return Result.NotAuthorized();
-            if (_state.Selected is null)
-            {
-                _state.SetError("Selected project is null. Call LoadCurrentProject.");
-                return Result.Fail();
-            }
-
-            if(!forceRefresh)
-            {
-                var cachedFlossMatchesProject = _state.Floss.All(f => f.ProjectId == _state.SelectedProjectId);
-                if(cachedFlossMatchesProject) return Result.Success();
-            }
-
-            var response = await _http.GetAsync($"api/projects/{_state.SelectedProjectId}/floss");
-            if (response.IsSuccessStatusCode)
-            {
-                var flosses = await response.Content.ReadFromJsonAsync<IEnumerable<FlossInProjectModel>>();
-                if(flosses is null)
-                {
-                    _state.SetError("Returned IEnumerable is null");
-                    return Result.Fail();
-                }
-                _state.SetFloss(flosses);
-                return Result.Success();
-            }
-            else
-            {
-                var msg = await response.Content.ReadAsStringAsync();
-                _state.SetError(msg);
-                return Result.Fail();
-            }
-        }
-
-        public async Task<Result> DeleteAsync(int id)
-        {
-            if (_userState.User is null) return Result.NotAuthorized();
-
-            var response = await _http.DeleteAsync($"api/projects/{id}");
-            if (response.IsSuccessStatusCode)
-            {
-                _state.Remove(id);
-                return Result.Success();
-            }
-            else
-            {
-                var msg = await response.Content.ReadAsStringAsync();
-                _state.SetError(msg);
-                return Result.Fail();
-            }
-        }
-
         public bool BeginUpdate(int id) => _state.BeginUpdate(id);
         public void CancelUpdate() => _state.CancelUpdate();
         public async Task<Result> SaveUpdateAsync()
@@ -408,7 +425,7 @@ namespace Client.Services
                 return Result.Fail();
             }
 
-            var response = await _http.PutAsJsonAsync($"api/projects/{draft.Id}/edit", draft);
+            var response = await _http.PutAsJsonAsync($"api/projects/{draft.Id}", draft);
             if (response.IsSuccessStatusCode)
             {
                 _state.ApplyEdit(draft);
@@ -416,14 +433,38 @@ namespace Client.Services
             }
             else
             {
-                var msg = await response.Content.ReadAsStringAsync();
-                _state.SetError(msg);
+                await SetErrorFromResponse(response);
+                return Result.Fail();
+            }
+        }
+
+        public void BeginMarkCompleted(int id)
+        {
+            _state.SetSelectedProjectId(id);
+        }
+        public async Task<Result> MarkCompletedAsync()
+        {
+            var response = await _http.PutAsync($"api/projects/{_state.SelectedProjectId}/mark-completed", null);
+            if (response.IsSuccessStatusCode)
+            {
+                var now = await response.Content.ReadFromJsonAsync<DateTime>();
+                var project = _state.Selected;
+                project.CompletionDate = now;
+                project.IsCompleted = true;
+
+                _state.ApplyEdit(project);
+                return Result.Success();
+            }
+            else
+            {
+                await SetErrorFromResponse(response);
                 return Result.Fail();
             }
         }
 
 
         public void BeginCreate(int userId) => _state.BeginCreate(userId);
+        public void CancelCreate() => _state.CancelCreate();
         public async Task<Result> CreateAsync()
         {
             if(_userState.User is null) return Result.NotAuthorized();
@@ -437,8 +478,8 @@ namespace Client.Services
             }
 
             draft.UserId = userId;
-
-            var response = await _http.PostAsJsonAsync($"api/projects/create", draft);
+            _state.SetError("at controller calls");
+            var response = await _http.PostAsJsonAsync($"api/projects", draft);
             if (response.IsSuccessStatusCode)
             {
                 var project = await response.Content.ReadFromJsonAsync<ProjectModel>();
@@ -447,16 +488,43 @@ namespace Client.Services
                     _state.SetError("A problem happened in reading the JSON.");
                     return Result.Fail();
                 }
+
+                using var content = new MultipartFormDataContent();
+                var stream = _state.DraftFile.OpenReadStream(maxAllowedSize: 20 * 1024 * 1024);
+                var fileContent = new StreamContent(stream);
+                fileContent.Headers.ContentType = new MediaTypeHeaderValue(_state.DraftFile.ContentType ?? "application/pdf");
+                content.Add(fileContent, "file", _state.DraftFileName);
+                var response2 = await _http.PostAsync($"api/projects/{project.Id}/pattern/upload", content);
+
+                
                 _state.ApplyCreate(project);
                 return Result.Success();
             }
             else
             {
-                var msg = await response.Content.ReadAsStringAsync();
-                _state.SetError(msg);
+                await SetErrorFromResponse(response);
+                _state.SetError("From first response" + _state.LastError);
                 return Result.Fail();
             }
         }
+
+
+        public bool BeginDelete(int projectId) => _state.BeginDelete(projectId);
+        public void CancelDelete() => _state.CancelDelete();
+        public async Task<Result> ApplyDeleteAsync()
+        {
+            var projectId = _state.SelectedProjectId;
+            var response = await _http.DeleteAsync($"api/projects/{projectId}");
+            if (!response.IsSuccessStatusCode)
+            {
+                await SetErrorFromResponse(response);
+                return Result.Fail();
+            }
+
+            _state.ApplyDelete((int)projectId);
+            return Result.Success();
+        }
+
 
         public async Task<Result> DownloadFile(int id)
         {
@@ -470,13 +538,12 @@ namespace Client.Services
             var response = await _http.GetAsync($"api/projects/{id}/download");
             if (!response.IsSuccessStatusCode)
             {
-                var msg = await response.Content.ReadAsStringAsync();
-                _state.SetError(msg);
+                await SetErrorFromResponse(response);
                 return Result.Fail();
             }
 
             var fileName = TryGetFileName(response.Content.Headers)
-                       ?? $"{project.Name.Replace(" ", "")}.pdf";
+                       ?? $"{project.Name!.Replace(" ", "")}.pdf";
 
             var contentType = response.Content.Headers.ContentType?.ToString()
                               ?? "application/pdf";
@@ -488,12 +555,109 @@ namespace Client.Services
             return Result.Success();
         }
 
+        public async Task<Result> ReadPatternKey()
+        {
+            int id = (int)_state.SelectedProjectId;
+
+            var response = await _http.GetAsync($"api/projects/{id}/pattern/read-key/full-auto");
+            if (!response.IsSuccessStatusCode)
+            {
+                await SetErrorFromResponse(response);
+                return Result.Fail();
+            }
+
+            Dictionary<int, SymbolData>? SymbolDictionary = await response.Content.ReadFromJsonAsync<Dictionary<int, SymbolData>>();
+            if(SymbolDictionary is null || SymbolDictionary.Count == 0)
+            {
+                return Result.NoKey();
+            }
+
+            _pfState.SetSymbolDictionary(SymbolDictionary);
+            bool HasNullFloss = SymbolDictionary.Any(x => x.Value.Floss is null);
+            if (HasNullFloss) return Result.PartialKey();
+
+            return Result.Success();
+        }
+
+        public async Task<Result> ReadPatternKeyManually(int? numFloss)
+        {
+            if (numFloss is null || _state.SelectedProjectId is null)
+            {
+                if (numFloss is null) _state.SetError("The number of floss is null");
+                else _state.SetError("Selected project id is null");
+                return Result.Fail();
+            }
+
+            var response = await _http.GetAsync($"api/projects/{_state.SelectedProjectId}/pattern/read-key/manual");
+            if (!response.IsSuccessStatusCode)
+            {
+                await SetErrorFromResponse(response);
+                return Result.Fail();
+            }
+
+            Dictionary<int, SymbolData>? SymbolDictionary = await response.Content.ReadFromJsonAsync<Dictionary<int, SymbolData>>();
+            if(SymbolDictionary is null || SymbolDictionary.Count == 0)
+            {
+                return Result.NoKey();
+            }
+
+            _pfState.SetSymbolDictionary(SymbolDictionary);
+            return Result.Success();
+        }
+
+        public async Task<Result> ReadPattern()
+        {
+            int projectId = (int)_state.SelectedProjectId;
+            if(_state.SelectedProjectId is null) return Result.Fail();
+
+            var response = await _http.PostAsJsonAsync($"api/projects/{projectId}/pattern/read-pattern", _pfState.SymbolDictionary);
+            if (!response.IsSuccessStatusCode)
+            {
+                await SetErrorFromResponse(response);
+                return Result.Fail();
+            }
+
+            var flosses = await response.Content.ReadFromJsonAsync<List<FlossInProjectModel>>();
+            _pfState.SetFlossList(projectId, flosses, false);
+            return Result.Success();
+        }
+
+        public async Task<Result> HardCodeBeePattern()
+        {
+            int projectId = (int)_state.SelectedProjectId;
+            if (_state.SelectedProjectId is null) return Result.Fail();
+
+            var response = await _http.GetAsync($"api/projects/{projectId}/pattern/read-key/manual");
+        }
+
         private static string? TryGetFileName(HttpContentHeaders headers)
         {
             var cd = headers.ContentDisposition;
             if (cd?.FileNameStar is not null) return cd.FileNameStar.Trim('"');
             if (cd?.FileName is not null) return cd.FileName.Trim('"');
             return null;
+        }
+
+        public int CalculateSkeinsNeeded(int numStrands, int numStitches, double oneSkein = 313.2)
+        {
+            // Total inches of thread needed for all stitches of this color
+            double totalInchesNeeded = _state.InchesPerStrand * numStitches;
+
+            // Effective length of 1 skein given how many strands you stitch with
+            double skeinLength = oneSkein * (6.0 / numStrands);
+
+            // Only a fraction is usable (waste, tails, etc.)
+            double usablePerSkein = _userState.WasteFactor * skeinLength;
+
+            // Number of skeins is just ceil(total / per-skein)
+            int skeinsNeeded = (int)Math.Ceiling(totalInchesNeeded / usablePerSkein);
+
+            return skeinsNeeded;
+        }
+        private async Task SetErrorFromResponse(HttpResponseMessage response)
+        {
+            var message = await response.Content.ReadAsStringAsync();
+            _state.SetError(message);
         }
         #endregion
     }

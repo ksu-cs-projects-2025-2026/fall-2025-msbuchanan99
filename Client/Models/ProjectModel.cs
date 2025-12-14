@@ -1,4 +1,6 @@
-﻿namespace Client.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Client.Models
 {
     public class ProjectModel
     {
@@ -7,7 +9,11 @@
         public string? Name { get; set; }
         public bool IsCompleted { get; set; }
         public DateTime? CompletionDate { get; set; }
+
+        [Range(0, int.MaxValue)]
         public int? KeyPage { get; set; }
+        
+        [Range(7,20)]
         public int? Aida { get; set; }
     }
 }

@@ -1,7 +1,4 @@
-﻿@code {
-    [Parameter] public IReadOnlyList<FlossInProjectModel>? floss { get; set; }
-}
-@if(floss is null)
+﻿@if(floss is null)
 {
     <div class="text-muted">Loading...</div>
 }
@@ -17,11 +14,10 @@ else
     </div>
     @foreach (FlossInProjectModel f in floss)
     {
-        <div class="d-flex flex-row">
+        <div class="d-flex flex-row select-row @(selected == f ? "selected" : "")" @onclick="() => SelectRow(f)">
             @*Symbol & HexColor in a cube*@
             <div class="w-10">
-                <div class="symbol-cube" style="background-color:@($"#{f.HexColor}")">
-                </div>
+                <div class="symbol-cube" style=@($"background-color: #{f.HexColor}")></div>
             </div>
 
             @*Number*@
@@ -44,6 +40,25 @@ else
                 @f.Amount
             </div>
         </div>
+    }
+}
+
+@code{
+    [Parameter] public IReadOnlyList<FlossInProjectModel>? floss { get; set; }
+    [Parameter] public EventCallback<FlossInProjectModel> OnSelected { get; set; }
+    private FlossInProjectModel? selected;
+
+    private async Task SelectRow(FlossInProjectModel f)
+    {
+        if(selected is not null && f.Id == selected.Id)
+        {
+            selected = null;
+        }
+        else
+        {
+            selected = f;
+        }
+        await OnSelected.InvokeAsync(f);
     }
 }
 
@@ -70,4 +85,16 @@ else
     .space-between {
         justify-content: space-between
     }
-</style>
+
+    .select-row {
+        cursor: pointer;
+        padding: 4px 0;
+        transition: background-color 0.15s ease-in-out;
+    }
+    .select-row:hover{
+        background-color: #c2c2c2;
+    }
+    .selected{
+        background-color: #c6c6c0;
+    }
+    </style>

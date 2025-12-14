@@ -1,0 +1,85 @@
+﻿<div class="d-flex flex-row gap-2">
+    <div style="flex:3"><p>Floss</p></div>
+    <div style="flex:1"><p>Strands</p></div>
+    <div style="flex:1"><p># Stitches</p></div>
+</div>
+@foreach (var entry in SymbolDictionary.Select((kvp, index) => new { kvp, index }))
+{
+    <div class="d-flex flex-row gap-2 w-100 align-items-center">
+        <div style="flex:3">
+            <FlossDropdown Dict="FlossDictionary"
+                OnSelect="(id) => OnFlossPicked(entry.index, entry.kvp.Key, id)"
+                Selected="@FlossList[entry.index].Id"
+                disabled="@busy" 
+            />
+        </div>
+        <div style="flex:1">
+            <input type="number"
+                   @bind="FlossList[entry.index].Strands"
+                   class="form-control" disabled="@busy" />
+        </div>
+        <div style="flex:1">
+            <input type="number"
+                   @bind="SymbolDictionary[entry.kvp.Key].Count"
+                   class="form-control" disabled="@busy" />
+        </div>
+    </div>
+}
+<div class="d-flex flex-row-reverse gap-2">
+    <button class="btn btn-primary mb-2" @onclick="CalculateAmount" type="button" disabled="@busy">Calculate Amount</button>
+    <button class="btn btn-primary mb-2" @onclick="Save" type="button" disabled="@busy">Save</button>
+</div>
+
+<style>
+    .flex-grow-3{
+        flex-grow: 3
+    }
+</style>
+
+@code {
+    [Parameter] public Dictionary<int, SymbolData> SymbolDictionary { get; set; } = new();
+    [Parameter] public Dictionary<int, string> FlossDictionary { get; set; } = new();
+    [Parameter] public EventCallback<(int, int)> OnFlossSelect { get; set; }
+    [Parameter] public EventCallback<Dictionary<int, SymbolData>> OnCalculateAmount { get; set; }
+    [Parameter] public EventCallback<List<FlossInProjectModel>?> OnSave { get; set; }
+    [Parameter] public bool busy { get; set; }
+
+    private List<FlossInProjectModel> FlossList = new();
+    protected override void OnParametersSet()
+    {
+        if (FlossList.Count != SymbolDictionary.Count)
+        {
+            FlossList = SymbolDictionary
+                .Select(kvp => new FlossInProjectModel
+                {
+                    Id = kvp.Value.Floss?.Id ?? -1,
+                    Strands = 2,
+                    Amount = 0
+                })
+                .ToList();
+        }
+    }
+
+    public async Task Save()
+    {
+        bool AnyNull = FlossList.Any(f => f.Id == -1);
+        if (AnyNull) await OnSave.InvokeAsync(null);
+        await OnSave.InvokeAsync(FlossList);
+    }
+
+    public async Task OnFlossPicked(int index, int key, int selectedId)
+    {
+        if(selectedId != -1)
+        {
+            FlossList[index].Id = selectedId;
+            SymbolDictionary[key].Floss = new FlossModel(selectedId);
+
+            await OnFlossSelect.InvokeAsync((key, selectedId));
+        }
+    }
+
+    public async Task CalculateAmount()
+    {
+        await OnCalculateAmount.InvokeAsync(SymbolDictionary);
+    }
+}
