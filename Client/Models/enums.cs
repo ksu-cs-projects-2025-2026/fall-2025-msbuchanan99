@@ -12,4 +12,6 @@
     }
 
     public enum FlossModalMode { Create, Edit }
+
+    public enum OwnershipMode { Owned, Unowned, Both }
 }

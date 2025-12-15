@@ -10,7 +10,7 @@ namespace Client.Services
         public int? LoadedForUserId { get; private set; }
 
         public int? SelectedFlossId { get; private set; }
-        public UserFlossModel? Selected => SelectedFlossId is int id ? _floss.FirstOrDefault(f => f.FlossId == id) : null;
+        public UserFlossModel? Selected => SelectedFlossId is int id ? _floss.FirstOrDefault(f => f.Id == id) : null;
         public UserFlossModel? Draft { get; private set; }
 
         public bool IsLoading { get; private set; }
@@ -61,13 +61,13 @@ namespace Client.Services
 
         public void Upsert(UserFlossModel floss)
         {
-            var idx = _floss.FindIndex(p => p.FlossId == floss.FlossId);
+            var idx = _floss.FindIndex(p => p.Id == floss.Id);
             if (idx >= 0) _floss[idx] = floss;
         }
 
         public void Remove(int id)
         {
-            _floss.RemoveAll(f => f.FlossId == id);
+            _floss.RemoveAll(f => f.Id == id);
             if(SelectedFlossId == id)
             {
                 SelectedFlossId = null;
@@ -78,7 +78,7 @@ namespace Client.Services
 
         private static UserFlossModel Clone(UserFlossModel f) => new()
         {
-            FlossId = f.FlossId,
+            Id = f.Id,
             Name = f.Name,
             Number = f.Number,
             HexColor = f.HexColor,
