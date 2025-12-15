@@ -24,7 +24,6 @@ namespace Client.Services
         public Dictionary<int, SymbolData>? SymbolDictionary { get; private set; }
         public bool? HasNullFloss => SymbolDictionary is null ? null : SymbolDictionary.Any(x => x.Value.Floss is null);
         public int DefaultStrand { get; private set; }
-
         public List<FlossInProjectModel>? FlossToBuy { get; private set; }
 
         public void BeginLoad()
@@ -90,6 +89,33 @@ namespace Client.Services
         public void SetSymbolDictionary(Dictionary<int, SymbolData>? symbolDictionary)
         {
             SymbolDictionary = symbolDictionary;
+            Changed?.Invoke();
+        }
+
+        public void UpdateSymbolDictionary(Dictionary<int, int> SymbolCount)
+        {
+            foreach(var item in SymbolCount)
+            {
+                var symbol = item.Key;
+                var count = item.Value;
+                Console.WriteLine($"Symbol: {symbol}        count: {count}");
+
+                if (SymbolDictionary.TryGetValue(symbol, out var sd))
+                    sd.Count = count;
+            }
+            Changed?.Invoke();
+        }
+
+        public void PopulateBee(Dictionary<int, SymbolData> beeDictionary)
+        {
+            foreach(var entry in beeDictionary)
+            {
+                if(SymbolDictionary.TryGetValue(entry.Key, out var sd))
+                {
+                    sd.Floss = entry.Value.Floss;
+                }
+            }
+            Changed?.Invoke();
         }
 
         public void DeNullSymbolDictionaryEntry((int, int) entry)
@@ -333,9 +359,14 @@ namespace Client.Services
         {
             var projectId = _state.LoadedForProjectId;
             if(projectId is null) return Result.Fail();
-
-            if(flosses is not null) _state.SetFlossList((int)projectId, flosses);
-
+            Console.WriteLine("past projectId");
+            if(flosses is not null)
+            {
+                Console.WriteLine("Meow");
+                _state.SetFlossList((int)projectId, flosses);
+            }
+            Console.WriteLine("Past flosses is not null");
+            foreach (var floss in _state.Floss) Console.WriteLine(floss.Amount);
             //Check if any of the amounts are 0
             if (NoAmountOverride)
             {
@@ -343,10 +374,13 @@ namespace Client.Services
                 if (hasZeroCount) return Result.PartialKey();
             }
 
+
+            Console.WriteLine("past noamountoverride");
             var response = await _http.PostAsJsonAsync<List<FlossInProjectModel>>
                 ($"api/projects/{projectId}/save-calculated-floss", _state.Floss.ToList());
             if (!response.IsSuccessStatusCode)
             {
+
                 await SetErrorFromResponse(response);
                 return Result.Fail();
             }
@@ -401,6 +435,13 @@ namespace Client.Services
         {
             var message = await response.Content.ReadAsStringAsync();
             _state.SetError(message);
+        }
+
+        public async Task PopulateBee()
+        {
+            var response = await _http.GetAsync("api/projects/BeeDictionary");
+            var beeDictionary = await response.Content.ReadFromJsonAsync<Dictionary<int, SymbolData>>();
+            _state.PopulateBee(beeDictionary);
         }
     }
 }

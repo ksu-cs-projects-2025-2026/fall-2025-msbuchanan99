@@ -453,6 +453,27 @@
   },
   {
     "ContainingType": "Server.Controllers.ProjectController",
+    "Method": "ReadPattern2",
+    "RelativePath": "api/projects/{projectId}/pattern/read-pattern-2",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "projectId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "symbolDictionary",
+        "Type": "System.Collections.Generic.Dictionary\u00602[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[Server.Controllers.SymbolData, Server, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Server.Controllers.ProjectController",
     "Method": "SaveCalculatedFloss",
     "RelativePath": "api/projects/{projectId}/save-calculated-floss",
     "HttpMethod": "POST",
@@ -637,19 +658,23 @@
   },
   {
     "ContainingType": "Server.Controllers.ProjectController",
-    "Method": "Bee",
-    "RelativePath": "api/projects/bee",
+    "Method": "GetBeeDictionary",
+    "RelativePath": "api/projects/BeeDictionary",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [
+    "Parameters": [],
+    "ReturnTypes": [
       {
-        "Name": "ProjectId",
-        "Type": "System.Int32",
-        "IsRequired": false
+        "Type": "System.Collections.Generic.Dictionary\u00602[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[Server.Controllers.SymbolData, Server, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
       }
-    ],
-    "ReturnTypes": []
+    ]
   },
   {
     "ContainingType": "Server.Controllers.UsersController",

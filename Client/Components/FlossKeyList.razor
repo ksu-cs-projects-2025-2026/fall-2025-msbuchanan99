@@ -3,24 +3,25 @@
     <div style="flex:1"><p>Strands</p></div>
     <div style="flex:1"><p># Stitches</p></div>
 </div>
-@foreach (var entry in SymbolDictionary.Select((kvp, index) => new { kvp, index }))
+@for(int i = 0; i < _symbols.Count; i++)
 {
-    <div class="d-flex flex-row gap-2 w-100 align-items-center">
+    var key = _symbols[i];
+    <div class="d-flex flex-row gap-2 w-100 align-items-center" @key="key">
         <div style="flex:3">
             <FlossDropdown Dict="FlossDictionary"
-                OnSelect="(id) => OnFlossPicked(entry.index, entry.kvp.Key, id)"
-                Selected="@FlossList[entry.index].Id"
+                OnSelect="(id) => OnFlossPicked(i, key, id)"
+                Selected="@FlossList[i].Id"
                 disabled="@busy" 
             />
         </div>
         <div style="flex:1">
             <input type="number"
-                   @bind="FlossList[entry.index].Strands"
+                   @bind="FlossList[i].Strands"
                    class="form-control" disabled="@busy" />
         </div>
         <div style="flex:1">
             <input type="number"
-                   @bind="SymbolDictionary[entry.kvp.Key].Count"
+                   @bind="SymbolDictionary[key].Count"
                    class="form-control" disabled="@busy" />
         </div>
     </div>
@@ -45,26 +46,48 @@
     [Parameter] public bool busy { get; set; }
 
     private List<FlossInProjectModel> FlossList = new();
+    private List<int> _symbols = new();
     protected override void OnParametersSet()
     {
-        if (FlossList.Count != SymbolDictionary.Count)
+        _symbols = SymbolDictionary.Keys.OrderBy(k => k).ToList();
+
+        // Ensure list length matches
+        if (FlossList.Count != _symbols.Count)
         {
-            FlossList = SymbolDictionary
-                .Select(kvp => new FlossInProjectModel
-                {
-                    Id = kvp.Value.Floss?.Id ?? -1,
-                    Strands = 2,
-                    Amount = 0
-                })
-                .ToList();
+            FlossList = _symbols.Select(_ => new FlossInProjectModel
+            {
+                Id = -1,
+                Strands = 2,
+                Amount = 0
+            }).ToList();
+        }
+
+        // ALWAYS sync IDs from SymbolDictionary so dropdown reflects new state (bee/server/etc.)
+        for (int i = 0; i < _symbols.Count; i++)
+        {
+            int symbol = _symbols[i];
+            FlossList[i].Id = SymbolDictionary[symbol].Floss?.Id ?? -1;
         }
     }
 
     public async Task Save()
     {
         bool AnyNull = FlossList.Any(f => f.Id == -1);
-        if (AnyNull) await OnSave.InvokeAsync(null);
-        await OnSave.InvokeAsync(FlossList);
+        if (AnyNull)
+        {
+            Console.WriteLine("There are null selections in FlossList");
+            await OnSave.InvokeAsync(null);
+        }
+        else 
+        {
+            foreach (var floss in FlossList)
+            {
+                floss.Amount = SymbolDictionary
+                    .Where(kvp => kvp.Value.Floss?.Id == floss.Id)
+                    .Sum(kvp => kvp.Value.Count);
+            }
+            await OnSave.InvokeAsync(FlossList);
+        }
     }
 
     public async Task OnFlossPicked(int index, int key, int selectedId)

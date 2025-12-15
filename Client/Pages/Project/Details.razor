@@ -67,6 +67,10 @@ else
                                   busy="@busy"
                                   OnSave="CompletePatternRead"
                                   SymbolDictionary="pfState.SymbolDictionary" />
+                    @if (IsManualEntry)
+                    {
+                        <button class="btn btn-secondary" type="button" disabled="@busy" @onclick="PopulateBee">Populate Dropdowns</button>
+                    }
                 }
                 else
                 {
@@ -393,7 +397,9 @@ else
 
     public void UpdateSymbolDictionary((int, int) keyFlossId){
         busy = true;
+
         pfState.DeNullSymbolDictionaryEntry(keyFlossId);
+
         busy = false;
     }
 
@@ -439,7 +445,8 @@ else
 
         if (IsManualEntry)
         {
-            //projectService.HardCodeBeePattern();
+
+            await projectService.HardCodeBeePattern();
         }
         else
         {
@@ -506,7 +513,7 @@ else
         IsManualEntry = true;
         confirmMode = ConfirmMode.NumFlossConfirm;
         NumberRequired = true;
-        Message = "How many flosses are used in this project?";
+        Message = "How many flosses are used in this project? Make sure to enter each floss line by line as it is in the key.";
     }
 
     public void ResetFloss()
@@ -515,6 +522,7 @@ else
         busy = true;
 
         pfService.BeginReset();
+        NumberRequired = false;
         confirmMode = ConfirmMode.ResetConfirm;
         Message = "Are you sure you want to recalculate the floss? This will delete all floss that is currently listed.";
     }
@@ -533,6 +541,15 @@ else
         busy = true;
 
         pfState.SetFlossToBuy(null);
+
+        busy = false;
+    }
+
+    public async Task PopulateBee()
+    {
+        busy = true;
+
+        await pfService.PopulateBee();
 
         busy = false;
     }

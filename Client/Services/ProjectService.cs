@@ -26,7 +26,6 @@ namespace Client.Services
         public IBrowserFile? DraftFile { get; private set; }
         public string? DraftFileName { get; private set; }
         public string? DraftPdfUrl { get; private set; }
-        public double InchesPerStrand => GetInchPerStitch();
         
 
         //Utilities
@@ -96,11 +95,7 @@ namespace Client.Services
             Changed?.Invoke();
         }
 
-        public double GetInchPerStitch() 
-        {
-            double numerator = 2 * (1 + Math.Sqrt(2));
-            return numerator / (int)Selected.Aida;
-        }
+        
 
         #region cache utilities
 
@@ -617,8 +612,8 @@ namespace Client.Services
                 return Result.Fail();
             }
 
-            var flosses = await response.Content.ReadFromJsonAsync<List<FlossInProjectModel>>();
-            _pfState.SetFlossList(projectId, flosses, false);
+            var symbolCountInfo = await response.Content.ReadFromJsonAsync<Dictionary<int, int>>();
+            _pfState.UpdateSymbolDictionary(symbolCountInfo);
             return Result.Success();
         }
 
@@ -627,7 +622,16 @@ namespace Client.Services
             int projectId = (int)_state.SelectedProjectId;
             if (_state.SelectedProjectId is null) return Result.Fail();
 
-            var response = await _http.GetAsync($"api/projects/{projectId}/pattern/read-key/manual");
+            var response = await _http.PostAsJsonAsync($"api/projects/{projectId}/pattern/read-pattern-2", _pfState.SymbolDictionary);
+            if (!response.IsSuccessStatusCode)
+            {
+                await SetErrorFromResponse(response);
+                return Result.Fail();
+            }
+
+            var symbolCountInfo = await response.Content.ReadFromJsonAsync<Dictionary<int, int>>();
+            _pfState.UpdateSymbolDictionary(symbolCountInfo);
+            return Result.Success();
         }
 
         private static string? TryGetFileName(HttpContentHeaders headers)
@@ -636,23 +640,6 @@ namespace Client.Services
             if (cd?.FileNameStar is not null) return cd.FileNameStar.Trim('"');
             if (cd?.FileName is not null) return cd.FileName.Trim('"');
             return null;
-        }
-
-        public int CalculateSkeinsNeeded(int numStrands, int numStitches, double oneSkein = 313.2)
-        {
-            // Total inches of thread needed for all stitches of this color
-            double totalInchesNeeded = _state.InchesPerStrand * numStitches;
-
-            // Effective length of 1 skein given how many strands you stitch with
-            double skeinLength = oneSkein * (6.0 / numStrands);
-
-            // Only a fraction is usable (waste, tails, etc.)
-            double usablePerSkein = _userState.WasteFactor * skeinLength;
-
-            // Number of skeins is just ceil(total / per-skein)
-            int skeinsNeeded = (int)Math.Ceiling(totalInchesNeeded / usablePerSkein);
-
-            return skeinsNeeded;
         }
         private async Task SetErrorFromResponse(HttpResponseMessage response)
         {

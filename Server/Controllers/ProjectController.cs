@@ -532,8 +532,6 @@ namespace Server.Controllers
         [HttpGet("{projectId:int}/pattern/read-key/manual")]
         public async Task<IActionResult> ReadPatternKeyForSymbols(int projectId)
         {
-            
-
             try
             {
                 Project proj = _dbContext.Projects.First(p => p.Id == projectId);
@@ -542,7 +540,7 @@ namespace Server.Controllers
                 if (!filename.EndsWith(".pdf")) filename += ".pdf";
                 string path = Path.Combine(_pdfFolder, filename);
 
-                var SymbolDictionary = ReadKeyForSymbols(5, path);
+                var SymbolDictionary = ReadKeyForSymbols();
                 return Ok(SymbolDictionary);
             }
             catch (Exception e)
@@ -559,7 +557,9 @@ namespace Server.Controllers
             Project? project = await _dbContext.Projects.FirstAsync(p => p.Id == projectId);
             if (project == null || project.KeyPage == null) return NotFound($"Project with id {projectId} not found");
 
-            string path = Path.Combine(_pdfFolder, project.FileName! + ".pdf");
+            string filename = project.FileName;
+            if (!filename.EndsWith(".pdf")) filename += ".pdf";
+            string path = Path.Combine(_pdfFolder, filename);
             if (!FileIO.Exists(path)) return NotFound("File not found");
 
             List<int> characters = new();
@@ -584,24 +584,79 @@ namespace Server.Controllers
                 }
             }
 
-            List<ProjectFlossDTO> returnable = new();
-            foreach (var kvp in symbolDictionary)
-            {
-                SymbolData data = kvp.Value;
-                int symbol = kvp.Key;
-
-                if (data.Count <= 0) continue;
-                if (data.Floss is null) continue;
-
-                Floss floss;
-                if (data.Floss.Name is null) floss = await _dbContext.Floss.FirstAsync(f => f.Id == data.Floss.Id);
-                else floss = data.Floss;
-
-                ProjectFlossDTO dto = new(floss.Id, floss.Name, floss.Number, floss.HexColor, data.Count, 2);
-                returnable.Add(dto);
-            }
+            var returnable = symbolDictionary
+                .Where(kvp => kvp.Value.Count > 0)
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Count);
 
             return Ok(returnable);
+        }
+
+        [HttpPost("{projectId:int}/pattern/read-pattern-2")]
+        public async Task<IActionResult> ReadPattern2(int projectId, Dictionary<int, SymbolData> symbolDictionary)
+        {
+            if (symbolDictionary.Count < 1) return BadRequest("Invalid symbol entries");
+
+            Project? project = await _dbContext.Projects.FirstAsync(p => p.Id == projectId);
+            if (project == null || project.KeyPage == null) return NotFound($"Project with id {projectId} not found");
+
+            string filename = project.FileName;
+            if (!filename.EndsWith(".pdf")) filename += ".pdf";
+            string path = Path.Combine(_pdfFolder, filename);
+            if (!FileIO.Exists(path)) return NotFound("File not found");
+
+            using (var pdf = PdfDocument.Open(path))
+            {
+                var page = pdf.GetPage(5);
+                string text = page.Text;
+
+                // Split into rows
+                var lines = text.Split('\n');
+
+                for (int row = 0; row < lines.Length; row++)
+                {
+                    var line = lines[row];
+
+                    for (int col = 0; col < line.Length; col++)
+                    {
+                        int c = (int)line[col];
+
+                        // Your requirement:
+                        if (symbolDictionary.ContainsKey(c))
+                        {
+                            symbolDictionary[c].Count++;
+                        }
+                    }
+                }
+            }
+
+            var returnable = symbolDictionary
+                .Where(kvp => kvp.Value.Count > 0)
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Count);
+
+            return Ok(returnable);
+        }
+        [HttpGet("BeeDictionary")]
+        public async Task<Dictionary<int, SymbolData>> GetBeeDictionary()
+        {
+            Dictionary<int, SymbolData> BeeDictionary = new()
+            {
+                {35, new SymbolData(_dbContext.Floss.First(f => f.Number == "712")) },
+                {36, new SymbolData(_dbContext.Floss.First(f => f.Number == "739")) },
+                {37, new SymbolData(_dbContext.Floss.First(f => f.Number == "433")) },
+                {38, new SymbolData(_dbContext.Floss.First(f => f.Number == "437")) },
+                {39, new SymbolData(_dbContext.Floss.First(f => f.Number == "3820")) },
+                {40, new SymbolData(_dbContext.Floss.First(f => f.Number == "3033")) },
+                {41, new SymbolData(_dbContext.Floss.First(f => f.Number == "976")) },
+                {42, new SymbolData(_dbContext.Floss.First(f => f.Number == "3855")) },
+                {43, new SymbolData(_dbContext.Floss.First(f => f.Number == "822")) },
+                {44, new SymbolData(_dbContext.Floss.First(f => f.Number == "3013")) },
+                {45, new SymbolData(_dbContext.Floss.First(f => f.Number == "3011")) },
+                {48, new SymbolData(_dbContext.Floss.First(f => f.Number == "420")) },
+                {51, new SymbolData(_dbContext.Floss.First(f => f.Number == "3782")) },
+                {52, new SymbolData(_dbContext.Floss.First(f => f.Number == "840")) },
+                {55, new SymbolData(_dbContext.Floss.First(f => f.Number == "3031")) }
+            };
+            return BeeDictionary;
         }
 
         [HttpPost("{projectId:int}/save-calculated-floss")]
@@ -610,10 +665,12 @@ namespace Server.Controllers
             try
             {
                 Project p = _dbContext.Projects.First(p => p.Id == projectId);
+                var inchPerStitch = GetInchPerStitch(p);
                 List<ProjectFloss> flosses = new();
                 foreach(var floss in flossDTOs)
                 {
-                    ProjectFloss pf = new(projectId, floss.Id, floss.Amount, floss.Strands);
+                    var NumSkeins = CalculateSkeinsNeeded(floss.Amount, floss.Strands, inchPerStitch);
+                    ProjectFloss pf = new(projectId, floss.Id, NumSkeins, floss.Strands);
                     flosses.Add(pf);
                 }
                 await _dbContext.ProjectFloss.AddRangeAsync(flosses);
@@ -652,7 +709,10 @@ namespace Server.Controllers
                 if(MyFloss.TryGetValue(pf_flossId, out int uf_amount))
                 {
                     var difference = pf_amount - uf_amount;
-                    if (difference >= 0)
+
+                    if (difference == 0) difference = 1;
+
+                    if (difference > 0)
                     {
                         FlossToBuy.Add(new(f.Id, f.Name, f.Number, f.HexColor, difference, 0));
                     }
@@ -736,27 +796,33 @@ namespace Server.Controllers
 
             return lines;
         }
-        private Dictionary<int, SymbolData> ReadKeyForSymbols(int pageToRead, string path)
+
+        private Dictionary<int, SymbolData> ReadKeyForSymbols()
         {
-            Dictionary<int, SymbolData?> BeeDictionary = new()
+            Dictionary<int, SymbolData> BeeDictionary = new()
             {
-                {35, new SymbolData(_dbContext.Floss.First(f => f.Number == "712")) },
-                {43, new SymbolData(_dbContext.Floss.First(f => f.Number == "822")) },
-                {36, new SymbolData(_dbContext.Floss.First(f => f.Number == "739")) },
-                {38, new SymbolData(_dbContext.Floss.First(f => f.Number == "437")) },
-                {37, new SymbolData(_dbContext.Floss.First(f => f.Number == "433")) },
-                {44, new SymbolData(_dbContext.Floss.First(f => f.Number == "3013")) },
-                {45, new SymbolData(_dbContext.Floss.First(f => f.Number == "3011")) },
-                {39, new SymbolData(_dbContext.Floss.First(f => f.Number == "3820")) },
-                {40, new SymbolData(_dbContext.Floss.First(f => f.Number == "3033")) },
-                {42, new SymbolData(_dbContext.Floss.First(f => f.Number == "3865")) },
-                {48, new SymbolData(_dbContext.Floss.First(f => f.Number == "420")) },
-                {41, new SymbolData(_dbContext.Floss.First(f => f.Number == "976")) },
-                {51, new SymbolData(_dbContext.Floss.First(f => f.Number == "3782")) },
-                {52, new SymbolData(_dbContext.Floss.First(f => f.Number == "840")) },
-                {55, new SymbolData(_dbContext.Floss.First(f => f.Number == "3031")) }
+                {35, new SymbolData() },
+                {36, new SymbolData() },
+                {37, new SymbolData() },
+                {38, new SymbolData() },
+                {39, new SymbolData() },
+                {40, new SymbolData() },
+                {41, new SymbolData() },
+                {42, new SymbolData() },
+                {43, new SymbolData() },
+                {44, new SymbolData() },
+                {45, new SymbolData() },
+                {48, new SymbolData() },
+                {51, new SymbolData() },
+                {52, new SymbolData() },
+                {55, new SymbolData() }
             };
 
+            return BeeDictionary;
+        }
+
+        private Dictionary<int, SymbolData> ReadBeePattern(int pageToRead, string path, ref Dictionary<int, SymbolData> BeeDictionary)
+        {
             using (var pdf = PdfDocument.Open(path))
             {
                 if (pageToRead < 1 || pageToRead > pdf.NumberOfPages)
@@ -784,8 +850,7 @@ namespace Server.Controllers
                     }
                 }
             }
-
-            return results;
+            return BeeDictionary;
         }
 
         private List<string> GetLineWords(List<int> line)
@@ -901,6 +966,28 @@ namespace Server.Controllers
             return flosses;
         }
 
+        private double GetInchPerStitch(Project p)
+        {
+            double numerator = 2 * (1 + Math.Sqrt(2));
+            return numerator / (int)p.Aida;
+        }
+        private int CalculateSkeinsNeeded(int amount, int strands, double inchesPerStrand, double waste = 0.9, double oneSkein = 313.2)
+        {
+            // Total inches of thread needed for all stitches of this color
+            double totalInchesNeeded = inchesPerStrand * amount;
+
+            // Effective length of 1 skein given how many strands you stitch with
+            double skeinLength = oneSkein * (6.0 / strands);
+
+            // Only a fraction is usable (waste, tails, etc.)
+            double usablePerSkein = waste * skeinLength;
+
+            // Number of skeins is just ceil(total / per-skein)
+            int skeinsNeeded = (int)Math.Ceiling(totalInchesNeeded / usablePerSkein);
+
+            return skeinsNeeded;
+        }
+
         #endregion
     }
 
@@ -940,6 +1027,5 @@ namespace Server.Controllers
     /// <param name="Amount">Can refer to number of skeins needed or number of stitches</param>
     /// <param name="Strands"></param>
     public record ProjectFlossDTO(int Id, string? Name, string? Number, string? HexColor, int Amount, int Strands);
-
     
 }
