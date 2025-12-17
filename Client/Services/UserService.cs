@@ -234,9 +234,20 @@ namespace Client.Services
 
             if (string.IsNullOrEmpty(draft.Password)) draft.Password = null;
 
+            if(draft.WasteFactor >= 0 && draft.WasteFactor <= 100)
+            {
+                if(draft.WasteFactor != 0) draft.WasteFactor /= 100;
+            }
+            else
+            {
+                _userState.SetError("Waste Factor must be between 0 and 100");
+                return Result.Fail();
+            }
+
             Dictionary<string, string?> dict = new();
             dict.Add("Username", draft.Username);
             dict.Add("Password", draft.Password);
+            dict.Add("WasteFactor", draft.WasteFactor.ToString());
 
             var response = await _http.PutAsJsonAsync($"api/users/{draft.Id}", dict);
             if (response.IsSuccessStatusCode)

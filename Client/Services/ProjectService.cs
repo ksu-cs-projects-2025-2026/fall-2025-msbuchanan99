@@ -473,7 +473,6 @@ namespace Client.Services
             }
 
             draft.UserId = userId;
-            _state.SetError("at controller calls");
             var response = await _http.PostAsJsonAsync($"api/projects", draft);
             if (response.IsSuccessStatusCode)
             {
@@ -498,7 +497,6 @@ namespace Client.Services
             else
             {
                 await SetErrorFromResponse(response);
-                _state.SetError("From first response" + _state.LastError);
                 return Result.Fail();
             }
         }

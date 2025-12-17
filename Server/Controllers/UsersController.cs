@@ -231,6 +231,9 @@ namespace Server.Controllers
                     currentUser.HashPassword = hasher.HashPassword(currentUser, user["Password"]!);
                 }
 
+                decimal wasteFactor = Decimal.Parse(user["WasteFactor"]);
+                if (wasteFactor != currentUser!.WasteFactor) currentUser.WasteFactor = wasteFactor;
+
                 currentUser!.LastModified = DateTime.UtcNow;
 
                 //Save Changes
@@ -281,11 +284,18 @@ namespace Server.Controllers
             User? user;
             if (UserExists(id, out user))
             {
-                List<FlossDTO> flosses = new();
-                foreach ((Floss floss, int amount) in user!.Floss)
-                {
-                    flosses.Add(new(floss.Id, floss.Name, floss.Number, floss.HexColor, amount));
-                }
+                var flosses = await (
+                    from uf in _context.UserFloss
+                    join f in _context.Floss on uf.FlossId equals f.Id
+                    where uf.UserId == id
+                    select new FlossDTO(
+                        f.Id,
+                        f.Name,
+                        f.Number,
+                        f.HexColor,
+                        uf.Amount
+                    )
+                ).ToListAsync();
 
                 return Ok(flosses);
             }
@@ -296,7 +306,7 @@ namespace Server.Controllers
         }
 
         [HttpPut("{userId:int}/floss/{flossId:int}")]
-        public async Task<IActionResult> UpdateFloss(int userId, int flossId, int amount)
+        public async Task<IActionResult> UpdateFloss(int userId, int flossId, [FromBody] int amount)
         {
             if (!_context.Users.Any(u => u.Id == userId)) return NotFound($"User with Id {userId} not found.");
             if (!_context.Floss.Any(f => f.Id == flossId)) return NotFound($"Floss with Id {flossId} not found.");

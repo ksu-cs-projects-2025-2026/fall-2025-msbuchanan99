@@ -7,5 +7,6 @@
         public string? Password { get; set; } //this is not hashed and will only be used for logging in. Will not store Password typically
         public string? ConfirmPassword { get; set; }
         public string? Role { get; set; }
+        public decimal WasteFactor { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Client.Models;
+using System;
 using System.Net.Http.Json;
 
 namespace Client.Services
@@ -6,7 +7,18 @@ namespace Client.Services
     public class UserFlossState
     {
         private List<UserFlossModel> _floss = new();
-        public IReadOnlyList<UserFlossModel> Floss => _floss;
+        public IReadOnlyList<UserFlossModel>? Floss => _floss
+            .Where(uf =>
+                (uf.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
+                 uf.Number.Contains(SearchText, StringComparison.OrdinalIgnoreCase)) &&
+                ((ShowOwned && uf.Amount > 0) || (ShowUnowned && uf.Amount == 0))
+            )
+            .ToList();
+
+        private string SearchText { get; set; } = "";
+        private bool ShowOwned { get; set; } = true;
+        private bool ShowUnowned { get; set; } = false;
+
         public int? LoadedForUserId { get; private set; }
 
         public int? SelectedFlossId { get; private set; }
@@ -37,6 +49,15 @@ namespace Client.Services
         public void SetSelectedFlossId(int id)
         {
             SelectedFlossId = id;
+            LastError = null;
+            Changed?.Invoke();
+        }
+
+        public void SetFilter(string search, bool own, bool unown)
+        {
+            SearchText = search;
+            ShowOwned = own;
+            ShowUnowned = unown;
             LastError = null;
             Changed?.Invoke();
         }
@@ -87,7 +108,6 @@ namespace Client.Services
 
         public bool BeginEdit(int id)
         {
-            IsLoading = true;
 
             SelectedFlossId = id;
             if(Selected is null)
@@ -107,7 +127,6 @@ namespace Client.Services
             SelectedFlossId = null;
             Draft = null;
             LastError = null;
-            IsLoading = false;
             Changed?.Invoke();
         }
         public void ApplyEdit(UserFlossModel floss)
@@ -115,9 +134,10 @@ namespace Client.Services
             Upsert(floss);
             Draft = null;
             LastError = null;
-            IsLoading = false;
             Changed?.Invoke();
         }
+
+        public void SetDraftAmount(int amount) => Draft.Amount = amount;
     }
     public class UserFlossService
     {
@@ -138,7 +158,7 @@ namespace Client.Services
 
             _state.BeginLoad();
 
-            var response = await _http.GetAsync($"api/users/{userId}/projects");
+            var response = await _http.GetAsync($"api/users/{userId}/floss");
             if (!response.IsSuccessStatusCode)
             {
                 await SetErrorFromResponse(response);
@@ -160,10 +180,23 @@ namespace Client.Services
             return Result.Success();
         }
 
-        public bool BeginEdt(int id) => _state.BeginEdit(id);
-        public void CancelEdit() => _state.CancelEdit();
-        public async Task<Result> ApplyEditAsync()
+        public void FilterUserFlosses(string searchText, OwnershipMode owned)
         {
+            bool own = true;
+            bool unown = true;
+
+            if (owned == OwnershipMode.Owned) unown = false;
+            else if (owned == OwnershipMode.Unowned) own = false;
+
+            _state.SetFilter(searchText, own, unown);
+        }
+
+        public bool BeginEdit(int id) => _state.BeginEdit(id);
+        public void CancelEdit() => _state.CancelEdit();
+        public async Task<Result> ApplyEditAsync(int? amount)
+        {
+            Console.WriteLine($"Number in ApplyEdit: {amount}");
+            _state.SetDraftAmount((int)amount);
             var draft = _state.Draft;
             if(draft is null)
             {
@@ -174,6 +207,7 @@ namespace Client.Services
             var userId = _state.LoadedForUserId;
             var flossId = _state.SelectedFlossId;
 
+            Console.WriteLine($"Number before http: {draft.Amount}");
             var response = await _http.PutAsJsonAsync($"api/users/{userId}/floss/{flossId}", draft.Amount);
             if (!response.IsSuccessStatusCode)
             {

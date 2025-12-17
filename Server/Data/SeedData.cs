@@ -55,6 +55,7 @@ public static class SeedData
                 {
                     Username = row["Username"],
                     Role = row["Role"],
+                    WasteFactor = Decimal.Parse(row["WasteFactor"]),
                     CreatedOn = DateTime.Parse(row["CreatedOn"]),
                     LastModified = DateTime.Parse(row["LastModified"])
                 };

@@ -13,9 +13,6 @@
         <NavLink class="btn btn-primary" disabled>Create</NavLink>
     </div>
     <div class="mb-2">
-        <p class="text-danger">@projectState.LastError</p>
-    </div>
-    <div class="mb-2">
         <table class="table">
             <thead>
                 <tr>
@@ -40,9 +37,6 @@ else
     <div class="flex-container-spread-out">
         <h3>My Projects</h3>
         <NavLink class="btn btn-primary" disabled="@busy" @onclick="BeginCreate">Create</NavLink>
-    </div>
-    <div class="mb-2">
-        <p class="text-danger">@projectState.LastError</p>
     </div>
     <div class="mb-2">
         <table class="table">
@@ -96,9 +90,9 @@ else
             </tbody>
         </table>
     </div>
-
-    <ConfirmationModal Message="@Message" NumberRequired="false" OnConfirm="Confirm" OnDeny="Deny"></ConfirmationModal>
 }
+
+<ConfirmationModal Message="@Message" NumberRequired="false" Error="@Error" OnConfirm="Confirm" OnDeny="Deny"></ConfirmationModal>
 
 <style>
     .flex-container-spread-out{
@@ -122,6 +116,7 @@ else
     bool busy = false;
     private string? Message;
     private ConfirmMode confirmMode;
+    private bool Error = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -172,10 +167,20 @@ else
     {
         busy = true;
 
-        projectService.BeginDelete(id);
+        var result = projectService.BeginDelete(id);
 
-        confirmMode = ConfirmMode.DeleteConfirm;
-        Message = $"Are you sure you want to delete {projectState.Selected!.Name}?";
+        if (result)
+        {
+            confirmMode = ConfirmMode.DeleteConfirm;
+            Error = false;
+            Message = $"Are you sure you want to delete {projectState.Selected!.Name}?";
+        }
+        else
+        {
+            confirmMode = ConfirmMode.ReadMessage;
+            Error = true;
+            Message = "Error: Can't find the project.";
+        }
 
         busy = false;
     }
@@ -185,6 +190,13 @@ else
         busy = true;
 
         var result = await projectService.DownloadFile(id);
+
+        if (!result.Ok)
+        {
+            confirmMode = ConfirmMode.ReadMessage;
+            Error = true;
+            Message = projectState.LastError;
+        }
 
         busy = false;
     }
@@ -203,6 +215,14 @@ else
         {
             Message = null;
         }
+        else
+        {
+            Message = null;
+
+            Error = true;
+            confirmMode = ConfirmMode.ReadMessage;
+            Message = projectState.LastError;
+        }
 
         busy = false;
     }
@@ -211,10 +231,7 @@ else
     {
         busy = true;
 
-        if(confirmMode == ConfirmMode.GeneralConfirm)
-        {
-            Message = null;
-        }
+        Message = null;
 
         busy = false;
     }

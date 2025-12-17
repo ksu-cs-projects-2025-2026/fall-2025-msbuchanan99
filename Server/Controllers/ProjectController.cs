@@ -666,10 +666,12 @@ namespace Server.Controllers
             {
                 Project p = _dbContext.Projects.First(p => p.Id == projectId);
                 var inchPerStitch = GetInchPerStitch(p);
+                var wasteFactor = _dbContext.Users.First(u => u.Id == p.UserId).WasteFactor;
+
                 List<ProjectFloss> flosses = new();
                 foreach(var floss in flossDTOs)
                 {
-                    var NumSkeins = CalculateSkeinsNeeded(floss.Amount, floss.Strands, inchPerStitch);
+                    var NumSkeins = CalculateSkeinsNeeded(floss.Amount, floss.Strands, inchPerStitch, wasteFactor);
                     ProjectFloss pf = new(projectId, floss.Id, NumSkeins, floss.Strands);
                     flosses.Add(pf);
                 }
@@ -971,7 +973,7 @@ namespace Server.Controllers
             double numerator = 2 * (1 + Math.Sqrt(2));
             return numerator / (int)p.Aida;
         }
-        private int CalculateSkeinsNeeded(int amount, int strands, double inchesPerStrand, double waste = 0.9, double oneSkein = 313.2)
+        private int CalculateSkeinsNeeded(int amount, int strands, double inchesPerStrand, decimal waste, double oneSkein = 313.2)
         {
             // Total inches of thread needed for all stitches of this color
             double totalInchesNeeded = inchesPerStrand * amount;
@@ -980,7 +982,7 @@ namespace Server.Controllers
             double skeinLength = oneSkein * (6.0 / strands);
 
             // Only a fraction is usable (waste, tails, etc.)
-            double usablePerSkein = waste * skeinLength;
+            double usablePerSkein = (double)waste * skeinLength;
 
             // Number of skeins is just ceil(total / per-skein)
             int skeinsNeeded = (int)Math.Ceiling(totalInchesNeeded / usablePerSkein);

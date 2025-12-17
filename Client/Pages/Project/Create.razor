@@ -61,13 +61,16 @@ else
         <button type="submit" class="btn btn-primary mb-1" @onclick="SaveProject" disabled="@busy">Save</button>
         <button type="submit" class="btn btn-secondary mb-1" @onclick="CancelProject" disabled="@busy">Cancel</button>
     </EditForm>
-    @debugMessage
+    
+    <ConfirmationModal Error="@Error" Message="@Message" NumberRequired="false" OnConfirm="CloseModal" OnDeny="CloseModal" /> 
 }
 
 @code {
     private bool Loading => userState.IsLoading || projectState.IsLoading;
     private bool busy = false;
-    private string? debugMessage;
+
+    private string? Message;
+    private bool Error = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -98,38 +101,34 @@ else
     private async Task SaveProject()
     {
         busy = true;
-        debugMessage = "SaveProject started.";
 
         try
         {
             if (projectState.DraftFile is null)
             {
-                debugMessage = "DraftFile is null – not calling CreateAsync.";
+                Error = true;
+                Message = "You must include a file to create the project.";
+
                 return;
             }
 
-            debugMessage = "DraftFile present. Calling projectService.CreateAsync...";
             Result result = await projectService.CreateAsync();
 
-            debugMessage = $"CreateAsync finished. Ok={result.Ok}";
 
             if (result.Ok)
             {
-                debugMessage += $", navigating to /projects/{projectState.SelectedProjectId}";
                 Nav.NavigateTo($"/projects/{projectState.SelectedProjectId}");
             }
             else
             {
-                // If your Result has an error message, include it
-                debugMessage += projectState.LastError is not null
-                    ? $", error: {projectState.LastError}"
-                    : ", but result.Ok is false with no message.";
+                Error = true;
+                Message = projectState.LastError;
             }
         }
         catch (Exception ex)
         {
-            debugMessage = $"Exception in SaveProject: {ex.Message}";
-            Console.WriteLine(ex); // shows in browser DevTools console
+            Error = true;
+            Message = "Something went wrong: " + ex.Message;
         }
         finally
         {
@@ -144,6 +143,15 @@ else
 
         Nav.NavigateTo($"/user/projects");
         projectService.CancelCreate();
+
+        busy = false;
+    }
+
+    private void CloseModal()
+    {
+        busy = true;
+
+        Message = null;
 
         busy = false;
     }

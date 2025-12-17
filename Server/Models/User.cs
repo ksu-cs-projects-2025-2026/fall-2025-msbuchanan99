@@ -22,6 +22,10 @@ namespace Server.Models
         [Required]
         public string? Role { get; set; }
 
+        [Required]
+        [Range(0,1)]
+        public decimal WasteFactor { get; set; }
+
         [Precision(0)]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime CreatedOn { get; set; }

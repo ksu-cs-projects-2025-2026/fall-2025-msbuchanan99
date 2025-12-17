@@ -16,7 +16,6 @@ else if(userState.User is null)
 }
 else
 {
-    <p class="alert-danger">@projectState.LastError</p>
     <EditForm Model="@projectState.Draft">
         <DataAnnotationsValidator />
         <ValidationSummary />
@@ -35,6 +34,8 @@ else
         <button class="btn btn-primary" type="submit" disabled="@busy" @onclick="SaveChanges">Save</button>
         <button class="btn btn-secondary" type="submit" disabled="@busy" @onclick="CancelChanges">Cancel</button>
     </EditForm>
+
+    <ConfirmationModal Error="true" NumberRequired="false" Message="@Message" OnConfirm="CloseModal" OnDeny="CloseModal" />
 }
 
 @code {
@@ -76,6 +77,10 @@ else
         {
             nav.NavigateTo($"/projects/{id}");
         }
+        else
+        {
+            Message = projectState.LastError;
+        }
 
         busy = false;
     }
@@ -86,6 +91,15 @@ else
 
         projectService.CancelUpdate();
         nav.NavigateTo($"/projects/{id}");
+
+        busy = false;
+    }
+
+    private void CloseModal()
+    {
+        busy = true;
+
+        Message = null;
 
         busy = false;
     }

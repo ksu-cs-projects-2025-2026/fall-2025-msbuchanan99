@@ -35,9 +35,6 @@ else
                 <h3>@projectState.Selected.Name</h3>
             }
         </div>
-        <div>
-            <p class="text-danger">@projectState.LastError</p>
-        </div>
         <div class="d-flex flex-row underline">
             <button class="btn btn-primary btn-row" @onclick="EditProject" type="button" disabled="@busy">Edit</button>
             <button class="btn btn-primary btn-row" @onclick="CalculateFlossNeeded" type="button" disabled="@busy">Buy Guide</button>
@@ -112,6 +109,7 @@ else
 
     <ConfirmationModal 
         Message="@Message" 
+        Error="@Error"
         NumberRequired="@NumberRequired" 
         OnConfirm="Confirm" 
         OnDeny="Deny" 
@@ -125,7 +123,7 @@ else
         margin-left:1rem;
     }
     .floss-container{
-        justify-content: flex-start;
+        justify-content:space-between;
         flex: 1 1 auto;
         min-height: 0
     }
@@ -168,6 +166,7 @@ else
     private string? Message = null;
     private ConfirmMode confirmMode;
     private bool NumberRequired = false;
+    private bool Error = false;
     private string debug = "";
     private bool IsManualEntry = false;
 
@@ -212,8 +211,15 @@ else
     {
         busy = true;
 
-        projectState.BeginUpdate(id);
-        nav.NavigateTo($"/projects/{id}/edit");
+        var found = projectState.BeginUpdate(id);
+        if(found) nav.NavigateTo($"/projects/{id}/edit");
+        else
+        {
+            confirmMode = ConfirmMode.ReadMessage;
+            Error = true;
+            NumberRequired = false;
+            Message = "Project not found";
+        }
 
         busy = false;
     }
@@ -223,8 +229,10 @@ else
         busy = true;
 
         projectService.BeginMarkCompleted(id);
+
         confirmMode = ConfirmMode.MarkCompleted;
         NumberRequired = false;
+        Error = false;
         Message = "Are you sure you want to complete your project?";
     }
 
@@ -232,7 +240,15 @@ else
     {
         busy = true;
 
-        var result = projectService.DownloadFile(id);
+        var result = await projectService.DownloadFile(id);
+
+        if (!result.Ok)
+        {
+            confirmMode = ConfirmMode.ReadMessage;
+            NumberRequired = false;
+            Error = true;
+            Message = projectState.LastError;
+        }
 
         busy = false;
     }
@@ -248,13 +264,23 @@ else
 
         var success = pfService.BeginEdit((int)pfState.SelectedFlossId!);
 
-        busy = false;
+
         if (success)
         {
             flossMode = FlossModalMode.Edit;
             ShowEditFlossModal = true;
         }
-        else ShowEditFlossModal = false;
+        else
+        {
+            ShowEditFlossModal = false;
+
+            confirmMode = ConfirmMode.ReadMessage;
+            NumberRequired = false;
+            Error = true;
+            Message = "Error: Can't find the floss.";
+        }
+
+        busy = false;
     }
 
     public void BeginFlossCreate()
@@ -263,10 +289,10 @@ else
 
         pfService.BeginCreate();
 
-        busy = false;
-
         flossMode = FlossModalMode.Create;
         ShowEditFlossModal = true;
+
+        busy = false;
     }
 
     public void BeginFlossDelete()
@@ -278,10 +304,17 @@ else
         if (success)
         {
             NumberRequired = false;
+            Error = false;
             confirmMode = ConfirmMode.DeleteFloss;
             Message = $"Are you sure you want to delete {pfState.Selected!.Name} from this project?";
         }
-        else Message = null;
+        else
+        {
+            confirmMode = ConfirmMode.ReadMessage;
+            NumberRequired = false;
+            Error = true;
+            Message = "Error: Can't find the floss.";
+        }
     }
 
     public void CancelFlossChange()
@@ -301,16 +334,13 @@ else
 
     public async Task ApplyFlossChange(FlossInProjectModel editing)
     {
-        debug = "In Apply floss change";
         Result result = Result.Success();
         if(flossMode == FlossModalMode.Create)
         {
-            debug += "\ncreate";
             result = await pfService.SaveCreateAsync();
         }
         else if (flossMode == FlossModalMode.Edit)
         {
-            debug += "\nedit";
             result = await pfService.SaveEditAsync();
             pfService.SetSelectedId(null);
         }
@@ -321,8 +351,11 @@ else
         }
         else
         {
-            NumberRequired = false;
+            ShowEditFlossModal = false;
+
             confirmMode = ConfirmMode.ReadMessage;
+            NumberRequired = false;
+            Error = true;
             Message = pfState.LastError;
         }
 
@@ -361,7 +394,15 @@ else
         {
             Message = null;
         }
-        else { }
+        else
+        {
+            Message = null;
+
+            confirmMode = ConfirmMode.ReadMessage;
+            Error = true;
+            NumberRequired = false;
+            Message = projectState.LastError + pfState.LastError;
+        }
 
         busy = false;
     }
@@ -414,6 +455,7 @@ else
         if (result.Ok)
         {
             confirmMode = ConfirmMode.ReadMessage;
+            Error = false;
             if (result.FailType == "Key partially filled out")
             {
                 Message = "The key was only able to be read partially. There are some empty Floss entries. Please manually enter them to continue.";
@@ -426,6 +468,7 @@ else
         else
         {
             confirmMode = ConfirmMode.ReadMessage;
+            Error = true;
             if(result.FailType == "Failed key read")
             {
                 Message = "The algorithm failed to read the key. You can add floss in the same order of the key to try again or nothave the Threadfolio auto calculate.";
@@ -443,26 +486,23 @@ else
     {
         busy = true;
 
+        Result result = Result.Success();
         if (IsManualEntry)
         {
-
-            await projectService.HardCodeBeePattern();
+            result = await projectService.HardCodeBeePattern();
         }
         else
         {
             pfState.SetSymbolDictionary(symbolDictionary);
-            Result result = await projectService.ReadPattern();
+            result = await projectService.ReadPattern();
+        }
 
-            if (result.Ok)
-            {
-
-            }
-            else
-            {
-                confirmMode = ConfirmMode.ReadMessage;
-                NumberRequired = false;
-                Message = projectState.LastError;
-            }
+        if (!result.Ok)
+        {
+            confirmMode = ConfirmMode.ReadMessage;
+            NumberRequired = false;
+            Error = true;
+            Message = projectState.LastError;
         }
 
         busy = false;
@@ -480,17 +520,15 @@ else
             {
                 confirmMode = ConfirmMode.GeneralConfirm;
                 NumberRequired = false;
+                Error = true;
                 Message = "There are some flosses that have 0 as their amount. Please confirm to continue.";
-            }
-            else
-            {
-
             }
         }
         else
         {
             confirmMode = ConfirmMode.ReadMessage;
             NumberRequired = false;
+            Error = true;
             Message = projectState.LastError;
         }
 
@@ -503,6 +541,7 @@ else
 
         confirmMode = ConfirmMode.StrandsConfirm;
         NumberRequired = true;
+        Error = false;
         Message = "How many strands are used for each floss? (You can change it later)";
     }
 
@@ -513,17 +552,19 @@ else
         IsManualEntry = true;
         confirmMode = ConfirmMode.NumFlossConfirm;
         NumberRequired = true;
+        Error = false;
         Message = "How many flosses are used in this project? Make sure to enter each floss line by line as it is in the key.";
     }
 
     public void ResetFloss()
     {
-        //Resets the floss
         busy = true;
 
         pfService.BeginReset();
-        NumberRequired = false;
+
         confirmMode = ConfirmMode.ResetConfirm;
+        NumberRequired = false;
+        Error = true;
         Message = "Are you sure you want to recalculate the floss? This will delete all floss that is currently listed.";
     }
 

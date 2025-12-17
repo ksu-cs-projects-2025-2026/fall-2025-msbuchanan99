@@ -20,30 +20,45 @@
         <label class="form-label">Confirm Password</label>
         <InputText class="form-control w-25" type="password" @bind-Value="userState.Draft.ConfirmPassword" />
     </div>
+    <div class="mb-5 border-top">
+        <label class="form-label">Settings: </label>
+    </div>
     <div class="mb-3">
-        <label class="form-label">Settings</label>
-        @*TODO: Add Settings*@
+        <label class="form-label">Waste Factor: </label>
+        <InputNumber class="form-control w-25"></InputNumber>
     </div>
     <button class="btn btn-primary" type="submit" disabled="@busy" @onclick="Submit">
         @(busy ? "Creating..." : "Create Account")
     </button>
-    @if (!string.IsNullOrEmpty(userState.LastError))
-    {
-        <div class="text-danger mt-2">@userState.LastError</div>
-    }
 </EditForm>
 
-    @code {
+<ConfirmationModal Error="@Error" NumberRequired="false" Message="@Message" OnConfirm="CloseModal" OnDeny="CloseModal" />
+
+@code {
     private bool busy = false;
-    private Result? result;
+    private string? Message;
+    private bool Error = false;
 
     private async Task Submit()
     {
         busy = true;
 
-        result = await userService.CreateUserAsync();
-        if (result.Ok) { }
-        else { }
+        Result result = await userService.CreateUserAsync();
+        if (!result.Ok)
+        {
+            Error = true;
+            Message = userState.LastError;
+        }
+
+        busy = false;
+    }
+
+    private void ShowMessage()
+    {
+        busy = true;
+
+        Error = false;
+        Message  = "This percent is used to determine how much of a whole skein will actually be used. If you typically create a lot of waste, make the percentage smaller.";
 
         busy = false;
     }
