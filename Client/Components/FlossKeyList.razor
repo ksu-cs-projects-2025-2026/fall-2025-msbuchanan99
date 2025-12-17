@@ -51,7 +51,6 @@
     {
         _symbols = SymbolDictionary.Keys.OrderBy(k => k).ToList();
 
-        // Ensure list length matches
         if (FlossList.Count != _symbols.Count)
         {
             FlossList = _symbols.Select(_ => new FlossInProjectModel
@@ -62,7 +61,6 @@
             }).ToList();
         }
 
-        // ALWAYS sync IDs from SymbolDictionary so dropdown reflects new state (bee/server/etc.)
         for (int i = 0; i < _symbols.Count; i++)
         {
             int symbol = _symbols[i];
@@ -75,7 +73,6 @@
         bool AnyNull = FlossList.Any(f => f.Id == -1);
         if (AnyNull)
         {
-            Console.WriteLine("There are null selections in FlossList");
             await OnSave.InvokeAsync(null);
         }
         else 

@@ -195,7 +195,6 @@ namespace Client.Services
         public void CancelEdit() => _state.CancelEdit();
         public async Task<Result> ApplyEditAsync(int? amount)
         {
-            Console.WriteLine($"Number in ApplyEdit: {amount}");
             _state.SetDraftAmount((int)amount);
             var draft = _state.Draft;
             if(draft is null)
@@ -207,7 +206,6 @@ namespace Client.Services
             var userId = _state.LoadedForUserId;
             var flossId = _state.SelectedFlossId;
 
-            Console.WriteLine($"Number before http: {draft.Amount}");
             var response = await _http.PutAsJsonAsync($"api/users/{userId}/floss/{flossId}", draft.Amount);
             if (!response.IsSuccessStatusCode)
             {

@@ -98,7 +98,6 @@ namespace Client.Services
             {
                 var symbol = item.Key;
                 var count = item.Value;
-                Console.WriteLine($"Symbol: {symbol}        count: {count}");
 
                 if (SymbolDictionary.TryGetValue(symbol, out var sd))
                     sd.Count = count;
@@ -161,7 +160,7 @@ namespace Client.Services
         {
             Upsert(floss);
             Draft = null;
-            //LastError = null;
+            LastError = null;
             IsLoading = false;
             Changed?.Invoke();
         }
@@ -359,13 +358,12 @@ namespace Client.Services
         {
             var projectId = _state.LoadedForProjectId;
             if(projectId is null) return Result.Fail();
-            Console.WriteLine("past projectId");
+
             if(flosses is not null)
             {
-                Console.WriteLine("Meow");
                 _state.SetFlossList((int)projectId, flosses);
             }
-            Console.WriteLine("Past flosses is not null");
+
             foreach (var floss in _state.Floss) Console.WriteLine(floss.Amount);
             //Check if any of the amounts are 0
             if (NoAmountOverride)
@@ -375,7 +373,6 @@ namespace Client.Services
             }
 
 
-            Console.WriteLine("past noamountoverride");
             var response = await _http.PostAsJsonAsync<List<FlossInProjectModel>>
                 ($"api/projects/{projectId}/save-calculated-floss", _state.Floss.ToList());
             if (!response.IsSuccessStatusCode)

@@ -234,11 +234,7 @@ namespace Client.Services
 
             if (string.IsNullOrEmpty(draft.Password)) draft.Password = null;
 
-            if(draft.WasteFactor >= 0 && draft.WasteFactor <= 100)
-            {
-                if(draft.WasteFactor != 0) draft.WasteFactor /= 100;
-            }
-            else
+            if(draft.WasteFactor < 0 || draft.WasteFactor > 100)
             {
                 _userState.SetError("Waste Factor must be between 0 and 100");
                 return Result.Fail();
@@ -247,7 +243,7 @@ namespace Client.Services
             Dictionary<string, string?> dict = new();
             dict.Add("Username", draft.Username);
             dict.Add("Password", draft.Password);
-            dict.Add("WasteFactor", draft.WasteFactor.ToString());
+            dict.Add("WasteFactor", (draft.WasteFactor / 100).ToString());
 
             var response = await _http.PutAsJsonAsync($"api/users/{draft.Id}", dict);
             if (response.IsSuccessStatusCode)
@@ -275,6 +271,7 @@ namespace Client.Services
             if (string.IsNullOrWhiteSpace(draft.Username)) error = "Username cannot be empty.";
             if (string.IsNullOrEmpty(draft.Password)) error = "Password cannot be empty.";
             if (draft.Password != draft.ConfirmPassword) error = "Passwords must match.";
+            if (draft.WasteFactor < 0 || draft.WasteFactor > 100) error = "Waste factor must be between 0 and 100";
 
             if(error is not null)
             {
@@ -285,7 +282,8 @@ namespace Client.Services
             var response = await _http.PostAsJsonAsync("api/users/create", new
             {
                 Username = draft.Username,
-                HashPassword = draft.Password
+                HashPassword = draft.Password, 
+                WasteFactor = draft.WasteFactor / 100
             });
 
             if (response.IsSuccessStatusCode)

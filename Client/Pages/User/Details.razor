@@ -17,56 +17,58 @@ else
     <h3>Profile</h3>
     <div class="mb-3">
         <label class="form-label">Username: </label>
-        @if (userState.User is not null)
-        {
-            <InputText class="form-control w-25" disabled @bind-value="userState.User.Username"></InputText>
-
-        }
+        <InputText class="form-control w-25" disabled @bind-value="userState.User.Username"></InputText>
+    </div>
+    <div class="mb-5">
+        <label class="form-label">Settings: </label>
     </div>
     <div class="mb-3">
-        <label class="form-label">Settings: </label>
-        ...Under Construction...
-        <ul>
-            @*TODO: Add settings for account*@
-        </ul>
+        <label class="form-label">Waste Factor: </label>
+        <InputNumber class="form-control w-25" disabled @bind-value="@userState.User.WasteFactor"></InputNumber>
     </div>
     <button class="btn btn-primary" @onclick="EditAccount">Edit Account</button>
     <button class="btn btn-danger" type="submit" @onclick="DeleteAccount" disabled="@busy">
         @(busy ? "Deleting Account..." : "Delete Account")
     </button>
-    @if (!string.IsNullOrEmpty(userState.LastError))
-    {
-        <div class="text-danger mt-2">@userState.LastError</div>
-    }
+    
+    <ConfirmationModal Error="true" NumberRequired="false" Message="@Message" OnConfirm="CloseModal" OnDeny="CloseModal" />
 }
 
 
 @code {
     private bool busy = false;
+    private string? Message;
 
     public void EditAccount()
     {
-        if(userState.User is null)
-        {
-            userState.SetError("Can't Edit because user is null.");
-            return;
-        }
+        busy = true;
 
         userState.BeginUpdate();
         Nav.NavigateTo("/user/profile/edit");
+
+        busy = false;
     }
 
     public async void DeleteAccount()
     {
         busy = true;
-        if(userState.User is null)
+
+        var result = await userService.DeleteAccountAsync();
+
+        if (!result.Ok)
         {
-            userState.SetError("Can't Delete because user is null.");
+            Message = userState.LastError;
         }
-        else
-        {
-            var result = await userService.DeleteAccountAsync();
-        }
+
+        busy = false;
+    }
+
+    private void CloseModal()
+    {
+        busy = true;
+
+        Message = null;
+
         busy = false;
     }
 }

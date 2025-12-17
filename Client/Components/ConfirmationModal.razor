@@ -38,7 +38,6 @@
     public async Task Confirm()
     {
         int? num = NumberRequired ? Number : null;
-        Console.WriteLine($"Number in ConfirmationModal: {num}");
         await OnConfirm.InvokeAsync(num);
     }
     public async Task Deny() => await OnDeny.InvokeAsync();

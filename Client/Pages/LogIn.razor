@@ -1,12 +1,8 @@
 ﻿@page "/login"
 
-@using Client.Models
-@using Client.Services
-
 @inject UserService userService
 @inject UserState userState
 @inject NavigationManager Nav
-
 
 <h3>Log In To Threadfolio</h3>
 
@@ -27,24 +23,21 @@
         </button>
         <button class="btn btn-primary" @onclick="CreateAccount">Create Account</button>
     </div>
-    @if (!string.IsNullOrEmpty(error))
-    {
-        <div class="text-danger mt-2">@error</div>
-    }
 </EditForm>
 
-    @code {
+<ConfirmationModal Error="true" NumberRequired="false" OnConfirm="CloseModal" OnDeny="CloseModal" />
+
+@code {
     private UserModel model = new();
     private bool busy;
-    private string? error;
+    private string? Message;
 
     private async Task Submit()
     {
         busy = true;
-        error = null;
 
         var result = await userService.LoginAsync(model);
-        
+        if (!result.Ok) Message = userState.LastError;
 
         busy = false;
     }
@@ -52,9 +45,17 @@
     private async Task CreateAccount()
     {
         busy = true;
-        error = null;
 
         Nav.NavigateTo("/CreateAccount");
+
+        busy = false;
+    }
+
+    private void CloseModal()
+    {
+        busy = true;
+
+        Message = null;
 
         busy = false;
     }

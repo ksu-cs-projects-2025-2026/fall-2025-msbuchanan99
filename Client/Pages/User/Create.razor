@@ -25,7 +25,7 @@
     </div>
     <div class="mb-3">
         <label class="form-label">Waste Factor: </label>
-        <InputNumber class="form-control w-25"></InputNumber>
+        <InputNumber class="form-control w-25" @bind-Value="userState.Draft.WasteFactor"></InputNumber>
     </div>
     <button class="btn btn-primary" type="submit" disabled="@busy" @onclick="Submit">
         @(busy ? "Creating..." : "Create Account")
@@ -59,6 +59,15 @@
 
         Error = false;
         Message  = "This percent is used to determine how much of a whole skein will actually be used. If you typically create a lot of waste, make the percentage smaller.";
+
+        busy = false;
+    }
+
+    private void CloseModal()
+    {
+        busy = true;
+
+        Message = null;
 
         busy = false;
     }

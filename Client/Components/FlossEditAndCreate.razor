@@ -63,8 +63,6 @@
     [Parameter] public bool Show { get; set; }
     [Parameter] public bool IsEdit { get; set; }
 
-    private bool NameSelected = true;
-
     public async Task SaveChanges()
     {
         await OnSave.InvokeAsync(floss);

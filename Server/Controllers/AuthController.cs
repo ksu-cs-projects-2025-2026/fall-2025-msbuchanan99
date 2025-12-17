@@ -55,11 +55,13 @@ namespace Server.Controllers
         public IActionResult Me()
         {
             if (!(User?.Identity?.IsAuthenticated ?? false)) return Unauthorized();
+            var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
             return Ok(new
             {
-                Id = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                Id = id,
                 Username = User.Identity!.Name,
-                Role = User.FindFirstValue(ClaimTypes.Role)
+                Role = User.FindFirstValue(ClaimTypes.Role),
+                WasteFactor = _dbContext.Users.First(u => u.Id == int.Parse(id)).WasteFactor * 100
             });
         }
     }
