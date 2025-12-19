@@ -3,8 +3,32 @@
   "WorkspaceRootPath": "C:\\Users\\megha\\Desktop\\Threadfolio\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|c:\\users\\megha\\desktop\\threadfolio\\server\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33B1B402-0A65-4963-A83D-11C206C674DC}|Server\\Server.csproj|solutionrelative:server\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A6C1354E-AE73-4D0A-A3CB-64C41DE04BA5}|Client\\Client.csproj|c:\\users\\megha\\desktop\\threadfolio\\client\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A6C1354E-AE73-4D0A-A3CB-64C41DE04BA5}|Client\\Client.csproj|solutionrelative:client\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A6C1354E-AE73-4D0A-A3CB-64C41DE04BA5}|Client\\Client.csproj|c:\\users\\megha\\desktop\\threadfolio\\client\\pages\\user\\details.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A6C1354E-AE73-4D0A-A3CB-64C41DE04BA5}|Client\\Client.csproj|solutionrelative:client\\pages\\user\\details.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A6C1354E-AE73-4D0A-A3CB-64C41DE04BA5}|Client\\Client.csproj|c:\\users\\megha\\desktop\\threadfolio\\client\\pages\\user\\edit.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A6C1354E-AE73-4D0A-A3CB-64C41DE04BA5}|Client\\Client.csproj|solutionrelative:client\\pages\\user\\edit.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A6C1354E-AE73-4D0A-A3CB-64C41DE04BA5}|Client\\Client.csproj|c:\\users\\megha\\desktop\\threadfolio\\client\\pages\\user\\create.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{A6C1354E-AE73-4D0A-A3CB-64C41DE04BA5}|Client\\Client.csproj|solutionrelative:client\\pages\\user\\create.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A6C1354E-AE73-4D0A-A3CB-64C41DE04BA5}|Client\\Client.csproj|c:\\users\\megha\\desktop\\threadfolio\\client\\pages\\home.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A6C1354E-AE73-4D0A-A3CB-64C41DE04BA5}|Client\\Client.csproj|solutionrelative:client\\pages\\home.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,7 +38,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 338,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Bookmark",
@@ -34,16 +58,93 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "Server\\Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "Server\\Controllers\\AuthController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-19T20:24:08.464Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "UsersController.cs",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Controllers\\UsersController.cs",
+              "RelativeDocumentMoniker": "Server\\Controllers\\UsersController.cs",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Server\\Controllers\\UsersController.cs",
+              "RelativeToolTip": "Server\\Controllers\\UsersController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-19T20:23:01.777Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Details.razor",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Client\\Pages\\User\\Details.razor",
+              "RelativeDocumentMoniker": "Client\\Pages\\User\\Details.razor",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Client\\Pages\\User\\Details.razor",
+              "RelativeToolTip": "Client\\Pages\\User\\Details.razor",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAAACoAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-19T20:22:46.112Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Edit.razor",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Client\\Pages\\User\\Edit.razor",
+              "RelativeDocumentMoniker": "Client\\Pages\\User\\Edit.razor",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Client\\Pages\\User\\Edit.razor",
+              "RelativeToolTip": "Client\\Pages\\User\\Edit.razor",
+              "ViewState": "AgIAACoAAAAAAAAAAAAAADkAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-19T19:59:00.201Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
               "Title": "Create.razor",
               "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Client\\Pages\\User\\Create.razor",
               "RelativeDocumentMoniker": "Client\\Pages\\User\\Create.razor",
               "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Client\\Pages\\User\\Create.razor",
               "RelativeToolTip": "Client\\Pages\\User\\Create.razor",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAABgAAAAbAAAAAAAAAA==",
+              "ViewState": "AgIAABIAAAAAAAAAAAAAADYAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-12-17T00:28:54.782Z",
+              "WhenOpened": "2025-12-19T19:57:38.291Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "UserService.cs",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Client\\Services\\UserService.cs",
+              "RelativeDocumentMoniker": "Client\\Services\\UserService.cs",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Client\\Services\\UserService.cs",
+              "RelativeToolTip": "Client\\Services\\UserService.cs",
+              "ViewState": "AgIAAIgAAAAAAAAAAAAlwJ8AAAA6AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-17T01:30:18.642Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Home.razor",
+              "DocumentMoniker": "C:\\Users\\megha\\Desktop\\Threadfolio\\Client\\Pages\\Home.razor",
+              "RelativeDocumentMoniker": "Client\\Pages\\Home.razor",
+              "ToolTip": "C:\\Users\\megha\\Desktop\\Threadfolio\\Client\\Pages\\Home.razor",
+              "RelativeToolTip": "Client\\Pages\\Home.razor",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAB0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-17T01:14:48.333Z"
             }
           ]
         }

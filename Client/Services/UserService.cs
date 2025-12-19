@@ -11,7 +11,6 @@ namespace Client.Services
         public UserModel? User { get; private set; }
         public UserModel? Draft { get; private set; }
         public bool IsLoggedIn => User is not null;
-        public double WasteFactor => 0.9;
 
         public string? LastError { get; private set; }
         public bool IsLoading { get; private set; }
@@ -50,7 +49,8 @@ namespace Client.Services
             Username = user.Username,
             Password = user.Password,
             ConfirmPassword = user.ConfirmPassword,
-            Role = user.Role
+            Role = user.Role,
+            WasteFactor = user.WasteFactor
         };
         private static UserModel CloneWithoutPassword(UserModel user) => new()
         {
@@ -58,7 +58,8 @@ namespace Client.Services
             Username = user.Username,
             Password = null,
             ConfirmPassword = null,
-            Role = user.Role
+            Role = user.Role,
+            WasteFactor = user.WasteFactor
         };
 
         public bool BeginUpdate()
@@ -93,7 +94,8 @@ namespace Client.Services
                 Username = null,
                 Password = null,
                 ConfirmPassword = null,
-                Role = "Anonymous"
+                Role = "Anonymous",
+                WasteFactor = 0
             };
             IsLoading = true;
             Changed?.Invoke();
@@ -148,13 +150,15 @@ namespace Client.Services
 
         public async Task UserLoadedAsync()
         {
+            
             if (_userState.User is not null) return;
             _userState.BeginLoad();
             var response = await _http.GetAsync("api/auth/me");
             if (response.IsSuccessStatusCode)
             {
                 var user = await response.Content.ReadFromJsonAsync<UserModel>();
-
+                Console.WriteLine($"Loading user {user.Id}");
+                Console.WriteLine(user.WasteFactor);
                 _userState.Set(user);
             }
             else
@@ -251,6 +255,7 @@ namespace Client.Services
                 var responseUser = await response.Content.ReadFromJsonAsync<UserModel>();
                 if (responseUser != null)
                 {
+                    Console.WriteLine($"{responseUser.WasteFactor}, {responseUser.Id}");
                     _userState.ApplyUpdate(responseUser);
                 }
                 return Result.Success();
@@ -289,8 +294,6 @@ namespace Client.Services
             if (response.IsSuccessStatusCode)
             {
                 _userState.ApplyCreate(draft);
-                //Navigate to login page for user to log in
-                _nav.NavigateTo("/login");
                 return Result.Success();
             }
             else

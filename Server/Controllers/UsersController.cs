@@ -2,15 +2,11 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Server.Data;
 using Server.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace Server.Controllers
 {
@@ -184,30 +180,32 @@ namespace Server.Controllers
         // POST: api/users/create
         //HashPassword that is brought in isn't actually Hashed
         [HttpPost("create")]
-        public async Task<IActionResult> Create([Bind("Username,HashPassword")] User user)
+        public async Task<IActionResult> Create([FromBody] CreateUserRequest req)
         {
-            if (ModelState.IsValid)
+            var username = req.Username.Trim();
+            //Check for duplicate usernames
+            if (await _context.Users.AnyAsync(u => u.Username.ToLower() == username.ToLower()))
+                return BadRequest("That Username already exists.");
+
+            var now = DateTime.Now;
+            User user = new User
             {
-                //Check for duplicate usernames
-                if (await _context.Users.AnyAsync(u => u.Username.ToLower() == user.Username.ToLower()))
-                    return BadRequest("That Username already exists.");
+                Username = username,
+                Role = "User",
+                WasteFactor = (decimal)req.WasteFactor,
+                CreatedOn = now,
+                LastModified = now
+            };
 
-                //Hash the password
-                var hasher = new PasswordHasher<User>();
-                user.HashPassword = hasher.HashPassword(user, user.HashPassword);
+            //Hash the password
+            var hasher = new PasswordHasher<User>();
+            user.HashPassword = hasher.HashPassword(user, req.HashPassword);
 
-                //Set Settings
-                user.Role = "User";
-                user.CreatedOn = DateTime.UtcNow;
-                user.LastModified = DateTime.UtcNow;
+            //Save new user
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
 
-                //Save new user
-                _context.Users.Add(user);
-                await _context.SaveChangesAsync();
-
-                return Ok();
-            }
-            return BadRequest(ModelState);
+            return Ok();
         }
 
         // PUT: api/users/5
@@ -243,7 +241,7 @@ namespace Server.Controllers
                 await ReissueCookieForSelfEdit(currentUser);
 
                 //return
-                return Ok(new UserDTO(currentUser.Id, currentUser.Username, currentUser.Role.ToString()));
+                return Ok(new UserDTO(currentUser.Id, currentUser.Username, currentUser.Role.ToString(), currentUser.WasteFactor));
             }
             return BadRequest("Model State not Valid");
         }
@@ -346,9 +344,23 @@ namespace Server.Controllers
             }
         }
 
-        public record UserDTO(int Id, string Username, string Role);
+        public record UserDTO(int Id, string Username, string Role, decimal WasteFactor);
         public record ProjectDTO(int Id, int UserId, string? Name, bool IsCompleted, DateTime? CompletionDate, int? KeyPage, int? Aida);
         public record ProjectAdminDTO(int Id, int UserId, string? Name, bool IsCompleted, DateTime? CompletionDate, int? KeyPage, int? Aida, DateTime? CreatedOn, DateTime? LastModified);
         public record FlossDTO(int Id, string? Name, string? Number, string? HexColor, int Amount);
+        public sealed class CreateUserRequest
+        {
+            [Required]
+            public string Username { get; set; } = "";
+
+            [Required]
+            public string HashPassword { get; set; } = "";
+
+            // Decide what WasteFactor means:
+            // - If client sends 0..1 fraction: use [Range(0,1)]
+            // - If client sends 0..100 percent: use [Range(0,100)]
+            [Range(0, 1)]
+            public double WasteFactor { get; set; }
+        }
     }
 }

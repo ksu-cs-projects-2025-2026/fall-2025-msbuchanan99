@@ -958,7 +958,7 @@
           "build/Microsoft.NET.ILLink.Tasks.props": {}
         }
       },
-      "Microsoft.NET.Sdk.WebAssembly.Pack/10.0.0": {
+      "Microsoft.NET.Sdk.WebAssembly.Pack/10.0.1": {
         "type": "package",
         "build": {
           "build/Microsoft.NET.Sdk.WebAssembly.Pack.props": {},
@@ -2161,7 +2161,7 @@
           "build/Microsoft.NET.ILLink.Tasks.props": {}
         }
       },
-      "Microsoft.NET.Sdk.WebAssembly.Pack/10.0.0": {
+      "Microsoft.NET.Sdk.WebAssembly.Pack/10.0.1": {
         "type": "package",
         "build": {
           "build/Microsoft.NET.Sdk.WebAssembly.Pack.props": {},
@@ -4060,10 +4060,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "Microsoft.NET.Sdk.WebAssembly.Pack/10.0.0": {
-      "sha512": "bewqpnzRlrdGaiT4f8aSbHiKuFhm/HWKcOAgvhFpYL1OhWR0zWakDnCB67XaJ33yQKj0gsIEMl1vry6c9iGpwQ==",
+    "Microsoft.NET.Sdk.WebAssembly.Pack/10.0.1": {
+      "sha512": "8XSP0Wu0xpj3xr88WwW43GiklXXiM27n6V8CXk35wT1MjxCfmudQJYmLbirWiPiqU1vCIWTIczPpI40ivC3ruQ==",
       "type": "package",
-      "path": "microsoft.net.sdk.webassembly.pack/10.0.0",
+      "path": "microsoft.net.sdk.webassembly.pack/10.0.1",
       "hasTools": true,
       "files": [
         ".nupkg.metadata",
@@ -4093,7 +4093,7 @@
         "build/Microsoft.NET.Sdk.WebAssembly.Pack.targets",
         "build/Wasm.web.config",
         "build/browser.runtimeconfig.template.json",
-        "microsoft.net.sdk.webassembly.pack.10.0.0.nupkg.sha512",
+        "microsoft.net.sdk.webassembly.pack.10.0.1.nupkg.sha512",
         "microsoft.net.sdk.webassembly.pack.nuspec",
         "tools/net10.0/Microsoft.NET.Sdk.WebAssembly.Pack.Tasks.dll",
         "tools/net10.0/Microsoft.NET.WebAssembly.Webcil.dll",
@@ -4442,7 +4442,7 @@
       "Microsoft.EntityFrameworkCore.Tools >= 8.0.21",
       "Microsoft.Extensions.Http >= 8.0.1",
       "Microsoft.NET.ILLink.Tasks >= 8.0.22",
-      "Microsoft.NET.Sdk.WebAssembly.Pack >= 10.0.0"
+      "Microsoft.NET.Sdk.WebAssembly.Pack >= 10.0.1"
     ]
   },
   "packageFolders": {
@@ -4527,7 +4527,7 @@
           "Microsoft.NET.Sdk.WebAssembly.Pack": {
             "suppressParent": "All",
             "target": "Package",
-            "version": "[10.0.0, )",
+            "version": "[10.0.1, )",
             "autoReferenced": true
           }
         },
@@ -4547,7 +4547,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.101/PortableRuntimeIdentifierGraph.json"
       }
     },
     "runtimes": {

@@ -901,8 +901,8 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "user",
-        "Type": "Server.Models.User",
+        "Name": "req",
+        "Type": "Server.Controllers.UsersController\u002BCreateUserRequest",
         "IsRequired": true
       }
     ],

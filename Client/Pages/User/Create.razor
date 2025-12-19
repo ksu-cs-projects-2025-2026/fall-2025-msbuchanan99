@@ -16,11 +16,11 @@
         <label class="form-label">Password</label>
         <InputText class="form-control w-25" type="password" @bind-Value="userState.Draft.Password" />
     </div>
-    <div class="mb-3">
+    <div class="mb-5">
         <label class="form-label">Confirm Password</label>
         <InputText class="form-control w-25" type="password" @bind-Value="userState.Draft.ConfirmPassword" />
     </div>
-    <div class="mb-5 border-top">
+    <div class="mb-3 border-top">
         <label class="form-label">Settings: </label>
     </div>
     <div class="mb-3">
@@ -48,6 +48,11 @@
         {
             Error = true;
             Message = userState.LastError;
+        }
+        else
+        {
+            //Navigate to login page for user to log in
+            Nav.NavigateTo("/login");
         }
 
         busy = false;

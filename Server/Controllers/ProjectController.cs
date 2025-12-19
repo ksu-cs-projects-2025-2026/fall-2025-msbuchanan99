@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Server.Data;
 using Server.Models;
-using System.IO;
-using System.Linq;
 using System.Text;
 using UglyToad.PdfPig;
 using FileIO = System.IO.File;

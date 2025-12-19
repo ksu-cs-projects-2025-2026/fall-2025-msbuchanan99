@@ -15,11 +15,11 @@ else if(userState.User is null)
 else
 {
     <h3>Profile</h3>
-    <div class="mb-3">
+    <div class="mb-5">
         <label class="form-label">Username: </label>
         <InputText class="form-control w-25" disabled @bind-value="userState.User.Username"></InputText>
     </div>
-    <div class="mb-5">
+    <div class="mb-3 border-top">
         <label class="form-label">Settings: </label>
     </div>
     <div class="mb-3">
@@ -38,7 +38,10 @@ else
 @code {
     private bool busy = false;
     private string? Message;
-
+    protected override async Task OnInitializedAsync()
+    {
+        await userService.UserLoadedAsync();
+    }
     public void EditAccount()
     {
         busy = true;

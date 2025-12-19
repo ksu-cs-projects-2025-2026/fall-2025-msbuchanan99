@@ -1342,17 +1342,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/User"
+                "$ref": "#/components/schemas/CreateUserRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/User"
+                "$ref": "#/components/schemas/CreateUserRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/User"
+                "$ref": "#/components/schemas/CreateUserRequest"
               }
             }
           }
@@ -1539,6 +1539,30 @@
   },
   "components": {
     "schemas": {
+      "CreateUserRequest": {
+        "required": [
+          "hashPassword",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "hashPassword": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "wasteFactor": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "Floss": {
         "required": [
           "name",
@@ -1756,7 +1780,8 @@
         "required": [
           "hashPassword",
           "role",
-          "username"
+          "username",
+          "wasteFactor"
         ],
         "type": "object",
         "properties": {
@@ -1776,6 +1801,12 @@
           "role": {
             "minLength": 1,
             "type": "string"
+          },
+          "wasteFactor": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
           },
           "createdOn": {
             "type": "string",
