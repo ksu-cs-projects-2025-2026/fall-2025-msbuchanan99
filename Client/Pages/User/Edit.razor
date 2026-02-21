@@ -1,0 +1,101 @@
+﻿@page "/user/profile/edit"
+
+@inject UserService userService
+@inject UserState userState
+@inject NavigationManager Nav
+
+@if (userState.IsLoading)
+{
+    <h3>Loading...</h3>
+}
+else if(userState.User is null)
+{
+    <UnAuthorized/>
+}
+else
+{
+    <h3>Edit Profile</h3>
+
+    <EditForm Model="@userState.Draft">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="mb-3">
+            <label class="form-label">Username: </label>
+            <InputText class="form-control w-25" @bind-Value="userState.Draft.Username" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Password: </label>
+            <InputText class="form-control w-25" type="password" @bind-Value="userState.Draft.Password" />
+        </div>
+        <div class="mb-5">
+            <label class="form-label">Confirm Password: </label>
+            <InputText class="form-control w-25" type="password" @bind-Value="userState.Draft.ConfirmPassword" />
+        </div>
+        <div class="mb-3 border-top w-25">
+            <h4>Settings:</h4>
+        </div>
+        <div class="mb-2">
+            <label class="form-label">Waste Factor (percentage): </label>
+            <InputNumber class="form-control w-25" @bind-Value="userState.Draft.WasteFactor" />
+            <button type="button" class="btn btn-secondary rounded-circle" @onclick="ShowMessage" disabled="@busy">?</button>
+        </div>
+        <button class="btn btn-primary" type="submit" disabled="@busy" @onclick="Save">
+            @(busy ? "Saving..." : "Save")
+        </button>
+        <button class="btn btn-secondary" type="submit" disabled="@busy" @onclick="Cancel">Cancel</button>
+    </EditForm>
+
+    <ConfirmationModal Message="@Message" NumberRequired="false" Error="@Error" OnConfirm="CloseModal" OnDeny="CloseModal" />
+}
+
+@code {
+    private bool busy;
+    private Result? result;
+    private string? Message;
+    private bool Error = false;
+
+    //Load in existing information
+    protected override async Task OnInitializedAsync()
+    {
+        await userService.UserLoadedAsync();
+    }
+
+    public async Task Save()
+    {
+        busy = true;
+
+        result = await userService.UpdateUserAsync();
+        if (result.Ok)
+        {
+            Nav.NavigateTo("/user/profile");
+        }
+        else
+        {
+            Error = true;
+            Message = userState.LastError;
+        }
+
+        busy = false;
+    }
+
+    public void Cancel()
+    {
+        busy = true;
+
+        userService.CancelUpdate();
+        Nav.NavigateTo("/user/profile");
+
+        busy = false;
+    }
+
+    public void CloseModal()
+    {
+        Message = null;
+    }
+
+    public void ShowMessage()
+    {
+        Error = false;
+        Message = "This percent is used to determine how much of a whole skein will actually be used. If you typically create a lot of waste, make the percentage smaller.";
+    }
+}

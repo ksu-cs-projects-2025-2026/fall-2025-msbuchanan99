@@ -1,0 +1,106 @@
+﻿@page "/projects/{id:int}/edit"
+
+@inject ProjectService projectService
+@inject ProjectState projectState
+@inject UserState userState
+@inject UserService userService
+@inject NavigationManager nav
+
+@if (Loading || projectState.Draft is null)
+{
+    <h3>Loading...</h3>
+}
+else if(userState.User is null)
+{
+    <UnAuthorized/>
+}
+else
+{
+    <EditForm Model="@projectState.Draft">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="mb-3">
+            <label class="form-label">Name: </label>
+            <InputText class="form-control w-25" @bind-Value="projectState.Draft.Name"></InputText>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Key Page: </label>
+            <InputNumber class="form-control w-25" @bind-Value="projectState.Draft.KeyPage"></InputNumber>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Aida: </label>
+            <InputNumber class="form-control w-25" @bind-Value="projectState.Draft.Aida"></InputNumber>
+        </div>
+        <button class="btn btn-primary" type="submit" disabled="@busy" @onclick="SaveChanges">Save</button>
+        <button class="btn btn-secondary" type="submit" disabled="@busy" @onclick="CancelChanges">Cancel</button>
+    </EditForm>
+
+    <ConfirmationModal Error="true" NumberRequired="false" Message="@Message" OnConfirm="CloseModal" OnDeny="CloseModal" />
+}
+
+@code {
+    [Parameter] public int id { get; set; }
+
+    private bool busy = false;
+    private bool Loading => projectState.IsLoading || userState.IsLoading;
+    private string? Message = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        userState.Changed += OnUserStateChanged;
+        projectState.Changed += OnProjectStateChanged;
+
+        await userService.UserLoadedAsync();
+        if(userState.User is not null)
+        {
+            _ = await projectService.LoadForCurrentUserAsync();
+            _ = await projectService.LoadCurrentProject(id, true);
+        }
+    }
+
+    private void OnUserStateChanged() => InvokeAsync(StateHasChanged);
+    private void OnProjectStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        userState.Changed -= OnUserStateChanged;
+        projectState.Changed -= OnProjectStateChanged;
+    }
+
+    public async Task SaveChanges()
+    {
+        busy = true;
+
+        Result result = await projectService.SaveUpdateAsync();
+
+        if (result.Ok)
+        {
+            nav.NavigateTo($"/projects/{id}");
+        }
+        else
+        {
+            Message = projectState.LastError;
+        }
+
+        busy = false;
+    }
+
+    public void CancelChanges()
+    {
+        busy = true;
+
+        projectService.CancelUpdate();
+        nav.NavigateTo($"/projects/{id}");
+
+        busy = false;
+    }
+
+    private void CloseModal()
+    {
+        busy = true;
+
+        Message = null;
+
+        busy = false;
+    }
+}

@@ -1,0 +1,165 @@
+﻿@page "/user/floss"
+
+@inject UserState userState
+@inject UserService userService
+@inject UserFlossState ufState
+@inject UserFlossService ufService
+
+<h2>My Floss</h2>
+@if (userState.IsLoading || ufState.IsLoading)
+{
+    <h3>Loading...</h3>
+}
+else if(userState.User is null)
+{
+    <UnAuthorized/>
+}
+else
+{
+    <div class="d-flex flex-row justify-content-between">
+        @*Filters*@
+        <div class="d-flex flex-column flex-grow-1 border-2 border-secondary">
+            <h3>Search</h3>
+            <div class="pt-2">
+                <InputText @bind-Value="SearchText" ></InputText>
+            </div>
+            <div class="pt-2">
+                <InputRadioGroup @bind-Value="Owned">
+                    <div class="form-check">
+                        <InputRadio class="form-check-input" Value="OwnershipMode.Owned"/>
+                        <label class="form-check-label">Owned Floss</label>
+                    </div>
+                    <div class="form-check">
+                        <InputRadio class="form-check-input" Value="OwnershipMode.Unowned" />
+                        <label class="form-check-label">Unowned Floss</label>
+                    </div>
+                    <div class="form-check">
+                        <InputRadio class="form-check-input" Value="OwnershipMode.Both" />
+                        <label class="form-check-label">All Floss</label>
+                    </div>
+                </InputRadioGroup>
+            </div>
+            <div class="pt-2 align-self-center">
+                <button type="button" class="btn btn-primary" @onclick="SearchFloss">Search</button>
+            </div>
+        </div>
+
+        @*FlossList*@
+        <div class="d-flex flex-grow-8">
+            <UserFlossList floss="ufState.Floss" OnSelected="StartEditFloss"></UserFlossList>
+        </div>
+    </div>
+
+    @*Confirmation Modal*@
+    <ConfirmationModal Message="@Message" NumberRequired="NumberRequired" Error="@Error" OnConfirm="(i) => Confirm(i)" OnDeny="DenyEdit" ></ConfirmationModal>
+}
+<style>
+    .flex-grow-8{flex-grow: 8}
+</style>
+
+@code{
+    private bool busy = false;
+    private string SearchText = "";
+    private OwnershipMode Owned = OwnershipMode.Owned;
+    private ConfirmMode confirm;
+
+    private string? Message;
+    private int? selectedId;
+    private bool NumberRequired;
+    private bool Error = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        userState.Changed += OnUserStateChanged;
+        ufState.Changed += OnFlossStateChanged;
+
+        await userService.UserLoadedAsync();
+        if(userState.User is not null)
+        {
+            _ = await ufService.LoadFloss(userState.User.Id);
+        }
+    }
+
+    private void OnUserStateChanged() => InvokeAsync(StateHasChanged);
+    private void OnFlossStateChanged() => InvokeAsync(StateHasChanged); 
+    public void Dispose()
+    {
+        userState.Changed -= OnUserStateChanged;
+        ufState.Changed -= OnFlossStateChanged;
+    }
+
+    public void SearchFloss()
+    {
+        busy = true;
+
+        ufService.FilterUserFlosses(SearchText, Owned);
+
+        busy = false;
+    }
+
+    public void StartEditFloss(UserFlossModel floss)
+    {
+        busy = true;
+
+        selectedId = floss.Id;
+        var result = ufService.BeginEdit((int)selectedId);
+        if (!result)
+        {
+            confirm = ConfirmMode.ReadMessage;
+            NumberRequired = false;
+            Error = true;
+            Message = "Unable to find floss in list.";
+        }
+        else
+        {
+            confirm = ConfirmMode.NumFlossConfirm;
+            NumberRequired = true;
+            Error = false;
+            Message = $"How many skeins of number {floss.Name} do you have? Round up to the nearest whole number.";
+        }
+
+
+        busy = false;
+    }
+
+    public async Task Confirm(int? amount)
+    {
+        busy = true;
+
+        Result result = Result.Success();
+        if(confirm == ConfirmMode.NumFlossConfirm)
+        {
+            result = await ufService.ApplyEditAsync(amount);
+        }
+
+
+        if (result.Ok)
+        {
+            Message = null;
+            selectedId = null;
+
+            if (confirm == ConfirmMode.NumFlossConfirm) SearchFloss();
+        }
+        else
+        {
+            Message = null;
+
+            confirm = ConfirmMode.ReadMessage;
+            NumberRequired = false;
+            Error = true;
+            Message = ufState.LastError;
+        }
+
+        busy = false;
+    }
+
+    public void DenyEdit()
+    {
+        busy = true;
+
+        Message = null;
+        selectedId = null;
+
+        busy = false;
+    }
+}

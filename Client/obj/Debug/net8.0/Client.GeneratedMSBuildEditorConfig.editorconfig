@@ -1,0 +1,119 @@
+is_global = true
+build_property.EnableAotAnalyzer = 
+build_property.EnableSingleFileAnalyzer = 
+build_property.EnableTrimAnalyzer = false
+build_property.IncludeAllContentForSelfExtract = 
+build_property.TargetFramework = net8.0
+build_property.TargetFrameworkIdentifier = .NETCoreApp
+build_property.TargetFrameworkVersion = v8.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = false
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = browser
+build_property.RootNamespace = Client
+build_property.RootNamespace = Client
+build_property.ProjectDir = C:\Users\megha\Desktop\Threadfolio\Client\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = false
+build_property.RazorLangVersion = 8.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Users\megha\Desktop\Threadfolio\Client
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 8.0
+build_property.EnableCodeStyleSeverity = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/App.razor]
+build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Components/ConfirmationModal.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xDb25maXJtYXRpb25Nb2RhbC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Components/FlossDropdown.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xGbG9zc0Ryb3Bkb3duLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Components/FlossEditAndCreate.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xGbG9zc0VkaXRBbmRDcmVhdGUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Components/FlossKeyList.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xGbG9zc0tleUxpc3QucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Components/FlossList.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xGbG9zc0xpc3QucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Components/FlossToBuy.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xGbG9zc1RvQnV5LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Components/UnAuthorized.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xVbkF1dGhvcml6ZWQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Components/UserFlossList.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xVc2VyRmxvc3NMaXN0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Pages/Floss/Index.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRmxvc3NcSW5kZXgucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Pages/Home.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSG9tZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Pages/LogIn.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTG9nSW4ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Pages/LogOut.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTG9nT3V0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Pages/Project/Create.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvamVjdFxDcmVhdGUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Pages/Project/Details.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvamVjdFxEZXRhaWxzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Pages/Project/Edit.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvamVjdFxFZGl0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Pages/Project/Index.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvamVjdFxJbmRleC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Pages/User/Create.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxDcmVhdGUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Pages/User/Details.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxEZXRhaWxzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Pages/User/Edit.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxFZGl0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Layout/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XE1haW5MYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-tmopy668it
+
+[C:/Users/megha/Desktop/Threadfolio/Client/Layout/NavMenu.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XE5hdk1lbnUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-9qkkwgv1yd

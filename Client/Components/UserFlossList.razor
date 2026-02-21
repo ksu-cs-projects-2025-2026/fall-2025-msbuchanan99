@@ -1,0 +1,99 @@
+﻿@if (floss is null)
+{
+    <div class="text-muted">Loading...</div>
+}
+else
+{
+    <div class="d-flex flex-column w-100">
+        <p>**Click to edit amount**</p>
+        <div class="d-flex flex-row border-top pt-3">
+            @*Header Row*@
+            <div class="w-10">Color</div>
+            <div class="w-20">Number</div>
+            <div class="w-50">Name</div>
+            <div class="w-20"># Skeins</div>
+        </div>
+        @if(floss.Count == 0)
+        {
+            <div class="border-top pt-2">
+                <p style="color: darkgray">No Floss Found</p>
+            </div>
+        }
+        else
+        {
+            @foreach (UserFlossModel f in floss)
+            {
+                <div class="d-flex flex-row select-row border-top pt-2" @onclick="() => SelectRow(f)">
+                    @*Symbol & HexColor in a cube*@
+                    <div class="w-10">
+                        <div class="symbol-cube" style=@($"background-color: #{f.HexColor}")></div>
+                    </div>
+
+                    @*Number*@
+                    <div class="w-20">
+                        @f.Number
+                    </div>
+
+                    @*Name*@
+                    <div class="w-50">
+                        @f.Name
+                    </div>
+
+                    @*Amount Needed*@
+                    <div class="w-20">
+                        @f.Amount
+                    </div>
+                </div>
+            }
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public IReadOnlyList<UserFlossModel>? floss { get; set; }
+    [Parameter] public EventCallback<UserFlossModel> OnSelected { get; set; }
+
+    private async Task SelectRow(UserFlossModel f)
+    {
+        await OnSelected.InvokeAsync(f);
+    }
+}
+
+<style>
+    .w-10 {
+        width: 10%;
+    }
+
+    .w-40 {
+        width: 40%;
+    }
+
+    .w-20 {
+        width: 20%;
+    }
+
+    .symbol-cube {
+        width: 20px;
+        height: 20px;
+        border: #262626 solid 2px;
+        text-align: center;
+    }
+
+    .space-between {
+        justify-content: space-between
+    }
+
+    .select-row {
+        cursor: pointer;
+        padding: 4px 0;
+        transition: background-color 0.15s ease-in-out;
+    }
+
+        .select-row:hover {
+            background-color: #c2c2c2;
+        }
+
+    .selected {
+        background-color: #c6c6c0;
+    }
+</style>

@@ -1,0 +1,77 @@
+﻿@page "/user/profile"
+
+@inject UserService userService
+@inject UserState userState
+@inject NavigationManager Nav
+
+@if (userState.IsLoading)
+{
+    <h3>Loading...</h3>
+}
+else if(userState.User is null)
+{
+    <UnAuthorized/>
+}
+else
+{
+    <h3>Profile</h3>
+    <div class="mb-5">
+        <label class="form-label">Username: </label>
+        <InputText class="form-control w-25" disabled @bind-value="userState.User.Username"></InputText>
+    </div>
+    <div class="mb-3 border-top">
+        <label class="form-label">Settings: </label>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Waste Factor: </label>
+        <InputNumber class="form-control w-25" disabled @bind-value="@userState.User.WasteFactor"></InputNumber>
+    </div>
+    <button class="btn btn-primary" @onclick="EditAccount">Edit Account</button>
+    <button class="btn btn-danger" type="submit" @onclick="DeleteAccount" disabled="@busy">
+        @(busy ? "Deleting Account..." : "Delete Account")
+    </button>
+    
+    <ConfirmationModal Error="true" NumberRequired="false" Message="@Message" OnConfirm="CloseModal" OnDeny="CloseModal" />
+}
+
+
+@code {
+    private bool busy = false;
+    private string? Message;
+    protected override async Task OnInitializedAsync()
+    {
+        await userService.UserLoadedAsync();
+    }
+    public void EditAccount()
+    {
+        busy = true;
+
+        userState.BeginUpdate();
+        Nav.NavigateTo("/user/profile/edit");
+
+        busy = false;
+    }
+
+    public async void DeleteAccount()
+    {
+        busy = true;
+
+        var result = await userService.DeleteAccountAsync();
+
+        if (!result.Ok)
+        {
+            Message = userState.LastError;
+        }
+
+        busy = false;
+    }
+
+    private void CloseModal()
+    {
+        busy = true;
+
+        Message = null;
+
+        busy = false;
+    }
+}

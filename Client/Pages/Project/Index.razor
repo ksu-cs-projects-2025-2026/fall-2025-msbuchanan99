@@ -1,0 +1,238 @@
+﻿@page "/user/projects"
+
+@inject ProjectService projectService
+@inject ProjectState projectState
+@inject UserService userService
+@inject UserState userState
+@inject NavigationManager Nav
+
+@if (projectState.IsLoading || userState.IsLoading)
+{
+    <div class="flex-container-spread-out">
+        <h3>My Projects</h3>
+        <NavLink class="btn btn-primary" disabled>Create</NavLink>
+    </div>
+    <div class="mb-2">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Completed</th>
+                    <th>Date Completed</th>
+                    <th>Download</th>
+                    <th>View Details</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+        </table>
+        Loading...
+    </div>
+}
+else if (userState.User is null)
+{
+    <UnAuthorized/>
+}
+else
+{
+    <div class="flex-container-spread-out">
+        <h3>My Projects</h3>
+        <NavLink class="btn btn-primary" disabled="@busy" @onclick="BeginCreate">Create</NavLink>
+    </div>
+    <div class="mb-2">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Completed</th>
+                    <th>Date Completed</th>
+                    <th>Download</th>
+                    <th>View Details</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (ProjectModel p in projectState.Projects)
+                {
+                    <tr>
+                        <td>@p.Name</td>
+                        <td>
+                            @if (@p.IsCompleted)
+                            {
+                                <i class="bi bi-check2"></i>
+                            }
+                            else
+                            {
+
+                                <i class="bi bi-x"></i>
+                            }
+                        </td>
+                        <td>@p.CompletionDate</td>
+                        <td>
+                            @*Download file button*@
+                            <button type="button" class="btn btn-outline-secondary dot" disabled="@busy" aria-label="Download File" @onclick="() => DownloadFile(p.Id)">
+                                <i class="bi bi-box-arrow-down"></i>
+                            </button>
+                        </td>
+                        <td>
+                            @*View details*@
+                            <button type="button" class="btn btn-outline-secondary dot" disabled="@busy" aria-label="View Project Details" @onclick="() => ViewDetails(p.Id)">
+                                <i class="bi bi-info"></i>
+                            </button>
+                        </td>
+                        <td>
+                            @*Delete*@
+                            <button class="btn btn-outline-danger dot" aria-label="Delete" disabled="@busy" @onclick="() => DeleteProject(p.Id)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<ConfirmationModal Message="@Message" NumberRequired="false" Error="@Error" OnConfirm="Confirm" OnDeny="Deny"></ConfirmationModal>
+
+<style>
+    .flex-container-spread-out{
+        display: flex;
+        justify-content: space-between;
+    }
+    .dot{
+        height: 1.7rem;
+        width: 1.7rem;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .dot i {
+
+    }
+</style>
+
+@code {
+    bool busy = false;
+    private string? Message;
+    private ConfirmMode confirmMode;
+    private bool Error = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        projectState.Changed += OnProjectStateChanged;
+        userState.Changed += OnUserStateChanged;
+        await userService.UserLoadedAsync();
+
+        if(userState.User is not null)
+        {
+            _ = await projectService.LoadForCurrentUserAsync();
+            projectState.SetSelectedProjectId(null);
+        }
+        else
+        {
+            projectState.Clear();
+        }
+    }
+
+    private void OnProjectStateChanged() => InvokeAsync(StateHasChanged);
+    private void OnUserStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        projectState.Changed -= OnProjectStateChanged;
+        userState.Changed -= OnUserStateChanged;
+    }
+
+    public void BeginCreate()
+    {
+        busy = true;
+
+        projectService.BeginCreate(userState.User.Id);
+        Nav.NavigateTo($"/projects/create");
+
+        busy = false;
+    }
+
+    public void ViewDetails(int id)
+    {
+        busy = true;
+
+        Nav.NavigateTo($"/projects/{id}");
+
+        busy = false;
+    }
+
+    public async Task DeleteProject(int id)
+    {
+        busy = true;
+
+        var result = projectService.BeginDelete(id);
+
+        if (result)
+        {
+            confirmMode = ConfirmMode.DeleteConfirm;
+            Error = false;
+            Message = $"Are you sure you want to delete {projectState.Selected!.Name}?";
+        }
+        else
+        {
+            confirmMode = ConfirmMode.ReadMessage;
+            Error = true;
+            Message = "Error: Can't find the project.";
+        }
+
+        busy = false;
+    }
+
+    public async Task DownloadFile(int id)
+    {
+        busy = true;
+
+        var result = await projectService.DownloadFile(id);
+
+        if (!result.Ok)
+        {
+            confirmMode = ConfirmMode.ReadMessage;
+            Error = true;
+            Message = projectState.LastError;
+        }
+
+        busy = false;
+    }
+
+    public async Task Confirm()
+    {
+        busy = true;
+
+        Result result = Result.Success();
+        if(confirmMode == ConfirmMode.DeleteConfirm)
+        {
+            result = await projectService.ApplyDeleteAsync();
+        }
+
+        if (result.Ok)
+        {
+            Message = null;
+        }
+        else
+        {
+            Message = null;
+
+            Error = true;
+            confirmMode = ConfirmMode.ReadMessage;
+            Message = projectState.LastError;
+        }
+
+        busy = false;
+    }
+
+    public async Task Deny()
+    {
+        busy = true;
+
+        Message = null;
+
+        busy = false;
+    }
+} 

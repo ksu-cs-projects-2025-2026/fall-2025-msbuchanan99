@@ -1,0 +1,50 @@
+﻿@page "/"
+
+@inject HttpClient Http
+@inject UserService userService
+@inject UserState userState
+
+<PageTitle>Home</PageTitle>
+
+@if (isLoading)
+{
+    <h1>Loading...</h1>
+}
+else if(userState.User is not null)
+{
+    <h1>Welcome to Threadfolio, @userState.User.Username</h1>
+    <p>
+        Welcome to Threadfolio - a place to manage your cross stitch projects.
+    </p>
+    <p>
+        This will become the home of Threadfolio's social feed in a future update.
+    </p>
+}
+else
+{
+    <h1>Welcome to Threadfolio. Please log in.</h1>
+}
+
+@code {
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Re-render when the shared user changes
+        userState.Changed += OnAuthChanged;
+
+        isLoading = true;
+        await userService.UserLoadedAsync(); // centralizes /api/auth/me fetch & sets CurrentUser
+        isLoading = false;
+    }
+
+    private void OnAuthChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        userState.Changed -= OnAuthChanged;
+    }
+}

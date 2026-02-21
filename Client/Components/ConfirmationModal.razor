@@ -1,0 +1,44 @@
+﻿@if(Message is not null)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Please Confirm...</h3>
+                </div>
+                <div class="modal-body">
+                    <h4 class="@(Error ? "text-danger" : "")">@Message</h4>
+                    @if (NumberRequired)
+                    {
+                        <div class="pt-2">
+                            <input type="text" inputmode="numeric" @bind-value="Number" @bind-value:event="oninput" />
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <div class="d-flex flex-row-reverse">
+                        <button type="button" class="btn btn-outline-secondary mb-2" @onclick="Deny">No</button>
+                        <button type="button" class="btn btn-outline-primary mb-2" @onclick="Confirm">Yes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string? Message { get; set; }
+    [Parameter] public bool NumberRequired { get; set; }
+    [Parameter] public bool Error { get; set; }
+    [Parameter] public EventCallback<int?> OnConfirm { get; set; }
+    [Parameter] public EventCallback OnDeny { get; set; }
+
+    private int Number = 0;
+
+    public async Task Confirm()
+    {
+        int? num = NumberRequired ? Number : null;
+        await OnConfirm.InvokeAsync(num);
+    }
+    public async Task Deny() => await OnDeny.InvokeAsync();
+}

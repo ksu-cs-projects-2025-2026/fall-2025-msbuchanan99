@@ -1,0 +1,366 @@
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Server.Data;
+using Server.Models;
+using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
+
+namespace Server.Controllers
+{
+    [ApiController]
+    [Route("api/users")]
+    public class UsersController : ControllerBase
+    {
+        private readonly ThreadfolioContext _context;
+
+        public UsersController(ThreadfolioContext context)
+        {
+            _context = context;
+        }
+
+        #region Admin Routes
+
+        [HttpGet("admin")]
+        public async Task<IActionResult> GetAllUsersAsync_Admin()
+        {
+            try
+            {
+                List<User> users = await _context.Users.ToListAsync();
+                return Ok(users);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPost("admin")]
+        public async Task<IActionResult> CreateUserAsync_Admin(User newUser)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(newUser.Username)) return BadRequest("Username cannot be empty");
+                if (string.IsNullOrWhiteSpace(newUser.Role)) return BadRequest("Role cannot be empty");
+
+                var hasUsername = await _context.Users.AnyAsync(u => u.Username == newUser.Username);
+                if (hasUsername) return BadRequest("Username already exists.");
+
+                var hasher = new PasswordHasher<User>();
+                newUser.HashPassword = hasher.HashPassword(newUser, "P455W0RD");
+
+                await _context.Users.AddAsync(newUser);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("admin/{id:int}")]
+        public async Task<IActionResult> UpdateUserAsync_Admin(int id, User updateUser)
+        {
+            try
+            {
+                User? current = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+                if (current is null) return NotFound($"User with Id {id} not found.");
+
+                if (string.IsNullOrWhiteSpace(updateUser.Username)) return BadRequest("Username cannot be empty");
+                if (string.IsNullOrWhiteSpace(updateUser.Role)) return BadRequest("Role cannot be empty");
+                if (!(updateUser.Role == "Admin" || updateUser.Role == "User")) return BadRequest("Incorrect Role Information.");
+                if (updateUser.LastModified <= updateUser.CreatedOn) return BadRequest("LastModified cannot be before creationDate");
+
+                updateUser.Id = id;
+                _context.Entry(updateUser).State = EntityState.Modified;
+
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpDelete("admin/{id:int}")]
+        public async Task<IActionResult> DeleteUserAsync_Admin(int id)
+        {
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(f => f.Id == id);
+                if (user is null) return NotFound($"User with Id {id} not found.");
+
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("admin/{id:int}/floss")]
+        public async Task<IActionResult> GetUserFlossAsync_Admin(int id)
+        {
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+                if (user is null) return NotFound($"User with Id {id} not found.");
+
+                List<FlossDTO> flosses = new();
+                foreach (UserFloss uf in _context.UserFloss.Where(uf => uf.UserId == id))
+                {
+                    Floss f = _context.Floss.First(f => f.Id == uf.FlossId);
+                    flosses.Add(new(
+                        uf.FlossId, 
+                        f.Name,
+                        f.Number,
+                        f.HexColor,
+                        uf.Amount
+                     ));
+                }
+
+                return Ok(flosses);
+            }
+            catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("admin/{userId:int}/floss/{flossId:int}")]
+        public async Task<IActionResult> UpdateUserFlossAsync_Admin(int userId, int flossId, int amount)
+        {
+            try
+            {
+                UserFloss? uf = await _context.UserFloss.FirstOrDefaultAsync(
+                    uf => uf.UserId == userId && uf.FlossId == flossId);
+                if (uf is null) return NotFound("UserFloss not found.");
+
+                if (uf.Amount == amount) return Ok();
+                if (uf.Amount < 0) return BadRequest("Amount cannot be less than 0.");
+
+                uf.Amount = amount;
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("admin/{id:int}/projects")]
+        public async Task<IActionResult> GetProjectsAdmin(int id)
+        {
+            if (UserExists(id, out User? user))
+            {
+                var projects = await _context.Projects.Where(p => p.UserId == id)
+                    .Select(p => new ProjectAdminDTO(p.Id, p.UserId, p.Name, p.IsCompleted, p.CompletionDate, p.KeyPage, p.Aida, p.CreatedOn, p.LastModified))
+                    .ToListAsync();
+                return Ok(projects);
+            }
+            else
+            {
+                return NotFound("User not found");
+            }
+        }
+
+
+        #endregion
+
+        #region User Routes
+
+        // POST: api/users/create
+        //HashPassword that is brought in isn't actually Hashed
+        [HttpPost("create")]
+        public async Task<IActionResult> Create([FromBody] CreateUserRequest req)
+        {
+            var username = req.Username.Trim();
+            //Check for duplicate usernames
+            if (await _context.Users.AnyAsync(u => u.Username.ToLower() == username.ToLower()))
+                return BadRequest("That Username already exists.");
+
+            var now = DateTime.Now;
+            User user = new User
+            {
+                Username = username,
+                Role = "User",
+                WasteFactor = (decimal)req.WasteFactor,
+                CreatedOn = now,
+                LastModified = now
+            };
+
+            //Hash the password
+            var hasher = new PasswordHasher<User>();
+            user.HashPassword = hasher.HashPassword(user, req.HashPassword);
+
+            //Save new user
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        // PUT: api/users/5
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Edit(int id, Dictionary<string, string?> user)
+        {
+            User? currentUser;
+            if (!UserExists(id, out currentUser))
+                return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                //Check if username needs to be changed
+                if (user["Username"] != currentUser!.Username) currentUser.Username = user["Username"];
+
+                //Check if password needs to be changed
+                if (user["Password"] is not null)
+                {
+                    //Check if passwords match
+                    var hasher = new PasswordHasher<User>();
+                    currentUser.HashPassword = hasher.HashPassword(currentUser, user["Password"]!);
+                }
+
+                decimal wasteFactor = Decimal.Parse(user["WasteFactor"]);
+                if (wasteFactor != currentUser!.WasteFactor) currentUser.WasteFactor = wasteFactor;
+
+                currentUser!.LastModified = DateTime.UtcNow;
+
+                //Save Changes
+                await _context.SaveChangesAsync();
+
+                //refresh login cookies
+                await ReissueCookieForSelfEdit(currentUser);
+
+                //return
+                return Ok(new UserDTO(currentUser.Id, currentUser.Username, currentUser.Role.ToString(), currentUser.WasteFactor));
+            }
+            return BadRequest("Model State not Valid");
+        }
+
+        // DELETE: api/users/
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            User? user;
+            if (UserExists(id, out user))
+            {
+                _context.Users.Remove(user);
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpGet("{id:int}/projects")]
+        public async Task<IActionResult> GetProjects(int id)
+        {
+            if(UserExists(id, out User? user))
+            {
+                var projects = await _context.Projects.Where(p => p.UserId == id)
+                    .Select(p => new ProjectDTO( p.Id, p.UserId, p.Name, p.IsCompleted, p.CompletionDate, p.KeyPage, p.Aida))
+                    .ToListAsync();
+                return Ok(projects);
+            }
+            else
+            {
+                return NotFound("User not found");
+            }
+        }
+
+        [HttpGet("{id:int}/floss")]
+        public async Task<IActionResult> GetFloss(int id)
+        {
+            User? user;
+            if (UserExists(id, out user))
+            {
+                var flosses = await (
+                    from uf in _context.UserFloss
+                    join f in _context.Floss on uf.FlossId equals f.Id
+                    where uf.UserId == id
+                    select new FlossDTO(
+                        f.Id,
+                        f.Name,
+                        f.Number,
+                        f.HexColor,
+                        uf.Amount
+                    )
+                ).ToListAsync();
+
+                return Ok(flosses);
+            }
+            else
+            {
+                return NotFound("User not found");
+            }
+        }
+
+        [HttpPut("{userId:int}/floss/{flossId:int}")]
+        public async Task<IActionResult> UpdateFloss(int userId, int flossId, [FromBody] int amount)
+        {
+            if (!_context.Users.Any(u => u.Id == userId)) return NotFound($"User with Id {userId} not found.");
+            if (!_context.Floss.Any(f => f.Id == flossId)) return NotFound($"Floss with Id {flossId} not found.");
+
+            var floss = await _context.UserFloss.FirstOrDefaultAsync(uf => uf.FlossId == flossId && uf.UserId == userId);
+            if (floss is null) return NotFound($"User Floss not found.");
+
+            floss.Amount = amount;
+
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        #endregion
+
+        private bool UserExists(int id, out User? user)
+        {
+            user = _context.Users.Find(id);
+            return user is not null;
+        }
+
+        private async Task ReissueCookieForSelfEdit(User user)
+        {
+            var editedSelf = User.FindFirst(ClaimTypes.NameIdentifier)?.Value == user.Id.ToString();
+            if (editedSelf)
+            {
+                var claims = new List<Claim>
+                {
+                    new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new(ClaimTypes.Name, user.Username),
+                    new(ClaimTypes.Role, user.Role)
+                };
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(identity));
+            }
+        }
+
+        public record UserDTO(int Id, string Username, string Role, decimal WasteFactor);
+        public record ProjectDTO(int Id, int UserId, string? Name, bool IsCompleted, DateTime? CompletionDate, int? KeyPage, int? Aida);
+        public record ProjectAdminDTO(int Id, int UserId, string? Name, bool IsCompleted, DateTime? CompletionDate, int? KeyPage, int? Aida, DateTime? CreatedOn, DateTime? LastModified);
+        public record FlossDTO(int Id, string? Name, string? Number, string? HexColor, int Amount);
+        public sealed class CreateUserRequest
+        {
+            [Required]
+            public string Username { get; set; } = "";
+
+            [Required]
+            public string HashPassword { get; set; } = "";
+
+            // Decide what WasteFactor means:
+            // - If client sends 0..1 fraction: use [Range(0,1)]
+            // - If client sends 0..100 percent: use [Range(0,100)]
+            [Range(0, 1)]
+            public double WasteFactor { get; set; }
+        }
+    }
+}

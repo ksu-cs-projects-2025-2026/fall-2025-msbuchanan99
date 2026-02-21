@@ -1,0 +1,105 @@
+﻿<div class="d-flex flex-row gap-2">
+    <div style="flex:3"><p>Floss</p></div>
+    <div style="flex:1"><p>Strands</p></div>
+    <div style="flex:1"><p># Stitches</p></div>
+</div>
+@for(int i = 0; i < _symbols.Count; i++)
+{
+    var key = _symbols[i];
+    <div class="d-flex flex-row gap-2 w-100 align-items-center" @key="key">
+        <div style="flex:3">
+            <FlossDropdown Dict="FlossDictionary"
+                OnSelect="(id) => OnFlossPicked(i, key, id)"
+                Selected="@FlossList[i].Id"
+                disabled="@busy" 
+            />
+        </div>
+        <div style="flex:1">
+            <input type="number"
+                   @bind="FlossList[i].Strands"
+                   class="form-control" disabled="@busy" />
+        </div>
+        <div style="flex:1">
+            <input type="number"
+                   @bind="SymbolDictionary[key].Count"
+                   class="form-control" disabled="@busy" />
+        </div>
+    </div>
+}
+<div class="d-flex flex-row-reverse gap-2">
+    <button class="btn btn-primary mb-2" @onclick="CalculateAmount" type="button" disabled="@busy">Calculate Amount</button>
+    <button class="btn btn-primary mb-2" @onclick="Save" type="button" disabled="@busy">Save</button>
+</div>
+
+<style>
+    .flex-grow-3{
+        flex-grow: 3
+    }
+</style>
+
+@code {
+    [Parameter] public Dictionary<int, SymbolData> SymbolDictionary { get; set; } = new();
+    [Parameter] public Dictionary<int, string> FlossDictionary { get; set; } = new();
+    [Parameter] public EventCallback<(int, int)> OnFlossSelect { get; set; }
+    [Parameter] public EventCallback<Dictionary<int, SymbolData>> OnCalculateAmount { get; set; }
+    [Parameter] public EventCallback<List<FlossInProjectModel>?> OnSave { get; set; }
+    [Parameter] public bool busy { get; set; }
+
+    private List<FlossInProjectModel> FlossList = new();
+    private List<int> _symbols = new();
+    protected override void OnParametersSet()
+    {
+        _symbols = SymbolDictionary.Keys.OrderBy(k => k).ToList();
+
+        if (FlossList.Count != _symbols.Count)
+        {
+            FlossList = _symbols.Select(_ => new FlossInProjectModel
+            {
+                Id = -1,
+                Strands = 2,
+                Amount = 0
+            }).ToList();
+        }
+
+        for (int i = 0; i < _symbols.Count; i++)
+        {
+            int symbol = _symbols[i];
+            FlossList[i].Id = SymbolDictionary[symbol].Floss?.Id ?? -1;
+        }
+    }
+
+    public async Task Save()
+    {
+        bool AnyNull = FlossList.Any(f => f.Id == -1);
+        if (AnyNull)
+        {
+            await OnSave.InvokeAsync(null);
+        }
+        else 
+        {
+            foreach (var floss in FlossList)
+            {
+                floss.Amount = SymbolDictionary
+                    .Where(kvp => kvp.Value.Floss?.Id == floss.Id)
+                    .Sum(kvp => kvp.Value.Count);
+            }
+            await OnSave.InvokeAsync(FlossList);
+        }
+    }
+
+    public async Task OnFlossPicked(int index, int key, int selectedId)
+    {
+        if(selectedId != -1)
+        {
+            FlossList[index].Id = selectedId;
+            SymbolDictionary[key].Floss = new FlossModel(selectedId);
+
+            await OnFlossSelect.InvokeAsync((key, selectedId));
+        }
+    }
+
+    public async Task CalculateAmount()
+    {
+        await OnCalculateAmount.InvokeAsync(SymbolDictionary);
+    }
+}

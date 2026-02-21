@@ -1,0 +1,81 @@
+﻿@if (Show && floss is not null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    @if (floss is null)
+                    {
+                        <h3>Add a new Floss</h3>
+                    }
+                    else
+                    {
+                        <h3>Edit a Floss</h3>
+                    }
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="floss" OnValidSubmit="SaveChanges">
+                        <div class="mb-3 d-flex align-items-center">
+                            <label class="form-label me-2 mb-0">Floss</label>
+                            <FlossDropdown Dict="@FlossDictionary"
+                                           OnSelect="SelectFloss"
+                                           Selected="floss.Id" 
+                                           Disabled="@IsEdit"/>
+                        </div>
+
+                        <div class="mb-3 d-flex align-items-center">
+                            <label class="me-2 mb-0">Strands:</label>
+                            <input type="text"
+                                   inputmode="numeric"
+                                   class="form-control w-75 me-3"
+                                   @bind="floss.Strands" />
+
+                            <label class="me-2 mb-0">Amount:</label>
+                            <input type="text"
+                                   inputmode="numeric"
+                                   class="form-control w-75"
+                                   @bind="floss.Amount" />
+                        </div>
+                    </EditForm>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" @onclick="SaveChanges">Save</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CancelChanges">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .modal-dialog-style{
+        background-color: white;
+        outline: 2px black;
+    }
+</style>
+
+@code {
+    [Parameter] public FlossInProjectModel? floss { get; set; }
+    [Parameter] public int DefaultStrands { get; set; }
+    [Parameter] public required Dictionary<int, string> FlossDictionary { get; set; }
+    [Parameter] public EventCallback<FlossInProjectModel> OnSave { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public bool Show { get; set; }
+    [Parameter] public bool IsEdit { get; set; }
+
+    public async Task SaveChanges()
+    {
+        await OnSave.InvokeAsync(floss);
+    }
+
+    public async Task CancelChanges()
+    {
+        await OnCancel.InvokeAsync();
+    }
+
+    public Task SelectFloss(int id)
+    {
+        floss.Id = id;
+        return Task.CompletedTask;
+    }
+}

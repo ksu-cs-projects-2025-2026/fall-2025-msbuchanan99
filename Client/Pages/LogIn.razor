@@ -1,0 +1,63 @@
+﻿@page "/login"
+
+@inject UserService userService
+@inject UserState userState
+@inject NavigationManager Nav
+
+<h3>Log In To Threadfolio</h3>
+
+<EditForm Model="@model" OnValidSubmit="Submit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+        <label class="form-label">Username</label>
+        <InputText class="form-control w-25" @bind-Value="model.Username" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <InputText class="form-control w-25" type="password" @bind-Value="model.Password" />
+    </div>
+    <div class="mb-3">
+        <button class="btn btn-primary" type="submit" disabled="@busy" @onclick="Submit">
+            @(busy ? "Logging in..." : "Login")
+        </button>
+        <button class="btn btn-primary" @onclick="CreateAccount">Create Account</button>
+    </div>
+</EditForm>
+
+<ConfirmationModal Error="true" NumberRequired="false" OnConfirm="CloseModal" OnDeny="CloseModal" />
+
+@code {
+    private UserModel model = new();
+    private bool busy;
+    private string? Message;
+
+    private async Task Submit()
+    {
+        busy = true;
+
+        var result = await userService.LoginAsync(model);
+        if (!result.Ok) Message = userState.LastError;
+
+        busy = false;
+    }
+
+    private async Task CreateAccount()
+    {
+        busy = true;
+
+        userService.BeginCreate();
+        Nav.NavigateTo("/CreateAccount");
+
+        busy = false;
+    }
+
+    private void CloseModal()
+    {
+        busy = true;
+
+        Message = null;
+
+        busy = false;
+    }
+}

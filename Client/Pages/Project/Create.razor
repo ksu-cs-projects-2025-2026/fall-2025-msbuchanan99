@@ -1,0 +1,158 @@
+﻿@page "/projects/create"
+
+@inject ProjectService projectService
+@inject ProjectState projectState
+@inject UserService userService
+@inject UserState userState
+@inject NavigationManager Nav
+
+<h3>Creating a new Project</h3>
+
+@if (Loading)
+{
+    <h4>Loading...</h4>
+}
+else if(userState.User is null)
+{
+    <UnAuthorized/>
+}
+else
+{
+    <p class="alert-danger">@projectState.LastError</p>
+    <EditForm Model="projectState.Draft">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+        <div class="d-flex flex-column">
+            <div class="mb-3">
+                <div class="mb-3">
+                    <label class="form-label">Name:</label>
+                    <InputText class="form-control w-25" @bind-Value="projectState.Draft.Name" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Key Page:</label>
+                    <InputNumber class="form-control w-25" @bind-Value="projectState.Draft.KeyPage" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Aida:</label>
+                    <InputNumber class="form-control w-25" @bind-Value="projectState.Draft.Aida" />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Pattern PDF</label>
+                <InputFile OnChange="OnFileSelected" accept="application/pdf" disabled="@busy" />
+
+                @if (!string.IsNullOrEmpty(projectState.DraftFileName))
+                {
+                    <div class="form-text">
+                        Selected File: @projectState.DraftFileName
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(projectState.DraftPdfUrl))
+                {
+                    <div class="mb-3">
+                        <div class="border" style="height: 400px">
+                            <iframe src="@projectState.DraftPdfUrl" style="width:100%;height:100%;border:none;"></iframe>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mb-1" @onclick="SaveProject" disabled="@busy">Save</button>
+        <button type="submit" class="btn btn-secondary mb-1" @onclick="CancelProject" disabled="@busy">Cancel</button>
+    </EditForm>
+    
+    <ConfirmationModal Error="@Error" Message="@Message" NumberRequired="false" OnConfirm="CloseModal" OnDeny="CloseModal" /> 
+}
+
+@code {
+    private bool Loading => userState.IsLoading || projectState.IsLoading;
+    private bool busy = false;
+
+    private string? Message;
+    private bool Error = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        projectState.Changed += OnProjectStateChanged;
+        userState.Changed += OnUserStateChanged;
+        await userService.UserLoadedAsync();
+    }
+
+    private void OnProjectStateChanged() => InvokeAsync(StateHasChanged);
+    private void OnUserStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        projectState.Changed -= OnProjectStateChanged;
+        userState.Changed -= OnUserStateChanged;
+    }
+
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
+    {
+        busy = true;
+
+        var file = e.File;
+        await projectState.SetDraftPDF(file);
+
+        busy = false;
+    }
+
+    private async Task SaveProject()
+    {
+        busy = true;
+
+        try
+        {
+            if (projectState.DraftFile is null)
+            {
+                Error = true;
+                Message = "You must include a file to create the project.";
+
+                return;
+            }
+
+            Result result = await projectService.CreateAsync();
+
+
+            if (result.Ok)
+            {
+                Nav.NavigateTo($"/projects/{projectState.SelectedProjectId}");
+            }
+            else
+            {
+                Error = true;
+                Message = projectState.LastError;
+            }
+        }
+        catch (Exception ex)
+        {
+            Error = true;
+            Message = "Something went wrong: " + ex.Message;
+        }
+        finally
+        {
+            busy = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task CancelProject()
+    {
+        busy = true;
+
+        Nav.NavigateTo($"/user/projects");
+        projectService.CancelCreate();
+
+        busy = false;
+    }
+
+    private void CloseModal()
+    {
+        busy = true;
+
+        Message = null;
+
+        busy = false;
+    }
+}
